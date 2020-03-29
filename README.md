@@ -5,13 +5,13 @@
 
 ### Distributed Architecture
 
-![Distributed Architecture](D:\A-DATA\GoogleDriveYork\Responsible Data by Design\rdbd\images\rdbd_architecture.case_03.svg)
+![Distributed Architecture](images/rdbd_architecture.case_03.svg)
 
 ### Rdbd Schema
 
 ### Rdbd Class Diagram
 
-![RDBD Class Diagram](images\rdbd_class_diagram.svg)
+![RDBD Class Diagram](images/rdbd_class_diagram.svg)
 
 ### Rdbd Access Control
 
@@ -24,19 +24,19 @@
 
 **FAIRNet** is the FAIR version of Facebook that stores users' personal data in their personal data vaults/devices. It uses the Spark framework (http://sparkjava.com/). 
 
-![fairnet_class_diagram](images\fairnet_class_diagram.svg)
+![fairnet_class_diagram](images/fairnet_class_diagram.svg)
 
 ### Create Account
 
-![Create Account](images\rdbd_architecture.case_01.svg)
+![Create Account](images/rdbd_architecture.case_01.svg)
 
 ### Add Friend
 
-![Create Account](images\rdbd_architecture.case_02.svg)
+![Create Account](images/rdbd_architecture.case_02.svg)
 
 ### List Friends
 
-![Create Account](images\rdbd_architecture.case_03.svg)
+![Create Account](images/rdbd_architecture.case_03.svg)
 
 ## How to Run the Demo
 
@@ -49,7 +49,7 @@ To run the early prototype of this project:
    - **org.rdbd.core.server** (the implementation of Rdbd server)
    - **org.rdbd.demo.fairnet** (the implementation of the FAIRNet demo)
 3. Download Apache ActiveMQ from https://activemq.apache.org/components/classic/download/. 
-4. Unzip and run the server by executing ***bin/activemq*** using command prompt or console.
+4. Unzip and run the server by executing ***bin/activemq start*** using command prompt or console.
 5. Run ***RDBDWindows.java*** inside the **org.rdbd.core.client.windows** project. The client will listen incoming messages.
 6. Run the **org.rdbd.demo.fairnet** project. 
 7. Go to http://localhost:4567/account/create/ using your browser.
