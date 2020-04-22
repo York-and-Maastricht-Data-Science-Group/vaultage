@@ -29,6 +29,8 @@ public class FairnetTest {
 		user1.setName("Foo");
 
 		boolean isSuccess = user1.register(fairnet);
+		Thread.sleep(500);
+		
 //		System.out.println(isSuccess ? "connected!" : "failed!");
 		assertEquals(true, isSuccess);
 	}
