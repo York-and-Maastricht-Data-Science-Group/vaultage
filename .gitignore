@@ -21,3 +21,10 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+*.prefs
+*.redo
+*.data
+*.genmodel
+org.rdbd.demo.fairnet/.settings/org.eclipse.jdt.core.prefs
+org.rdbd.demo.fairnet/model/fairnet.ecore
+org.rdbd.demo.fairnet/files/*

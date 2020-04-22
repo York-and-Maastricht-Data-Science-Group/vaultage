@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.rdbd.demo.fairnet;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: .
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Automatic-Module-Name: org.rdbd.demo.fairnet
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: org.rdbd.demo.fairnet
+Require-Bundle: org.junit
+Bundle-ActivationPolicy: lazy
