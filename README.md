@@ -5,6 +5,8 @@
 
 ### Distributed Architecture
 
+![Distributed Architecture](images/rdbd_architecture.case_04.svg)
+
 ![Distributed Architecture](images/rdbd_architecture.case_03.svg)
 
 ### Rdbd Schema
