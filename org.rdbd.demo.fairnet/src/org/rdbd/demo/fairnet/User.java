@@ -8,7 +8,8 @@ import java.util.Map;
 
 import org.rdbd.demo.fairnet.exception.NotFoundException;
 import org.rdbd.demo.fairnet.exception.PermissionDeniedException;
-import org.rdbd.demo.fairnet.handler.AddFriendConfirmedHandler;
+import org.rdbd.demo.fairnet.handler.AddFriendConfirmationHandler;
+import org.rdbd.demo.fairnet.handler.GetPostsConfirmationHandler;
 import org.rdbd.demo.fairnet.util.FairnetUtil;
 
 public class User extends UserBase {
@@ -112,12 +113,22 @@ public class User extends UserBase {
 	}
 
 	@Override
+	public List<String> getPosts() throws Exception {
+		return (List<String>) new ArrayList<String>(posts.keySet());
+	}
+
+	@Override
 	public List<String> getPosts(User requester) throws Exception {
 		if (isFriend(requester)) {
 			return (List<String>) new ArrayList<String>(posts.keySet());
 		} else {
 			throw new PermissionDeniedException();
 		}
+	}
+
+	@Override
+	public List<String> getFriends() throws Exception {
+		return FairnetUtil.getFiles(VAULT_PATH + File.separator + this.publicKey + File.separator + STRING_FRIENDS);
 	}
 
 	@Override
@@ -149,7 +160,13 @@ public class User extends UserBase {
 		}
 	}
 
-	public boolean isFriend(User other) {
-		return true;
+	public boolean isFriend(User user) throws Exception {
+		return this.getFriends().contains(user.getPublicKey());
+	}
+
+	@Override
+	public void setGetPostsConfirmationHandler(GetPostsConfirmationHandler getPostsConfirmationHandler) {
+		// TODO Auto-generated method stub
+		
 	}
 }

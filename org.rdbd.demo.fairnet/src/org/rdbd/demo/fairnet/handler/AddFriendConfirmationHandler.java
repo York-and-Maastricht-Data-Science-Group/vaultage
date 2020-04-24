@@ -3,7 +3,7 @@ package org.rdbd.demo.fairnet.handler;
 import org.rdbd.core.server.RDBDHandler;
 import org.rdbd.demo.fairnet.User;
 
-public class AddFriendConfirmedHandler extends RDBDHandler {
+public class AddFriendConfirmationHandler extends RDBDHandler {
 
 	@Override
 	public void run() {
@@ -11,6 +11,7 @@ public class AddFriendConfirmedHandler extends RDBDHandler {
 		System.out.println("------------------");
 		System.out.println("From: " + this.message.getFrom());
 		System.out.println("Message: " + this.message.getValue());
+		System.out.println("This is " + this.getName());
 		if ("1".equals(this.message.getValue())) {
 			try {
 				User newFriend = new User(this.message.getFrom(), null);

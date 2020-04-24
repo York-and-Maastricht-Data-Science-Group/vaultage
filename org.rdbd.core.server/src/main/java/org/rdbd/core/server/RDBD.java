@@ -68,7 +68,7 @@ public class RDBD implements MessageListener {
 //		synchronized (t2) {
 //			t2.wait();
 //		}
-		
+
 		Thread.sleep(1000);
 
 		rdbd1.disconnect();
@@ -90,7 +90,7 @@ public class RDBD implements MessageListener {
 
 	public Thread listenMessage(String queueId, Map<String, RDBDHandler> handlers) {
 		this.isListening = true;
-		return thread(new Consumer(queueId, handlers), false);
+		return thread(new Consumer(queueId, handlers), true);
 	}
 
 	private Thread thread(Runnable runnable, boolean daemon) {
@@ -112,12 +112,12 @@ public class RDBD implements MessageListener {
 	public void disconnect() throws Exception {
 		this.stopListening();
 
-		for(Thread t: threads) {
+		for (Thread t : threads) {
 			if (t.isAlive()) {
 				t.interrupt();
 			}
 		}
-
+//		session.rollback();
 		session.close();
 		connection.stop();
 		connection.close();
@@ -195,8 +195,12 @@ public class RDBD implements MessageListener {
 						String operation = rdbdMessage.getOperation();
 
 						RDBDHandler handler = handlers.get(operation);
-						if (handler != null) {
+						if (handler != null && !handler.isAlive()) {
+							threads.add(handler);
+							System.out.println("Thread Run: " + handler.getName() + " of " + RDBD.this.hashCode());
 							handler.execute(queueId, rdbdMessage);
+						} else {
+							System.out.println();
 						}
 					}
 				}

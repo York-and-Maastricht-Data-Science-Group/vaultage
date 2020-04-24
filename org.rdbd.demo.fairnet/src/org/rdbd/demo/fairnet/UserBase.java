@@ -6,9 +6,10 @@ import java.util.Map;
 
 import org.rdbd.core.server.RDBD;
 import org.rdbd.core.server.RDBDHandler;
-import org.rdbd.demo.fairnet.handler.AddFriendConfirmedHandler;
+import org.rdbd.demo.fairnet.handler.AddFriendConfirmationHandler;
 import org.rdbd.demo.fairnet.handler.AddFriendResponseHandler;
 import org.rdbd.demo.fairnet.handler.GetPostResponseHandler;
+import org.rdbd.demo.fairnet.handler.GetPostsConfirmationHandler;
 import org.rdbd.demo.fairnet.handler.GetPostsResponseHandler;
 
 public abstract class UserBase {
@@ -19,7 +20,7 @@ public abstract class UserBase {
 	protected AddFriendResponseHandler addFriendResponseHandler;
 	protected GetPostsResponseHandler getPostsResponseHandler;
 	protected GetPostResponseHandler getPostResponseHandler;
-	protected AddFriendConfirmedHandler addFriendConfirmedHandler;
+	protected AddFriendConfirmationHandler addFriendConfirmedHandler;
 	protected boolean isListening;
 	protected RDBD rdbd;
 	protected Map<String, RDBDHandler> handlers;
@@ -37,7 +38,7 @@ public abstract class UserBase {
 	public void setRdbd(RDBD rdbd) {
 		this.rdbd = rdbd;
 	}
-	
+
 	public AddFriendResponseHandler getAddFriendResponseHandler() {
 		return addFriendResponseHandler;
 	}
@@ -67,12 +68,12 @@ public abstract class UserBase {
 		this.getPostResponseHandler.setOwner(this);
 		handlers.put(GetPostResponseHandler.class.getName(), getPostResponseHandler);
 	}
-	
-	public void setAddFriendConfirmedHandler(AddFriendConfirmedHandler addFriendConfirmedHandler) {
-	this.addFriendConfirmedHandler = addFriendConfirmedHandler;
-	this.addFriendConfirmedHandler.setOwner(this);
-	handlers.put(AddFriendConfirmedHandler.class.getName(), addFriendConfirmedHandler);
-}
+
+	public void setAddFriendConfirmationHandler(AddFriendConfirmationHandler addFriendConfirmedHandler) {
+		this.addFriendConfirmedHandler = addFriendConfirmedHandler;
+		this.addFriendConfirmedHandler.setOwner(this);
+		handlers.put(AddFriendConfirmationHandler.class.getName(), addFriendConfirmedHandler);
+	}
 
 	/***
 	 * This method makes the user listens to a message broker. When a request e.g.
@@ -97,6 +98,10 @@ public abstract class UserBase {
 		return false;
 
 	}
+	
+	public void unregister() throws Exception {
+		rdbd.disconnect();
+	}
 
 	// These are left abstract for the developer to fill in with
 	// behaviour in a subclass (i.e. User.java above)
@@ -110,5 +115,10 @@ public abstract class UserBase {
 
 	public abstract Post getPost(String id) throws Exception;
 
+	public abstract List<String> getFriends() throws Exception;
+
+	public abstract List<String> getPosts() throws Exception;
+
+	public abstract void setGetPostsConfirmationHandler(GetPostsConfirmationHandler getPostsConfirmationHandler) throws Exception;
 	
 }

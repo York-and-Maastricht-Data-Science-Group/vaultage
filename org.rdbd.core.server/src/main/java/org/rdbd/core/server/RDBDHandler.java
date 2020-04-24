@@ -5,9 +5,8 @@ public abstract class RDBDHandler extends Thread {
 	protected String queueId;
 	protected RDBDMessage message;
 	protected Object owner;
-	
+
 	public void execute(String queueId, RDBDMessage message) {
-		this.queueId = queueId;
 		this.message = message;
 		this.start();
 	}
@@ -19,6 +18,9 @@ public abstract class RDBDHandler extends Thread {
 	public void setOwner(Object owner) {
 		this.owner = owner;
 	}
-	
-	
+
+	public RDBDMessage getMessage() {
+		return message;
+	}
+
 }

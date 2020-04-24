@@ -6,6 +6,7 @@ import org.rdbd.demo.fairnet.User;
 
 public class AddFriendResponseHandler extends RDBDHandler {
 
+	
 	@Override
 	public void run() {
 		System.out.println("Add friend request");
@@ -20,7 +21,7 @@ public class AddFriendResponseHandler extends RDBDHandler {
 			RDBDMessage messageBack = new RDBDMessage();
 			messageBack.setFrom(me.getPublicKey());
 			messageBack.setTo(this.message.getFrom());
-			messageBack.setOperation(AddFriendConfirmedHandler.class.getName());
+			messageBack.setOperation(AddFriendConfirmationHandler.class.getName());
 			messageBack.setValue("1");
 			me.getRdbd().sendMessage(friend.getPublicKey(), messageBack);
 		} catch (Exception e) {
