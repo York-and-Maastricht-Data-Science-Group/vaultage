@@ -1,36 +1,34 @@
 package org.rdbd.demo.fairnet.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.rdbd.core.server.RDBDHandler;
+import org.rdbd.demo.fairnet.Post;
 import org.rdbd.demo.fairnet.User;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class GetPostsConfirmationHandler extends RDBDHandler {
-	private List<String> postIds;
+public class GetPostConfirmationHandler extends RDBDHandler {
+	private Post post;
 
 	@Override
 	public void run() {
-		System.out.println("Get Posts Confirmation");
+		System.out.println("Get Post Confirmation");
 		System.out.println("------------------");
 		System.out.println("From: " + this.message.getFrom());
 		System.out.println("Operation: " + this.message.getOperation());
-		System.out.println("Friends:"); 
+		System.out.println("Post:");
 		try {
+			System.out.println(this.message.getValue());
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			postIds = gson.fromJson(message.getValue(), ArrayList.class);
-			for(String postId:postIds) {
-				System.out.println(((User)this.owner).getName() +": "+ postId);
-			}
+			post = gson.fromJson(message.getValue(), Post.class);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public List<String> getPostIds() {
-		return postIds;
+	public Post getPost() {
+		return post;
 	}
+
 }

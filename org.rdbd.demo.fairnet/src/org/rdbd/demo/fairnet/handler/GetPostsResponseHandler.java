@@ -13,7 +13,7 @@ public class GetPostsResponseHandler extends RDBDHandler {
 
 	@Override
 	public void run() {
-		System.out.println("Get Post Request");
+		System.out.println("Get Posts Request");
 		System.out.println("------------------");
 		System.out.println("From: " + this.message.getFrom());
 		System.out.println("Operation: " + this.message.getOperation());
@@ -31,6 +31,7 @@ public class GetPostsResponseHandler extends RDBDHandler {
 			messageBack.setTo(this.message.getFrom());
 			messageBack.setOperation(GetPostsConfirmationHandler.class.getName());
 			messageBack.setValue(value);
+			
 			me.getRdbd().sendMessage(myFriend.getPublicKey(), messageBack);
 		} catch (Exception e) {
 			e.printStackTrace();

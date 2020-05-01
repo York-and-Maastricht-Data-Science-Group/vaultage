@@ -10,7 +10,6 @@ import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -20,7 +19,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class RDBD implements MessageListener {
+public class RDBD {
 
 	private String url;
 	private ActiveMQConnectionFactory connectionFactory;
@@ -28,7 +27,8 @@ public class RDBD implements MessageListener {
 	private Session session;
 	private boolean isListening;
 	private Gson gson;
-	private Set<Thread> threads;
+	private Set<RDBDHandler> threads;
+	private Set<String> tokens;
 
 	/***
 	 * 
@@ -81,7 +81,7 @@ public class RDBD implements MessageListener {
 	 */
 	public RDBD() {
 		gson = new GsonBuilder().setPrettyPrinting().create();
-		threads = new HashSet<Thread>();
+		threads = new HashSet<RDBDHandler>();
 	}
 
 	public Thread sendMessage(String queueId, RDBDMessage message) {
@@ -112,9 +112,9 @@ public class RDBD implements MessageListener {
 	public void disconnect() throws Exception {
 		this.stopListening();
 
-		for (Thread t : threads) {
-			if (t.isAlive()) {
-				t.interrupt();
+		for (RDBDHandler h : threads) {
+			if (h.isAlive()) {
+				h.interrupt();
 			}
 		}
 //		session.rollback();
@@ -197,7 +197,7 @@ public class RDBD implements MessageListener {
 						RDBDHandler handler = handlers.get(operation);
 						if (handler != null && !handler.isAlive()) {
 							threads.add(handler);
-							System.out.println("Thread Run: " + handler.getName() + " of " + RDBD.this.hashCode());
+							System.out.println("Run: " + handler.getName());
 							handler.execute(queueId, rdbdMessage);
 						} else {
 							System.out.println();
@@ -215,7 +215,5 @@ public class RDBD implements MessageListener {
 		this.isListening = false;
 	}
 
-	public void onMessage(Message message) {
 
-	}
 }

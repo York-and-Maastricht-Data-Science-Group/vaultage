@@ -8,8 +8,6 @@ import java.util.Map;
 
 import org.rdbd.demo.fairnet.exception.NotFoundException;
 import org.rdbd.demo.fairnet.exception.PermissionDeniedException;
-import org.rdbd.demo.fairnet.handler.AddFriendConfirmationHandler;
-import org.rdbd.demo.fairnet.handler.GetPostsConfirmationHandler;
 import org.rdbd.demo.fairnet.util.FairnetUtil;
 
 public class User extends UserBase {
@@ -164,9 +162,5 @@ public class User extends UserBase {
 		return this.getFriends().contains(user.getPublicKey());
 	}
 
-	@Override
-	public void setGetPostsConfirmationHandler(GetPostsConfirmationHandler getPostsConfirmationHandler) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 }

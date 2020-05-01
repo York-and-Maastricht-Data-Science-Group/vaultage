@@ -8,6 +8,7 @@ import org.rdbd.core.server.RDBD;
 import org.rdbd.core.server.RDBDHandler;
 import org.rdbd.demo.fairnet.handler.AddFriendConfirmationHandler;
 import org.rdbd.demo.fairnet.handler.AddFriendResponseHandler;
+import org.rdbd.demo.fairnet.handler.GetPostConfirmationHandler;
 import org.rdbd.demo.fairnet.handler.GetPostResponseHandler;
 import org.rdbd.demo.fairnet.handler.GetPostsConfirmationHandler;
 import org.rdbd.demo.fairnet.handler.GetPostsResponseHandler;
@@ -17,14 +18,17 @@ public abstract class UserBase {
 	protected String privateKey;
 	protected String publicKey;
 
-	protected AddFriendResponseHandler addFriendResponseHandler;
-	protected GetPostsResponseHandler getPostsResponseHandler;
-	protected GetPostResponseHandler getPostResponseHandler;
-	protected AddFriendConfirmationHandler addFriendConfirmedHandler;
 	protected boolean isListening;
 	protected RDBD rdbd;
 	protected Map<String, RDBDHandler> handlers;
 
+	protected AddFriendResponseHandler addFriendResponseHandler;
+	protected GetPostsResponseHandler getPostsResponseHandler;
+	protected GetPostResponseHandler getPostResponseHandler;
+	protected AddFriendConfirmationHandler addFriendConfirmedHandler;
+	protected GetPostsConfirmationHandler getPostsConfirmationHandler;
+	protected GetPostConfirmationHandler getPostConfirmationHandler;
+	
 	public UserBase() {
 		this.isListening = false;
 		this.rdbd = new RDBD();
@@ -74,6 +78,32 @@ public abstract class UserBase {
 		this.addFriendConfirmedHandler.setOwner(this);
 		handlers.put(AddFriendConfirmationHandler.class.getName(), addFriendConfirmedHandler);
 	}
+	
+	public void setGetPostsConfirmationHandler(GetPostsConfirmationHandler getPostsConfirmationHandler) {
+		this.getPostsConfirmationHandler = getPostsConfirmationHandler;
+		this.getPostsConfirmationHandler.setOwner(this);
+		handlers.put(GetPostsConfirmationHandler.class.getName(), getPostsConfirmationHandler);
+	}
+	
+	public void setGetPostConfirmationHandler(GetPostConfirmationHandler getPostConfirmationHandler) {
+		this.getPostConfirmationHandler = getPostConfirmationHandler;
+		this.getPostConfirmationHandler.setOwner(this);
+		handlers.put(GetPostConfirmationHandler.class.getName(), getPostConfirmationHandler);
+	}
+	
+	
+
+	public AddFriendConfirmationHandler getAddFriendConfirmedHandler() {
+		return addFriendConfirmedHandler;
+	}
+
+	public GetPostsConfirmationHandler getGetPostsConfirmationHandler() {
+		return getPostsConfirmationHandler;
+	}
+	
+	public GetPostConfirmationHandler getGetPostConfirmationHandler() {
+		return getPostConfirmationHandler;
+	}
 
 	/***
 	 * This method makes the user listens to a message broker. When a request e.g.
@@ -119,6 +149,6 @@ public abstract class UserBase {
 
 	public abstract List<String> getPosts() throws Exception;
 
-	public abstract void setGetPostsConfirmationHandler(GetPostsConfirmationHandler getPostsConfirmationHandler) throws Exception;
+	
 	
 }

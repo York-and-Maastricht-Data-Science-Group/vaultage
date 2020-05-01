@@ -11,7 +11,6 @@ public class AddFriendConfirmationHandler extends RDBDHandler {
 		System.out.println("------------------");
 		System.out.println("From: " + this.message.getFrom());
 		System.out.println("Message: " + this.message.getValue());
-		System.out.println("This is " + this.getName());
 		if ("1".equals(this.message.getValue())) {
 			try {
 				User newFriend = new User(this.message.getFrom(), null);
@@ -21,6 +20,5 @@ public class AddFriendConfirmationHandler extends RDBDHandler {
 				e.printStackTrace();
 			}
 		}
-
 	}
 }

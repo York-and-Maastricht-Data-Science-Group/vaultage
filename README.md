@@ -1,5 +1,5 @@
 # rdbd
-**Rdbd** or *Responsible Data by Design* is a collaborative work between University of Maastricht and University of York that aims to move users' personal data from centralize servers to their personal data vaults/devices. It is designed to comply with the GDPR (https://gdpr.eu/) regulation on data protection and apply FAIR (Findable, Accessible, Interoperable, Re-usable) (https://www.go-fair.org/fair-principles/) data principles.
+**Rdbd** or *Responsible Data Science by Design* is a collaborative work between University of Maastricht and University of York that aims to move users' personal data from centralize servers to their personal data vaults/devices. It is designed to comply with the GDPR (https://gdpr.eu/) regulation on data protection and apply FAIR (Findable, Accessible, Interoperable, Re-usable) (https://www.go-fair.org/fair-principles/) data principles.
 
 ## How does **Rdbd** work?
 
