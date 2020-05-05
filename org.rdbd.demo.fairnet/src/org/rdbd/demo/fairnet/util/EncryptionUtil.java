@@ -78,24 +78,90 @@ public class EncryptionUtil {
 
 	}
 
-	public static String encrypt(String plainMessage, PublicKey publicKey)
+	/***
+	 * A method to encrypt a message using receiver public key.
+	 * 
+	 * @param plainMessage
+	 * @param receiverPublicKey
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 */
+	public static String encrypt(String plainMessage, PublicKey receiverPublicKey)
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		return encrypt(plainMessage, (Key) publicKey);
+		return encrypt(plainMessage, (Key) receiverPublicKey);
 	}
 
-	public static String encrypt(String plainMessage, PrivateKey privateKey)
+	/***
+	 * A method to encrypt a message using sender private key.
+	 * 
+	 * @param plainMessage
+	 * @param senverPrivateKey
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 */
+	public static String encrypt(String plainMessage, PrivateKey senverPrivateKey)
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		return encrypt(plainMessage, (Key) privateKey);
+		return encrypt(plainMessage, (Key) senverPrivateKey);
 	}
 
-	public static String encrypt(String plainMessage, Key privateKey)
+	/***
+	 * A method to double encrypt a message using receiver public key and sender
+	 * private key.
+	 * 
+	 * @param plainMessage
+	 * @param receiverPublicKey
+	 * @param senderPrivateKey
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 */
+	public static String doubleEncrypt(String plainMessage, PublicKey receiverPublicKey, PrivateKey senderPrivateKey)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
+			NoSuchAlgorithmException, NoSuchPaddingException, IOException {
+		String encryptedMessage1 = encrypt(plainMessage, (Key) receiverPublicKey);
+		return encrypt(encryptedMessage1, (Key) senderPrivateKey);
+	}
+
+	/***
+	 * A method to encrypt a message using receiver public key or sender private
+	 * key.
+	 * 
+	 * @param plainMessage
+	 * @param key
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IOException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 */
+	public static String encrypt(String plainMessage, Key key)
 			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException {
 
 		Cipher cipher = Cipher.getInstance("RSA");
-		cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+		cipher.init(Cipher.ENCRYPT_MODE, key);
 //		StringBuilder sb = new StringBuilder();
 		ByteArrayInputStream in = new ByteArrayInputStream(plainMessage.getBytes(StandardCharsets.UTF_8));
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -110,35 +176,103 @@ public class EncryptionUtil {
 
 	}
 
-	public static String decrypt(String encryptedMessage, PrivateKey privateKey)
+	/***
+	 * A method to decrypt an encrypted messaged using receiver receiver private
+	 * key.
+	 * 
+	 * @param encryptedMessage
+	 * @param receiverPrivateKey
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 */
+	public static String decrypt(String encryptedMessage, PrivateKey receiverPrivateKey)
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		return decrypt(encryptedMessage, (Key) privateKey);
+		return decrypt(encryptedMessage, (Key) receiverPrivateKey);
 	}
 
-	public static String decrypt(String encryptedMessage, PublicKey publicKey)
+	/***
+	 * A method to decrypt an encrypted message using receiver sender public key.
+	 * 
+	 * @param encryptedMessage
+	 * @param senderPublicKey
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 */
+	public static String decrypt(String encryptedMessage, PublicKey senderPublicKey)
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		return decrypt(encryptedMessage, (Key) publicKey);
+		return decrypt(encryptedMessage, (Key) senderPublicKey);
 	}
 
-	public static String decrypt(String encryptedMessage, Key publicKey)
+	/***
+	 * A method to double decrypt an encrypted message using sender public key and
+	 * receiver private key.
+	 * 
+	 * @param encryptedMessage
+	 * @param senderPublicKey
+	 * @param receiverPrivateKey
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 */
+	public static String doubleDecrypt(String encryptedMessage, PublicKey senderPublicKey,
+			PrivateKey receiverPrivateKey) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
+			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
+		String decryptedMessage1 = decrypt(encryptedMessage, (Key) senderPublicKey);
+		return decrypt(decryptedMessage1, (Key) receiverPrivateKey);
+	}
+
+	/***
+	 * A method to decrypt an encrypted message using sender public key or receiver
+	 * private key.
+	 * 
+	 * @param encryptedMessage
+	 * @param key
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IOException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 */
+	public static String decrypt(String encryptedMessage, Key key)
 			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException {
 
 		Cipher cipher = Cipher.getInstance("RSA");
-		cipher.init(Cipher.DECRYPT_MODE, publicKey);
+		cipher.init(Cipher.DECRYPT_MODE, key);
 		StringBuilder sb = new StringBuilder();
 		ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encryptedMessage));
 		byte[] buffer = new byte[MAXIMUM_ENCRYPTED_MESSAGE_LENGTH];
-		int len;
-		int count = 1;
-		while ((len = in.read(buffer)) > 0) {
+//		int len;
+//		int count = 1;
+//		while ((len = in.read(buffer)) > 0) {
+		while (in.read(buffer) > 0) {
 			byte[] cipherText = cipher.doFinal(buffer);
 			String temp = new String(cipherText, StandardCharsets.UTF_8);
 			sb.append(temp);
-			System.out.println("Message Part-" + count + ": " + temp);
-			count++;
+//			System.out.println("Message Part-" + count + ": " + temp);
+//			count++;
 		}
 		return sb.toString();
 

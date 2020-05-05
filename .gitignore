@@ -25,6 +25,7 @@ hs_err_pid*
 *.redo
 *.data
 *.genmodel
+*.key
 org.rdbd.demo.fairnet/.settings/org.eclipse.jdt.core.prefs
 org.rdbd.demo.fairnet/model/fairnet.ecore
 org.rdbd.demo.fairnet/files/*
