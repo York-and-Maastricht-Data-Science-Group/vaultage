@@ -29,3 +29,6 @@ hs_err_pid*
 org.rdbd.demo.fairnet/.settings/org.eclipse.jdt.core.prefs
 org.rdbd.demo.fairnet/model/fairnet.ecore
 org.rdbd.demo.fairnet/files/*
+org.rdbd.demo.fairnet/fairnet/*
+org.rdbd.demo.fairnet/output/*
+org.rdbd.core.server/activemq-data

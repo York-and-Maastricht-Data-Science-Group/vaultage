@@ -1,4 +1,4 @@
-package org.rdbd.demo.fairnet.util;
+package org.rdbd.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -7,12 +7,16 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
@@ -20,7 +24,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-public class EncryptionUtil {
+public class RDBDEncryptionUtil {
 
 	public static final String ALGORITHM = "RSA";
 	public static final int MAXIMUM_PLAIN_MESSAGE_LENGTH = 53;
@@ -78,6 +82,20 @@ public class EncryptionUtil {
 
 	}
 
+	public static KeyPair generateKeys() throws NoSuchAlgorithmException {
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		keyPairGen.initialize(RDBDEncryptionUtil.KEY_LENGTH);
+		return keyPairGen.generateKeyPair();
+	}
+
+	public static String getPrivateKey(KeyPair keyPair) {
+		return Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
+	}
+
+	public static String getPublicKey(KeyPair keyPair) {
+		return Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+	}
+
 	/***
 	 * A method to encrypt a message using receiver public key.
 	 * 
@@ -119,6 +137,40 @@ public class EncryptionUtil {
 	}
 
 	/***
+	 * A method to double encrypt a message using Strings of receiver public key and
+	 * sender private key.
+	 * 
+	 * @param plainMessage
+	 * @param receiverPublicKeyString
+	 * @param senderPrivateKeyString
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 * @throws InvalidKeySpecException
+	 */
+	public static String doubleEncrypt(String plainMessage, String receiverPublicKeyString,
+			String senderPrivateKeyString)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
+			NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
+
+		KeyFactory keyFactory = KeyFactory.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		byte[] privateKeyBytes = Base64.getDecoder().decode(senderPrivateKeyString);
+		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+		PrivateKey senderPrivateKey = keyFactory.generatePrivate(privateKeySpec);
+
+		byte[] publicKeyBytes = Base64.getDecoder().decode(receiverPublicKeyString);
+		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+		PublicKey receiverPublicKey = keyFactory.generatePublic(publicKeySpec);
+
+		return doubleEncrypt(plainMessage, receiverPublicKey, senderPrivateKey);
+	}
+
+	/***
 	 * A method to double encrypt a message using receiver public key and sender
 	 * private key.
 	 * 
@@ -138,6 +190,7 @@ public class EncryptionUtil {
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException {
 		String encryptedMessage1 = encrypt(plainMessage, (Key) receiverPublicKey);
+		System.out.println("intermediateEncryptedMessage: " + encryptedMessage1);
 		return encrypt(encryptedMessage1, (Key) senderPrivateKey);
 	}
 
@@ -160,7 +213,7 @@ public class EncryptionUtil {
 			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException {
 
-		Cipher cipher = Cipher.getInstance("RSA");
+		Cipher cipher = Cipher.getInstance(RDBDEncryptionUtil.ALGORITHM);
 		cipher.init(Cipher.ENCRYPT_MODE, key);
 //		StringBuilder sb = new StringBuilder();
 		ByteArrayInputStream in = new ByteArrayInputStream(plainMessage.getBytes(StandardCharsets.UTF_8));
@@ -217,6 +270,22 @@ public class EncryptionUtil {
 		return decrypt(encryptedMessage, (Key) senderPublicKey);
 	}
 
+	public static String doubleDecrypt(String encryptedMessage, String senderPublicKeyString,
+			String receiverPrivateKeyString) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
+			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
+		
+		KeyFactory keyFactory = KeyFactory.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		byte[] privateKeyBytes = Base64.getDecoder().decode(receiverPrivateKeyString);
+		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+		PrivateKey receiverPrivateKey = keyFactory.generatePrivate(privateKeySpec);
+
+		byte[] publicKeyBytes = Base64.getDecoder().decode(senderPublicKeyString);
+		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+		PublicKey senderPublicKey = keyFactory.generatePublic(publicKeySpec);
+		
+		return doubleDecrypt(encryptedMessage, senderPublicKey, receiverPrivateKey);
+	}
+	
 	/***
 	 * A method to double decrypt an encrypted message using sender public key and
 	 * receiver private key.
@@ -237,6 +306,7 @@ public class EncryptionUtil {
 			PrivateKey receiverPrivateKey) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
 		String decryptedMessage1 = decrypt(encryptedMessage, (Key) senderPublicKey);
+		System.out.println("intermediateDecryptedMessage: " + decryptedMessage1);
 		return decrypt(decryptedMessage1, (Key) receiverPrivateKey);
 	}
 
@@ -259,20 +329,19 @@ public class EncryptionUtil {
 			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException {
 
-		Cipher cipher = Cipher.getInstance("RSA");
+		Cipher cipher = Cipher.getInstance(RDBDEncryptionUtil.ALGORITHM);
 		cipher.init(Cipher.DECRYPT_MODE, key);
 		StringBuilder sb = new StringBuilder();
 		ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encryptedMessage));
 		byte[] buffer = new byte[MAXIMUM_ENCRYPTED_MESSAGE_LENGTH];
-//		int len;
-//		int count = 1;
-//		while ((len = in.read(buffer)) > 0) {
-		while (in.read(buffer) > 0) {
-			byte[] cipherText = cipher.doFinal(buffer);
+		int len;
+		int count = 1;
+		while ((len = in.read(buffer)) > 0) {
+			byte[] cipherText = cipher.doFinal(buffer, 0, len);
 			String temp = new String(cipherText, StandardCharsets.UTF_8);
 			sb.append(temp);
-//			System.out.println("Message Part-" + count + ": " + temp);
-//			count++;
+			System.out.println("Message Part-" + count + ": " + temp);
+			count++;
 		}
 		return sb.toString();
 

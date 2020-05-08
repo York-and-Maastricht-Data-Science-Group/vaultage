@@ -3,8 +3,8 @@ package org.rdbd.demo.fairnet.handler;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.rdbd.core.server.RDBDHandler;
-import org.rdbd.demo.fairnet.User;
+import org.rdbd.core.RDBDHandler;
+import org.rdbd.demo.fairnet.FairnetVault;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,7 +23,7 @@ public class GetPostsConfirmationHandler extends RDBDHandler {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			postIds = gson.fromJson(message.getValue(), ArrayList.class);
 			for(String postId:postIds) {
-				System.out.println(((User)this.owner).getName() +": "+ postId);
+				System.out.println(((FairnetVault)this.owner).getName() +": "+ postId);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

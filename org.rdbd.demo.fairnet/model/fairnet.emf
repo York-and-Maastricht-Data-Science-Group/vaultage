@@ -1,22 +1,30 @@
-@GenModel(basePackage="org.rdbd.demo")
+@GenModel(basePackage="org.rdbd.demo.model")
 @namespace(uri="http://fairnet.net/", prefix="")
 package fairnet;
 
-datatype Exception : java.lang.Exception;
 
-abstract class UserBase {
+class FairnetVault {
 
-	op Boolean addFriend(User requester) throws Exception;
-	op Post[*] getPosts(User requester) throws Exception;
-	op Post getPost(User requester, String ~id) throws Exception;
+	attr String ~id;	
+	attr String name;
+	val Friend[*] friends;
+	val Post[*] posts;
+	
+	@private
+	op Boolean isFriend(Friend somene);
+	@private
+	op Boolean addFriend(Friend requester);
+	
+	@public
+	op Post[*] getPostList(Friend requester); 
+	@public
+	op Post getPost(Friend requester, String ~id);
 }
 
-class User extends UserBase {
-	op Boolean isFriend(User other);
+class Friend {
+	attr String ~id;
 	attr String name;
-	attr String email;
-	val User[*] friends;
-	val Post[*] posts;
+	attr String publicKey;
 }
 
 class Post {

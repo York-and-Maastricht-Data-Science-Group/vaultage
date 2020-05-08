@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.rdbd.core.server.RDBD;
-import org.rdbd.core.server.RDBDHandler;
+import org.rdbd.core.RDBD;
+import org.rdbd.core.RDBDHandler;
 import org.rdbd.demo.fairnet.handler.AddFriendConfirmationHandler;
 import org.rdbd.demo.fairnet.handler.AddFriendResponseHandler;
 import org.rdbd.demo.fairnet.handler.GetPostConfirmationHandler;
@@ -13,7 +13,7 @@ import org.rdbd.demo.fairnet.handler.GetPostResponseHandler;
 import org.rdbd.demo.fairnet.handler.GetPostsConfirmationHandler;
 import org.rdbd.demo.fairnet.handler.GetPostsResponseHandler;
 
-public abstract class UserBase {
+public abstract class FairnetVaultBase {
 
 	protected String privateKey;
 	protected String publicKey;
@@ -29,7 +29,7 @@ public abstract class UserBase {
 	protected GetPostsConfirmationHandler getPostsConfirmationHandler;
 	protected GetPostConfirmationHandler getPostConfirmationHandler;
 	
-	public UserBase() {
+	public FairnetVaultBase() {
 		this.isListening = false;
 		this.rdbd = new RDBD();
 		this.handlers = new HashMap<String, RDBDHandler>();
@@ -121,7 +121,7 @@ public abstract class UserBase {
 
 		boolean isSuccess = rdbd.connect(fairnet.getAddress());
 		if (isSuccess) {
-			rdbd.listenMessage(publicKey, handlers);
+			rdbd.listenMessage(publicKey, privateKey,  handlers);
 			return true;
 		}
 
@@ -135,20 +135,17 @@ public abstract class UserBase {
 
 	// These are left abstract for the developer to fill in with
 	// behaviour in a subclass (i.e. User.java above)
-	public abstract boolean addFriend(User requester) throws Exception;
+	public abstract boolean addFriend(Friend requester) throws Exception;
 
-	public abstract List<String> getPosts(User requester) throws Exception;
+	public abstract List<String> getPosts(Friend requester) throws Exception;
 
-	public abstract Post getPost(User requester, String id) throws Exception;
+	public abstract Post getPost(Friend requester, String id) throws Exception;
 
-	public abstract Post createPost(String text, boolean isPublic);
+	public abstract Post createPost(String title, String body, boolean isPublic);
 
 	public abstract Post getPost(String id) throws Exception;
 
-	public abstract List<String> getFriends() throws Exception;
+	public abstract List<Friend> getFriends() throws Exception;
 
 	public abstract List<String> getPosts() throws Exception;
-
-	
-	
 }

@@ -1,9 +1,10 @@
 package org.rdbd.demo.fairnet.handler;
 
-import org.rdbd.core.server.RDBDHandler;
-import org.rdbd.core.server.RDBDMessage;
 import org.rdbd.demo.fairnet.Post;
-import org.rdbd.demo.fairnet.User;
+import org.rdbd.core.RDBDHandler;
+import org.rdbd.core.RDBDMessage;
+import org.rdbd.demo.fairnet.FairnetVault;
+import org.rdbd.demo.fairnet.Friend;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,8 +19,8 @@ public class GetPostResponseHandler extends RDBDHandler {
 		System.out.println("Operation: " + this.message.getOperation());
 
 		try {
-			User me = (User) this.owner;
-			User myFriend = new User(message.getFrom());
+			FairnetVault me = (FairnetVault) this.owner;
+			Friend myFriend = new Friend("", message.getFrom());
 			Post post = me.getPost(message.getValue());
 			
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -31,7 +32,7 @@ public class GetPostResponseHandler extends RDBDHandler {
 			messageBack.setOperation(GetPostConfirmationHandler.class.getName());
 			messageBack.setValue(value);
 			
-			me.getRdbd().sendMessage(myFriend.getPublicKey(), messageBack);
+			me.getRdbd().sendMessage(myFriend.getPublicKey(), me.getPublicKey(), me.getPrivateKey(), messageBack);
 		
 		} catch (Exception e) {
 			e.printStackTrace();

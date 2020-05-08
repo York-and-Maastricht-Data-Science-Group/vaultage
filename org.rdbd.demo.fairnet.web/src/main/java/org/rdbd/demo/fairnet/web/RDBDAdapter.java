@@ -1,6 +1,6 @@
 package org.rdbd.demo.fairnet.web;
 
-import org.rdbd.core.server.RDBD;
+import org.rdbd.core.RDBD;
 import org.rdbd.demo.fairnet.web.account.Account;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

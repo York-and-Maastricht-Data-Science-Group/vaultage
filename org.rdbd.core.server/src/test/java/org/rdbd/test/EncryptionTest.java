@@ -1,4 +1,5 @@
-package org.rdbd.demo.fairnet.test;
+package org.rdbd.test;
+
 
 import static org.junit.Assert.assertEquals;
 
@@ -24,7 +25,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.junit.Test;
-import org.rdbd.demo.fairnet.util.EncryptionUtil;
+import org.rdbd.util.RDBDEncryptionUtil;
 
 /***
  * A class to test the encryption and decryption of EncryptionUtil.java
@@ -39,9 +40,9 @@ public class EncryptionTest {
 	private KeyFactory keyFactory;
 
 	public EncryptionTest() throws NoSuchAlgorithmException {
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(EncryptionUtil.ALGORITHM);
-		keyFactory = KeyFactory.getInstance(EncryptionUtil.ALGORITHM);
-		keyPairGen.initialize(EncryptionUtil.KEY_LENGTH);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		keyFactory = KeyFactory.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		keyPairGen.initialize(RDBDEncryptionUtil.KEY_LENGTH);
 
 		receiverKeyPair = keyPairGen.generateKeyPair();
 		senderKeyPair = keyPairGen.generateKeyPair();
@@ -86,8 +87,8 @@ public class EncryptionTest {
 		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
 		PublicKey loadedPublicKey = keyFactory.generatePublic(publicKeySpec);
 
-		String encryptedMessage = EncryptionUtil.encrypt(message, loadedPublicKey);
-		String decryptedMessage = EncryptionUtil.decrypt(encryptedMessage, loadedPrivateKey);
+		String encryptedMessage = RDBDEncryptionUtil.encrypt(message, loadedPublicKey);
+		String decryptedMessage = RDBDEncryptionUtil.decrypt(encryptedMessage, loadedPrivateKey);
 
 		assertEquals(privateKeyString, loadedPrivateKeyString);
 		assertEquals(publicKeyString, loadedPublicKeyString);
@@ -98,7 +99,16 @@ public class EncryptionTest {
 	public void testDoubleEncryptionWithKeysFromFiles()
 			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException {
-		String message = "Foo Bar!";
+		String message = "Boo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
+				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
+				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
+				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
+				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
+				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
+				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
+				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
+				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
+		+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!";
 
 		// RECEIVER
 		PublicKey receiverPublicKey = receiverKeyPair.getPublic();
@@ -148,9 +158,9 @@ public class EncryptionTest {
 
 		// ENCRYPT / DECRYPT
 		System.out.println("Original Message: " + message);
-		String encryptedMessage = EncryptionUtil.doubleEncrypt(message, receiverLoadedPublicKey, senderLoadedPrivateKey);
+		String encryptedMessage = RDBDEncryptionUtil.doubleEncrypt(message, receiverLoadedPublicKey, senderLoadedPrivateKey);
 		System.out.println("Double Encrypted Message: " + encryptedMessage);
-		String decryptedMessage = EncryptionUtil.doubleDecrypt(encryptedMessage, senderLoadedPublicKey, receiverLoadedPrivateKey); 	
+		String decryptedMessage = RDBDEncryptionUtil.doubleDecrypt(encryptedMessage, senderLoadedPublicKey, receiverLoadedPrivateKey); 	
 		System.out.println("Double Decrypted Message: " + decryptedMessage);
 		
 		assertEquals(message, decryptedMessage);
@@ -186,11 +196,11 @@ public class EncryptionTest {
 		System.out.println("Original Message: " + message);
 
 		// encrypt with private key
-		String encryptedMessage = EncryptionUtil.encrypt(message, publicKey);
+		String encryptedMessage = RDBDEncryptionUtil.encrypt(message, publicKey);
 		System.out.println("Encrypted Message: " + encryptedMessage);
 
 		// decrypt with public key
-		String decryptedMessage = EncryptionUtil.decrypt(encryptedMessage, privateKey);
+		String decryptedMessage = RDBDEncryptionUtil.decrypt(encryptedMessage, privateKey);
 		System.out.println("Decrypted Message: " + decryptedMessage);
 
 		assertEquals(message, decryptedMessage);
@@ -228,11 +238,11 @@ public class EncryptionTest {
 		System.out.println("Original Message: " + message);
 
 		// encrypt with private key
-		String encryptedMessage = EncryptionUtil.encrypt(message, publicKey);
+		String encryptedMessage = RDBDEncryptionUtil.encrypt(message, publicKey);
 		System.out.println("Encrypted Message: " + encryptedMessage);
 
 		// decrypt with public key
-		String decryptedMessage = EncryptionUtil.decrypt(encryptedMessage, privateKey);
+		String decryptedMessage = RDBDEncryptionUtil.decrypt(encryptedMessage, privateKey);
 		System.out.println("Decrypted Message: " + decryptedMessage);
 
 		assertEquals(message, decryptedMessage);

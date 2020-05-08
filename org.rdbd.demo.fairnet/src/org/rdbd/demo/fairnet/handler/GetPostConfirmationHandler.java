@@ -1,8 +1,8 @@
 package org.rdbd.demo.fairnet.handler;
 
-import org.rdbd.core.server.RDBDHandler;
 import org.rdbd.demo.fairnet.Post;
-import org.rdbd.demo.fairnet.User;
+import org.rdbd.core.RDBDHandler;
+import org.rdbd.demo.fairnet.FairnetVault;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

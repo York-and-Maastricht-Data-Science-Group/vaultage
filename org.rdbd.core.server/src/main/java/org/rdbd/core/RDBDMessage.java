@@ -1,12 +1,20 @@
-package org.rdbd.core.server;
+package org.rdbd.core;
+
+import java.util.UUID;
 
 public class RDBDMessage {
+	
+	private String senderId;
 	private String from;
 	private String to;
 	private String operation;
 	private String value;
 	private String token;
 
+	public RDBDMessage() {
+		this.token = UUID.randomUUID().toString();
+	}
+	
 	public String getToken() {
 		return token;
 	}
@@ -45,6 +53,14 @@ public class RDBDMessage {
 
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	public String getSenderId() {
+		return senderId;
+	}
+
+	public void setSenderId(String senderId) {
+		this.senderId = senderId;
 	}
 
 }

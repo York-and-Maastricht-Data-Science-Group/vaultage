@@ -1,29 +1,43 @@
 package org.rdbd.demo.fairnet;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
+import org.rdbd.demo.fairnet.util.FairnetUtil;
 
 public class Post {
 
 	private String id;
+	private String title;
 	private String body;
 	private boolean isPublic;
 
-	public Post(String id, String body) {
+	public Post(String id, String title, String body) {
 		this.id = id;
 		this.body = body;
-		this.isPublic = (id.charAt(17) == 'T'? true : false);
+		this.isPublic = true;
 	}
 	
-	public Post(String body, boolean isPublic) {
+	public Post(String title, String body) {
+		this.id = FairnetUtil.getTimestamp();
+		this.body = body;
+		this.isPublic = true;
+	}
+	
+	public Post(String title, String body, boolean isPublic) {
 		this.isPublic = isPublic;
-		this.id = (new SimpleDateFormat("yyyyMMddhhmmssSSS")).format(new Date()) + ((isPublic) ? "T" : "F");
-		this.body = body; 
-
+		this.id = FairnetUtil.getTimestamp();
+		this.body = body;
 	}
 
 	public String getId() {
 		return id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public String getBody() {

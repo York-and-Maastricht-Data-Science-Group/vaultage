@@ -1,5 +1,9 @@
-package org.rdbd.core.server;
+package org.rdbd.core;
 
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,10 +19,18 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.rdbd.util.RDBDEncryptionUtil;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+/***
+ * The main class that is responsible to listen, send, and receive messages to
+ * and from Apache ActiveMQ server. 
+ * 
+ * @author Ryano
+ *
+ */
 public class RDBD {
 
 	private String url;
@@ -28,7 +40,15 @@ public class RDBD {
 	private boolean isListening;
 	private Gson gson;
 	private Set<RDBDHandler> threads;
-	private Set<String> tokens;
+	private Set<String> expectedReplyTokens = new HashSet<>();
+
+	public Set<String> getExpectedReplyTokens() {
+		return expectedReplyTokens;
+	}
+
+	public void setExpectedReplyTokens(Set<String> expectedReplyTokens) {
+		this.expectedReplyTokens = expectedReplyTokens;
+	}
 
 	/***
 	 * 
@@ -36,6 +56,18 @@ public class RDBD {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
+
+		// encryption
+		KeyPair receiverKeyPair;
+		KeyPair senderKeyPair;
+		KeyFactory keyFactory;
+
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		keyFactory = KeyFactory.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		keyPairGen.initialize(RDBDEncryptionUtil.KEY_LENGTH);
+
+		receiverKeyPair = keyPairGen.generateKeyPair();
+		senderKeyPair = keyPairGen.generateKeyPair();
 
 //		String address = ActiveMQConnection.DEFAULT_BROKER_URL;
 		String address = "vm://localhost";
@@ -52,14 +84,17 @@ public class RDBD {
 
 			}
 		});
-		Thread t2 = rdbd2.listenMessage("bob", handlers);
+		Thread t2 = rdbd2.listenMessage("bob",
+				Base64.getEncoder().encodeToString(receiverKeyPair.getPrivate().getEncoded()), handlers);
 
 		RDBDMessage message = new RDBDMessage();
 		message.setFrom("alice");
 		message.setTo("bob");
 		message.setOperation(RDBDHandler.class.getName());
 		message.setValue("Hello World!");
-		Thread t1 = rdbd1.sendMessage(message.getTo(), message);
+		Thread t1 = rdbd1.sendMessage(message.getTo(),
+				Base64.getEncoder().encodeToString(senderKeyPair.getPublic().getEncoded()),
+				Base64.getEncoder().encodeToString(senderKeyPair.getPrivate().getEncoded()), message);
 
 //		synchronized (t1) {
 //			t1.wait();
@@ -84,13 +119,13 @@ public class RDBD {
 		threads = new HashSet<RDBDHandler>();
 	}
 
-	public Thread sendMessage(String queueId, RDBDMessage message) {
-		return thread(new Producer(queueId, message), false);
+	public Thread sendMessage(String queueId, String senderPublicKey, String senderPrivateKey, RDBDMessage message) {
+		return thread(new Producer(queueId, senderPublicKey, senderPrivateKey, message), false);
 	}
 
-	public Thread listenMessage(String queueId, Map<String, RDBDHandler> handlers) {
+	public Thread listenMessage(String queueId, String receiverPrivateKey, Map<String, RDBDHandler> handlers) {
 		this.isListening = true;
-		return thread(new Consumer(queueId, handlers), true);
+		return thread(new Consumer(queueId, receiverPrivateKey, handlers), true);
 	}
 
 	private Thread thread(Runnable runnable, boolean daemon) {
@@ -126,17 +161,21 @@ public class RDBD {
 	private class Producer implements Runnable {
 
 		String queueId;
+		String senderPublicKey;
+		String senderPrivateKey;
 		RDBDMessage message;
 		String text;
 
-		public Producer(String queue, RDBDMessage message) {
+		public Producer(String queue, String senderPublicKey, String senderPrivateKey, RDBDMessage message) {
 			this.queueId = queue;
+			this.senderPublicKey = senderPublicKey;
+			this.senderPrivateKey = senderPrivateKey;
 			this.message = message;
 		}
 
 		public void run() {
 			try {
-				System.out.println("Send to: " + queueId);
+//				System.out.println("Send to: " + queueId);
 
 				// Create the destination (Topic or Queue)
 				Destination destination = session.createQueue(queueId);
@@ -146,10 +185,16 @@ public class RDBD {
 				producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
 				// Create a message
-				text = gson.toJson(message);
-				TextMessage message = session.createTextMessage(text);
+				text = gson.toJson(message).trim();
+
+				// encrypt message
+				String encryptedMessage = RDBDEncryptionUtil.doubleEncrypt(text, queueId, senderPrivateKey).trim();
+
+				TextMessage message = session.createTextMessage(this.senderPublicKey + encryptedMessage);
 
 				producer.send(message);
+
+				expectedReplyTokens.add(this.message.getToken());
 				System.out.println("SENT MESSAGE: " + queueId + "\n" + text);
 
 			} catch (Exception e) {
@@ -160,12 +205,15 @@ public class RDBD {
 
 	private class Consumer implements Runnable {
 		private String queueId;
+		private String senderPublicKey;
+		private String receiverPrivateKey;
 		private String json;
 		private Map<String, RDBDHandler> handlers;
 
-		public Consumer(String queueId, Map<String, RDBDHandler> handlers) {
+		public Consumer(String queueId, String receiverPrivateKey, Map<String, RDBDHandler> handlers) {
 			this.queueId = queueId;
 			this.handlers = handlers;
+			this.receiverPrivateKey = receiverPrivateKey;
 		}
 
 		public void run() {
@@ -188,7 +236,18 @@ public class RDBD {
 
 						TextMessage textMessage = (TextMessage) message;
 
-						json = textMessage.getText();
+						String mergedMessage = textMessage.getText();
+						this.senderPublicKey = mergedMessage.substring(0, 128);
+//						System.out.println("X: " + this.senderPublicKey);
+						String encryptedMessage = mergedMessage.substring(128, mergedMessage.length());
+
+//						System.out.println("M: " + encryptedMessage);
+//						System.out.println("B:" + this.senderPublicKey.getBytes().length + ", " + encryptedMessage.getBytes().length);
+//						System.out.println("S:" + this.senderPublicKey.length() + ", " + encryptedMessage.length());
+//						System.out.println("A:" + textMessage.getText().length());
+
+						json = RDBDEncryptionUtil.doubleDecrypt(encryptedMessage, senderPublicKey, receiverPrivateKey);
+
 						System.out.println("RECEIVED MESSAGE: " + queueId + "\n" + json);
 
 						RDBDMessage rdbdMessage = gson.fromJson(json, RDBDMessage.class);
@@ -197,7 +256,7 @@ public class RDBD {
 						RDBDHandler handler = handlers.get(operation);
 						if (handler != null && !handler.isAlive()) {
 							threads.add(handler);
-							System.out.println("Run: " + handler.getName());
+//							System.out.println("Run: " + handler.getName());
 							handler.execute(queueId, rdbdMessage);
 						} else {
 							System.out.println();
@@ -214,6 +273,5 @@ public class RDBD {
 	public void stopListening() {
 		this.isListening = false;
 	}
-
 
 }

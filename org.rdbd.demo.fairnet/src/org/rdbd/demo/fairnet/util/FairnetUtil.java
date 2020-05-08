@@ -3,17 +3,28 @@ package org.rdbd.demo.fairnet.util;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.TimeZone;
 
 public class FairnetUtil {
+
+	public static String getTimestamp() {
+		SimpleDateFormat gmtDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		gmtDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return gmtDateFormat.format(new Date()) + gmtDateFormat.getTimeZone().getID();
+	}
+
+	public static Date timestampToDate(String timestampString) throws ParseException {
+		String dateString = timestampString.substring(0, timestampString.length() - 2);
+		Date date = new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(dateString);
+		return date;
+	}
 
 	public static String readFile(String path) {
 		try {

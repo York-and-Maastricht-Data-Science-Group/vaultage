@@ -1,9 +1,10 @@
-package org.rdbd.core.server;
+package org.rdbd.core;
 
 public abstract class RDBDHandler {
 
 	private static long COUNTER = 0;
 	protected String queueId;
+	protected String senderPublicKey;
 	protected RDBDMessage message;
 	protected Object owner;
 	protected String name;
@@ -31,6 +32,14 @@ public abstract class RDBDHandler {
 	}
 
 	public abstract void run();
+
+	public String getSenderPublicKey() {
+		return senderPublicKey;
+	}
+
+	public void setSenderPublicKey(String senderPublicKey) {
+		this.senderPublicKey = senderPublicKey;
+	}
 
 	public String getName() {
 		return name;
