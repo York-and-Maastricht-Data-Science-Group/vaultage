@@ -1,7 +1,0 @@
-rule Library2Page 
-  transform fairnet : EClass {
-  
-  template : "../egl/fairnet.egl"
-  
-  target : "../output/index.html"
-}

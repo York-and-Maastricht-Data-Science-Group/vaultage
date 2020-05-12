@@ -1,0 +1,43 @@
+@GenModel(basePackage="org.rdbd.demo.model")
+@namespace(uri="http://fairnet.net/", prefix="")
+package fairnet;
+
+
+class FairnetVault {
+
+	attr String ~id;	
+	attr String name;
+	val Friend[*] friends;
+	val Post[*] posts;
+	
+	@private
+	op Post createPost(String title, String body, Boolean isPublic);
+	@private
+	op Boolean addFriend(Friend requester);
+	@private
+	op Friend[*] getFriends();
+	
+	//@private
+	//op Post getPost(String ~id);
+	//@private
+	//op String[*] getPosts();
+ 
+	@public
+	op Post getPost(Friend requester, String ~id);
+	@public
+	op String[*] getPosts(Friend requester);
+}
+
+class Friend {
+	attr String ~id;
+	attr String name;
+	attr String publicKey;
+}
+
+class Post {
+	attr String ~id;
+	attr String title;
+	attr String body;
+	attr boolean public;
+}
+

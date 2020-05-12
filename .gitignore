@@ -26,9 +26,11 @@ hs_err_pid*
 *.data
 *.genmodel
 *.key
-org.rdbd.demo.fairnet/.settings/org.eclipse.jdt.core.prefs
-org.rdbd.demo.fairnet/model/fairnet.ecore
-org.rdbd.demo.fairnet/files/*
-org.rdbd.demo.fairnet/fairnet/*
-org.rdbd.demo.fairnet/output/*
-org.rdbd.core.server/activemq-data
+org.vaultage.demo.fairnet/.settings/org.eclipse.jdt.core.prefs
+org.vaultage.demo.fairnet/model/fairnet.ecore
+org.vaultage.demo.fairnet/files/*
+org.vaultage.demo.fairnet/fairnet/*
+org.vaultage.demo.fairnet/output/*
+org.vaultage.demo.fairnet/activemq-data
+org.vaultage.core.server/activemq-data
+/target/

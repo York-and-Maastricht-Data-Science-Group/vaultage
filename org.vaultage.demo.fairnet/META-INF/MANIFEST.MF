@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Fairnet
+Bundle-SymbolicName: org.vaultage.demo.fairnet
+Bundle-Version: 1.0.0.qualifier
+Export-Package: org.vaultage.demo.fairnet,
+ org.vaultage.demo.fairnet.exception,
+ org.vaultage.demo.fairnet.generator,
+ org.vaultage.demo.fairnet.handler,
+ org.vaultage.demo.fairnet.test,
+ org.vaultage.demo.fairnet.util
+Require-Bundle: org.eclipse.epsilon.egl.engine,
+ org.eclipse.epsilon.emc.emf,
+ org.eclipse.epsilon.eol.engine,
+ org.junit
