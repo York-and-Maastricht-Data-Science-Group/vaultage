@@ -24,7 +24,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-public class RDBDEncryptionUtil {
+public class VaultAgeEncryption {
 
 	public static final String ALGORITHM = "RSA";
 	public static final int MAXIMUM_PLAIN_MESSAGE_LENGTH = 53;
@@ -83,8 +83,8 @@ public class RDBDEncryptionUtil {
 	}
 
 	public static KeyPair generateKeys() throws NoSuchAlgorithmException {
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(RDBDEncryptionUtil.ALGORITHM);
-		keyPairGen.initialize(RDBDEncryptionUtil.KEY_LENGTH);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultAgeEncryption.ALGORITHM);
+		keyPairGen.initialize(VaultAgeEncryption.KEY_LENGTH);
 		return keyPairGen.generateKeyPair();
 	}
 
@@ -158,7 +158,7 @@ public class RDBDEncryptionUtil {
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
 
-		KeyFactory keyFactory = KeyFactory.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(VaultAgeEncryption.ALGORITHM);
 		byte[] privateKeyBytes = Base64.getDecoder().decode(senderPrivateKeyString);
 		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 		PrivateKey senderPrivateKey = keyFactory.generatePrivate(privateKeySpec);
@@ -213,7 +213,7 @@ public class RDBDEncryptionUtil {
 			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException {
 
-		Cipher cipher = Cipher.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		Cipher cipher = Cipher.getInstance(VaultAgeEncryption.ALGORITHM);
 		cipher.init(Cipher.ENCRYPT_MODE, key);
 //		StringBuilder sb = new StringBuilder();
 		ByteArrayInputStream in = new ByteArrayInputStream(plainMessage.getBytes(StandardCharsets.UTF_8));
@@ -274,7 +274,7 @@ public class RDBDEncryptionUtil {
 			String receiverPrivateKeyString) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
 		
-		KeyFactory keyFactory = KeyFactory.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(VaultAgeEncryption.ALGORITHM);
 		byte[] privateKeyBytes = Base64.getDecoder().decode(receiverPrivateKeyString);
 		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 		PrivateKey receiverPrivateKey = keyFactory.generatePrivate(privateKeySpec);
@@ -329,7 +329,7 @@ public class RDBDEncryptionUtil {
 			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException {
 
-		Cipher cipher = Cipher.getInstance(RDBDEncryptionUtil.ALGORITHM);
+		Cipher cipher = Cipher.getInstance(VaultAgeEncryption.ALGORITHM);
 		cipher.init(Cipher.DECRYPT_MODE, key);
 		StringBuilder sb = new StringBuilder();
 		ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encryptedMessage));

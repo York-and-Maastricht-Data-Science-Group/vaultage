@@ -1,11 +1,11 @@
 package org.vaultage.demo.fairnet.handler;
 
-import org.vaultage.core.RDBDHandler;
-import org.vaultage.core.RDBDMessage;
+import org.vaultage.core.VaultAgeHandler;
+import org.vaultage.core.VaultAgeMessage;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
 
-public class AddFriendResponseHandler extends RDBDHandler {
+public class AddFriendResponseHandler extends VaultAgeHandler {
 
 	@Override
 	public void run() {
@@ -19,7 +19,7 @@ public class AddFriendResponseHandler extends RDBDHandler {
 			FairnetVault me = (FairnetVault) this.owner;
 		
 			me.addFriend(friend);
-			RDBDMessage messageBack = new RDBDMessage();
+			VaultAgeMessage messageBack = new VaultAgeMessage();
 			messageBack.setSenderId(me.getId());
 			messageBack.setToken(this.message.getToken());
 			messageBack.setFrom(me.getPublicKey());

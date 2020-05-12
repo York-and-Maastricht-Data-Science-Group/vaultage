@@ -1,6 +1,6 @@
 package org.vaultage.demo.fairnet;
 
-import org.vaultage.core.RDBDMessage;
+import org.vaultage.core.VaultAgeMessage;
 import org.vaultage.demo.fairnet.handler.AddFriendResponseHandler;
 import org.vaultage.demo.fairnet.handler.GetPostResponseHandler;
 import org.vaultage.demo.fairnet.handler.GetPostsResponseHandler;
@@ -17,7 +17,7 @@ public class RemoteUser {
 
 	public Friend addFriend(String friendPublicKey) {
 
-		RDBDMessage message = new RDBDMessage();
+		VaultAgeMessage message = new VaultAgeMessage();
 		message.setSenderId(me.getId());
 		message.setFrom(me.getPublicKey());
 		message.setTo(friendPublicKey);
@@ -31,7 +31,7 @@ public class RemoteUser {
 	}
 
 	public void getPosts(FairnetVault otherUser) {
-		RDBDMessage message = new RDBDMessage();
+		VaultAgeMessage message = new VaultAgeMessage();
 		message.setSenderId(me.getId());
 		message.setFrom(me.getPublicKey());
 		message.setTo(otherUser.getPublicKey());
@@ -43,7 +43,7 @@ public class RemoteUser {
 
 	public Post getPost(FairnetVault otherUser, String postId) {
 
-		RDBDMessage message = new RDBDMessage();
+		VaultAgeMessage message = new VaultAgeMessage();
 		message.setSenderId(me.getId());
 		message.setFrom(me.getPublicKey());
 		message.setTo(otherUser.getPublicKey());

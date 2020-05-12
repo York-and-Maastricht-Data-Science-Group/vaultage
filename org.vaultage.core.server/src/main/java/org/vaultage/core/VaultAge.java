@@ -19,7 +19,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.vaultage.util.RDBDEncryptionUtil;
+import org.vaultage.util.VaultAgeEncryption;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,7 +31,7 @@ import com.google.gson.GsonBuilder;
  * @author Ryano
  *
  */
-public class RDBD {
+public class VaultAge {
 
 	private String url;
 	private ActiveMQConnectionFactory connectionFactory;
@@ -39,7 +39,7 @@ public class RDBD {
 	private Session session;
 	private boolean isListening;
 	private Gson gson;
-	private Set<RDBDHandler> threads;
+	private Set<VaultAgeHandler> threads;
 	private Set<String> expectedReplyTokens = new HashSet<>();
 
 	public Set<String> getExpectedReplyTokens() {
@@ -62,23 +62,23 @@ public class RDBD {
 		KeyPair senderKeyPair;
 		KeyFactory keyFactory;
 
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(RDBDEncryptionUtil.ALGORITHM);
-		keyFactory = KeyFactory.getInstance(RDBDEncryptionUtil.ALGORITHM);
-		keyPairGen.initialize(RDBDEncryptionUtil.KEY_LENGTH);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultAgeEncryption.ALGORITHM);
+		keyFactory = KeyFactory.getInstance(VaultAgeEncryption.ALGORITHM);
+		keyPairGen.initialize(VaultAgeEncryption.KEY_LENGTH);
 
 		receiverKeyPair = keyPairGen.generateKeyPair();
 		senderKeyPair = keyPairGen.generateKeyPair();
 
 //		String address = ActiveMQConnection.DEFAULT_BROKER_URL;
 		String address = "vm://localhost";
-		RDBD rdbd1 = new RDBD();
+		VaultAge rdbd1 = new VaultAge();
 		rdbd1.connect(address);
 
-		RDBD rdbd2 = new RDBD();
+		VaultAge rdbd2 = new VaultAge();
 		rdbd2.connect(address);
 
-		HashMap<String, RDBDHandler> handlers = new HashMap<String, RDBDHandler>();
-		handlers.put(RDBDHandler.class.getName(), new RDBDHandler() {
+		HashMap<String, VaultAgeHandler> handlers = new HashMap<String, VaultAgeHandler>();
+		handlers.put(VaultAgeHandler.class.getName(), new VaultAgeHandler() {
 			public void run() {
 				System.out.println("Received message: " + this.message.getValue());
 
@@ -87,10 +87,10 @@ public class RDBD {
 		Thread t2 = rdbd2.listenMessage("bob",
 				Base64.getEncoder().encodeToString(receiverKeyPair.getPrivate().getEncoded()), handlers);
 
-		RDBDMessage message = new RDBDMessage();
+		VaultAgeMessage message = new VaultAgeMessage();
 		message.setFrom("alice");
 		message.setTo("bob");
-		message.setOperation(RDBDHandler.class.getName());
+		message.setOperation(VaultAgeHandler.class.getName());
 		message.setValue("Hello World!");
 		Thread t1 = rdbd1.sendMessage(message.getTo(),
 				Base64.getEncoder().encodeToString(senderKeyPair.getPublic().getEncoded()),
@@ -114,16 +114,16 @@ public class RDBD {
 	/***
 	 * 
 	 */
-	public RDBD() {
+	public VaultAge() {
 		gson = new GsonBuilder().setPrettyPrinting().create();
-		threads = new HashSet<RDBDHandler>();
+		threads = new HashSet<VaultAgeHandler>();
 	}
 
-	public Thread sendMessage(String queueId, String senderPublicKey, String senderPrivateKey, RDBDMessage message) {
+	public Thread sendMessage(String queueId, String senderPublicKey, String senderPrivateKey, VaultAgeMessage message) {
 		return thread(new Producer(queueId, senderPublicKey, senderPrivateKey, message), false);
 	}
 
-	public Thread listenMessage(String queueId, String receiverPrivateKey, Map<String, RDBDHandler> handlers) {
+	public Thread listenMessage(String queueId, String receiverPrivateKey, Map<String, VaultAgeHandler> handlers) {
 		this.isListening = true;
 		return thread(new Consumer(queueId, receiverPrivateKey, handlers), true);
 	}
@@ -147,7 +147,7 @@ public class RDBD {
 	public void disconnect() throws Exception {
 		this.stopListening();
 
-		for (RDBDHandler h : threads) {
+		for (VaultAgeHandler h : threads) {
 			if (h.isAlive()) {
 				h.interrupt();
 			}
@@ -163,10 +163,10 @@ public class RDBD {
 		String queueId;
 		String senderPublicKey;
 		String senderPrivateKey;
-		RDBDMessage message;
+		VaultAgeMessage message;
 		String text;
 
-		public Producer(String queue, String senderPublicKey, String senderPrivateKey, RDBDMessage message) {
+		public Producer(String queue, String senderPublicKey, String senderPrivateKey, VaultAgeMessage message) {
 			this.queueId = queue;
 			this.senderPublicKey = senderPublicKey;
 			this.senderPrivateKey = senderPrivateKey;
@@ -188,7 +188,7 @@ public class RDBD {
 				text = gson.toJson(message).trim();
 
 				// encrypt message
-				String encryptedMessage = RDBDEncryptionUtil.doubleEncrypt(text, queueId, senderPrivateKey).trim();
+				String encryptedMessage = VaultAgeEncryption.doubleEncrypt(text, queueId, senderPrivateKey).trim();
 
 				TextMessage message = session.createTextMessage(this.senderPublicKey + encryptedMessage);
 
@@ -208,9 +208,9 @@ public class RDBD {
 		private String senderPublicKey;
 		private String receiverPrivateKey;
 		private String json;
-		private Map<String, RDBDHandler> handlers;
+		private Map<String, VaultAgeHandler> handlers;
 
-		public Consumer(String queueId, String receiverPrivateKey, Map<String, RDBDHandler> handlers) {
+		public Consumer(String queueId, String receiverPrivateKey, Map<String, VaultAgeHandler> handlers) {
 			this.queueId = queueId;
 			this.handlers = handlers;
 			this.receiverPrivateKey = receiverPrivateKey;
@@ -246,14 +246,14 @@ public class RDBD {
 //						System.out.println("S:" + this.senderPublicKey.length() + ", " + encryptedMessage.length());
 //						System.out.println("A:" + textMessage.getText().length());
 
-						json = RDBDEncryptionUtil.doubleDecrypt(encryptedMessage, senderPublicKey, receiverPrivateKey);
+						json = VaultAgeEncryption.doubleDecrypt(encryptedMessage, senderPublicKey, receiverPrivateKey);
 
 						System.out.println("RECEIVED MESSAGE: " + queueId + "\n" + json);
 
-						RDBDMessage rdbdMessage = gson.fromJson(json, RDBDMessage.class);
+						VaultAgeMessage rdbdMessage = gson.fromJson(json, VaultAgeMessage.class);
 						String operation = rdbdMessage.getOperation();
 
-						RDBDHandler handler = handlers.get(operation);
+						VaultAgeHandler handler = handlers.get(operation);
 						if (handler != null && !handler.isAlive()) {
 							threads.add(handler);
 //							System.out.println("Run: " + handler.getName());

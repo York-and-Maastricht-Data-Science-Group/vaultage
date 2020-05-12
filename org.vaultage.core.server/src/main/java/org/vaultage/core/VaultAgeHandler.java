@@ -1,31 +1,31 @@
 package org.vaultage.core;
 
-public abstract class RDBDHandler {
+public abstract class VaultAgeHandler {
 
 	private static long COUNTER = 0;
 	protected String queueId;
 	protected String senderPublicKey;
-	protected RDBDMessage message;
+	protected VaultAgeMessage message;
 	protected Object owner;
 	protected String name;
 	protected Thread thread;
 
-	public RDBDHandler() {
+	public VaultAgeHandler() {
 		name = this.getClass().getSimpleName() + "-" + COUNTER;
 		COUNTER++;
 	}
 
-	public void execute(String queueId, RDBDMessage message) {
+	public void execute(String queueId, VaultAgeMessage message) {
 		this.message = message;
 		this.start();
 	}
 
 	public void start() {
 
-		thread = new Thread(RDBDHandler.this.getName()) {
+		thread = new Thread(VaultAgeHandler.this.getName()) {
 			@Override
 			public void run() {
-				RDBDHandler.this.run();
+				VaultAgeHandler.this.run();
 			}
 		};
 		thread.run();
@@ -58,7 +58,7 @@ public abstract class RDBDHandler {
 		this.owner = owner;
 	}
 
-	public RDBDMessage getMessage() {
+	public VaultAgeMessage getMessage() {
 		return message;
 	}
 

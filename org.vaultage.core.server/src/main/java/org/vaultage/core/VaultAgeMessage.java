@@ -2,7 +2,7 @@ package org.vaultage.core;
 
 import java.util.UUID;
 
-public class RDBDMessage {
+public class VaultAgeMessage {
 	
 	private String senderId;
 	private String from;
@@ -11,7 +11,7 @@ public class RDBDMessage {
 	private String value;
 	private String token;
 
-	public RDBDMessage() {
+	public VaultAgeMessage() {
 		this.token = UUID.randomUUID().toString();
 	}
 	

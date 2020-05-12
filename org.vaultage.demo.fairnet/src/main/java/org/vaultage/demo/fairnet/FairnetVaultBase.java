@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.vaultage.core.RDBD;
-import org.vaultage.core.RDBDHandler;
+import org.vaultage.core.VaultAge;
+import org.vaultage.core.VaultAgeHandler;
 import org.vaultage.demo.fairnet.handler.AddFriendConfirmationHandler;
 import org.vaultage.demo.fairnet.handler.AddFriendResponseHandler;
 import org.vaultage.demo.fairnet.handler.GetPostConfirmationHandler;
@@ -19,8 +19,8 @@ public abstract class FairnetVaultBase {
 	protected String publicKey;
 
 	protected boolean isListening;
-	protected RDBD rdbd;
-	protected Map<String, RDBDHandler> handlers;
+	protected VaultAge rdbd;
+	protected Map<String, VaultAgeHandler> handlers;
 
 	protected AddFriendResponseHandler addFriendResponseHandler;
 	protected GetPostsResponseHandler getPostsResponseHandler;
@@ -31,15 +31,15 @@ public abstract class FairnetVaultBase {
 
 	public FairnetVaultBase() {
 		this.isListening = false;
-		this.rdbd = new RDBD();
-		this.handlers = new HashMap<String, RDBDHandler>();
+		this.rdbd = new VaultAge();
+		this.handlers = new HashMap<String, VaultAgeHandler>();
 	}
 
-	public RDBD getRdbd() {
+	public VaultAge getRdbd() {
 		return rdbd;
 	}
 
-	public void setRdbd(RDBD rdbd) {
+	public void setRdbd(VaultAge rdbd) {
 		this.rdbd = rdbd;
 	}
 

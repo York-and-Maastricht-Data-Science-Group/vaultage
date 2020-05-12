@@ -17,7 +17,7 @@ import java.util.Properties;
 import org.vaultage.demo.fairnet.exception.NotFoundException;
 import org.vaultage.demo.fairnet.exception.PermissionDeniedException;
 import org.vaultage.demo.fairnet.util.FairnetUtil;
-import org.vaultage.util.RDBDEncryptionUtil;
+import org.vaultage.util.VaultAgeEncryption;
 
 public class FairnetVault extends FairnetVaultBase {
 
@@ -65,7 +65,7 @@ public class FairnetVault extends FairnetVaultBase {
 
 		this.setId(id);
 
-		KeyPair keyPair = RDBDEncryptionUtil.generateKeys();
+		KeyPair keyPair = VaultAgeEncryption.generateKeys();
 		if ((Files.exists(Paths.get(VAULT_PATH + File.separator + this.id + File.separator + STRING_PRIVATE_KEY))
 				&& (Files.exists(
 						Paths.get(VAULT_PATH + File.separator + this.id + File.separator + STRING_PUBLIC_KEY))))) {
@@ -76,13 +76,13 @@ public class FairnetVault extends FairnetVaultBase {
 					.exists(Paths.get(VAULT_PATH + File.separator + this.id + File.separator + STRING_PRIVATE_KEY)))) {
 				privateKey = this.getPrivateKey();
 			} else {
-				this.setPrivateKey(RDBDEncryptionUtil.getPrivateKey(keyPair));
+				this.setPrivateKey(VaultAgeEncryption.getPrivateKey(keyPair));
 			}
 
 			if ((Files.exists(Paths.get(VAULT_PATH + File.separator + this.id + File.separator + STRING_PUBLIC_KEY)))) {
 				publicKey = this.getPublicKey();
 			} else {
-				this.setPublicKey(RDBDEncryptionUtil.getPublicKey(keyPair));
+				this.setPublicKey(VaultAgeEncryption.getPublicKey(keyPair));
 			}
 		}
 

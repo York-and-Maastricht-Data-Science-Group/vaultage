@@ -2,15 +2,15 @@ package org.vaultage.demo.fairnet.handler;
 
 import java.util.List;
 
-import org.vaultage.core.RDBDHandler;
-import org.vaultage.core.RDBDMessage;
+import org.vaultage.core.VaultAgeHandler;
+import org.vaultage.core.VaultAgeMessage;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class GetPostsResponseHandler extends RDBDHandler {
+public class GetPostsResponseHandler extends VaultAgeHandler {
 
 	@Override
 	public void run() {
@@ -27,7 +27,7 @@ public class GetPostsResponseHandler extends RDBDHandler {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			String value = gson.toJson(posts);
 			 
-			RDBDMessage messageBack = new RDBDMessage();
+			VaultAgeMessage messageBack = new VaultAgeMessage();
 			messageBack.setFrom(me.getPublicKey());
 			messageBack.setTo(this.message.getFrom());
 			messageBack.setOperation(GetPostsConfirmationHandler.class.getName());

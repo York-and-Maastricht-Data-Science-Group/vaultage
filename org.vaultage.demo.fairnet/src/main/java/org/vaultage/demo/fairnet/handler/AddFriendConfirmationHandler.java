@@ -2,7 +2,7 @@ package org.vaultage.demo.fairnet.handler;
 
 import java.util.Set;
 
-import org.vaultage.core.RDBDHandler;
+import org.vaultage.core.VaultAgeHandler;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
 
@@ -13,7 +13,7 @@ import org.vaultage.demo.fairnet.Friend;
  * @author Ryano
  *
  */
-public class AddFriendConfirmationHandler extends RDBDHandler {
+public class AddFriendConfirmationHandler extends VaultAgeHandler {
 
 	private String status;
 	private Friend newFriend;

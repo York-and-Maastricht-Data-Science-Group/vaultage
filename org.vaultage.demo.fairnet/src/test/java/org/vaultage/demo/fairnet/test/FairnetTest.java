@@ -15,7 +15,7 @@ import org.vaultage.demo.fairnet.handler.GetPostConfirmationHandler;
 import org.vaultage.demo.fairnet.handler.GetPostResponseHandler;
 import org.vaultage.demo.fairnet.handler.GetPostsConfirmationHandler;
 import org.vaultage.demo.fairnet.handler.GetPostsResponseHandler;
-import org.vaultage.util.RDBDEncryptionUtil;
+import org.vaultage.util.VaultAgeEncryption;
 
 public class FairnetTest {
 
@@ -77,9 +77,9 @@ public class FairnetTest {
 		Thread.sleep(SLEEP_TIME);
 
 		String message = "ABC";
-		String encryptedMessage = RDBDEncryptionUtil.doubleEncrypt(message, user1.getPublicKey(),
+		String encryptedMessage = VaultAgeEncryption.doubleEncrypt(message, user1.getPublicKey(),
 				user2.getPrivateKey());
-		String decryptedMessage = RDBDEncryptionUtil.doubleDecrypt(encryptedMessage, user2.getPublicKey(),
+		String decryptedMessage = VaultAgeEncryption.doubleDecrypt(encryptedMessage, user2.getPublicKey(),
 				user1.getPrivateKey());
 		assertEquals(message, decryptedMessage);
 	}

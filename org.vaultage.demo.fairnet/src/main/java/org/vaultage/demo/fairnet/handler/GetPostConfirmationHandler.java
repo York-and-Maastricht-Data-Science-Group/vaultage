@@ -1,13 +1,13 @@
 package org.vaultage.demo.fairnet.handler;
 
-import org.vaultage.core.RDBDHandler;
+import org.vaultage.core.VaultAgeHandler;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Post;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class GetPostConfirmationHandler extends RDBDHandler {
+public class GetPostConfirmationHandler extends VaultAgeHandler {
 	private Post post;
 
 	@Override

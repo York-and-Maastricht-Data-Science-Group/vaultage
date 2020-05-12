@@ -3,13 +3,13 @@ package org.vaultage.demo.fairnet.handler;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.vaultage.core.RDBDHandler;
+import org.vaultage.core.VaultAgeHandler;
 import org.vaultage.demo.fairnet.FairnetVault;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class GetPostsConfirmationHandler extends RDBDHandler {
+public class GetPostsConfirmationHandler extends VaultAgeHandler {
 	private List<String> postIds;
 
 	@Override

@@ -25,7 +25,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.junit.Test;
-import org.vaultage.util.RDBDEncryptionUtil;
+import org.vaultage.util.VaultAgeEncryption;
 
 /***
  * A class to test the encryption and decryption of EncryptionUtil.java
@@ -40,9 +40,9 @@ public class EncryptionTest {
 	private KeyFactory keyFactory;
 
 	public EncryptionTest() throws NoSuchAlgorithmException {
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(RDBDEncryptionUtil.ALGORITHM);
-		keyFactory = KeyFactory.getInstance(RDBDEncryptionUtil.ALGORITHM);
-		keyPairGen.initialize(RDBDEncryptionUtil.KEY_LENGTH);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultAgeEncryption.ALGORITHM);
+		keyFactory = KeyFactory.getInstance(VaultAgeEncryption.ALGORITHM);
+		keyPairGen.initialize(VaultAgeEncryption.KEY_LENGTH);
 
 		receiverKeyPair = keyPairGen.generateKeyPair();
 		senderKeyPair = keyPairGen.generateKeyPair();
@@ -87,8 +87,8 @@ public class EncryptionTest {
 		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
 		PublicKey loadedPublicKey = keyFactory.generatePublic(publicKeySpec);
 
-		String encryptedMessage = RDBDEncryptionUtil.encrypt(message, loadedPublicKey);
-		String decryptedMessage = RDBDEncryptionUtil.decrypt(encryptedMessage, loadedPrivateKey);
+		String encryptedMessage = VaultAgeEncryption.encrypt(message, loadedPublicKey);
+		String decryptedMessage = VaultAgeEncryption.decrypt(encryptedMessage, loadedPrivateKey);
 
 		assertEquals(privateKeyString, loadedPrivateKeyString);
 		assertEquals(publicKeyString, loadedPublicKeyString);
@@ -158,9 +158,9 @@ public class EncryptionTest {
 
 		// ENCRYPT / DECRYPT
 		System.out.println("Original Message: " + message);
-		String encryptedMessage = RDBDEncryptionUtil.doubleEncrypt(message, receiverLoadedPublicKey, senderLoadedPrivateKey);
+		String encryptedMessage = VaultAgeEncryption.doubleEncrypt(message, receiverLoadedPublicKey, senderLoadedPrivateKey);
 		System.out.println("Double Encrypted Message: " + encryptedMessage);
-		String decryptedMessage = RDBDEncryptionUtil.doubleDecrypt(encryptedMessage, senderLoadedPublicKey, receiverLoadedPrivateKey); 	
+		String decryptedMessage = VaultAgeEncryption.doubleDecrypt(encryptedMessage, senderLoadedPublicKey, receiverLoadedPrivateKey); 	
 		System.out.println("Double Decrypted Message: " + decryptedMessage);
 		
 		assertEquals(message, decryptedMessage);
@@ -196,11 +196,11 @@ public class EncryptionTest {
 		System.out.println("Original Message: " + message);
 
 		// encrypt with private key
-		String encryptedMessage = RDBDEncryptionUtil.encrypt(message, publicKey);
+		String encryptedMessage = VaultAgeEncryption.encrypt(message, publicKey);
 		System.out.println("Encrypted Message: " + encryptedMessage);
 
 		// decrypt with public key
-		String decryptedMessage = RDBDEncryptionUtil.decrypt(encryptedMessage, privateKey);
+		String decryptedMessage = VaultAgeEncryption.decrypt(encryptedMessage, privateKey);
 		System.out.println("Decrypted Message: " + decryptedMessage);
 
 		assertEquals(message, decryptedMessage);
@@ -238,11 +238,11 @@ public class EncryptionTest {
 		System.out.println("Original Message: " + message);
 
 		// encrypt with private key
-		String encryptedMessage = RDBDEncryptionUtil.encrypt(message, publicKey);
+		String encryptedMessage = VaultAgeEncryption.encrypt(message, publicKey);
 		System.out.println("Encrypted Message: " + encryptedMessage);
 
 		// decrypt with public key
-		String decryptedMessage = RDBDEncryptionUtil.decrypt(encryptedMessage, privateKey);
+		String decryptedMessage = VaultAgeEncryption.decrypt(encryptedMessage, privateKey);
 		System.out.println("Decrypted Message: " + decryptedMessage);
 
 		assertEquals(message, decryptedMessage);
