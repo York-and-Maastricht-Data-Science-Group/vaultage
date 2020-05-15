@@ -1,0 +1,131 @@
+var e = new EPackage;
+e.getBasePackage().println();
+
+
+
+operation EClass filename() : String {
+    return self.name + ".java";
+}
+
+operation EClass getBaseName() : String {
+    return self.name + "Base";
+}
+
+operation EClass baseFilename() : String {
+    return self.getBaseName() + ".java";
+}
+  
+operation String clean() {
+	var clean;
+	var badChars = Sequence{'?','\\', '/'};
+	for (c in self.toCharSequence()) {
+		if (badChars.exists(i|i=c)) {
+			clean = clean + '_';
+		}	
+		else {
+			clean = clean + c;
+		}
+	}
+	return clean;
+}
+
+operation EStructuralFeature getType(): String {
+	if (self.eType.name == "EString") {
+		return "String";
+	} else if (self.eType.name == "EBoolean") {
+		return "Boolean";
+	} else {
+		return self.eType.name;
+	}
+}
+
+operation EOperation getAccessModifier(): String{
+	var access = "protected";
+	if (self.eAnnotations.size() > 0){
+		var a  = self.eAnnotations.selectOne(a | a.source="public");
+		if (a <> null){
+			access = a.source;
+		}
+	}
+	return access;
+}
+
+
+operation EOperation getReturnType(): String{
+	var type = "";
+	if (self.eType <> null){
+		if (self.upperBound == -1){
+			type = type + "List<";
+		}
+		if (self.eType.name == "EBooleanObject"){
+			type = type + "Boolean";
+		} else if (self.eType.name == "EString"){
+			type = type + "String";
+		}else {
+			type = type + self.eType.name;
+		}
+	if (self.upperBound == -1){
+			type = type + ">";
+	}
+	} else {
+		type = "void";
+	}
+	return type;
+}
+
+operation EParameter getType(): String{
+	var type = "";
+	if (self.eType <> null){
+		if (self.upperBound == -1){
+			type = type + "List<";
+		}
+		if (self.eType.name == "EBooleanObject"){
+			type = type + "Boolean";
+		} else if (self.eType.name == "EString"){
+			type = type + "String";
+		}else {
+			type = type + self.eType.name;
+		}
+	} else {
+		type = "void";
+	}
+	return type;
+}
+
+operation EOperation getParams(): String {
+	var params = "";
+	var count : Integer = 0;
+  	for (eParameter in self.eParameters) {
+  	  if (count >= 1) params = params + ", ";
+      params = params + eParameter.getType() + " " + eParameter.name;
+  	  count++; 
+  	}
+   return params;
+}
+
+operation EClass hasVaultAnnotation(): Boolean{
+	var annotation = self.eAnnotations.selectOne(a | a.source = "vault");
+	if (annotation <> null) {
+		return true;
+	}	
+	return false;
+}
+
+operation EClass getPublicEOperations() : List(EOperation){
+	var eOperations = new List(EOperation);
+	for (eOperation in self.eOperations){
+		if (eOperation.eAnnotations.selectOne(a | a.source == "public") <> null){
+			eOperations.add(eOperation);
+		}
+	}
+	return eOperations;
+}
+
+operation EOperation getClassRequestHandlerName(): String {
+	return self.name.firstToUpperCase() + "RequestHandler"; 
+}
+
+operation EOperation getClassResponseHandlerName(): String {
+	return self.name.firstToUpperCase() + "ResponseHandler"; 
+}
+

@@ -148,27 +148,4 @@ public abstract class FairnetVaultBase {
 	public abstract List<String> getPosts(Friend requester) throws Exception;
 	*/
 	
-	[%for (eOperation in class.eOperations) { %]
-  	public abstract 
-  		[% if (eOperation.upperBound == -1){ %]List<
-  		[%= eOperation.eType.name %]
-  		[% } else {%]
-  		[% if (eOperation.eType.name == "EBooleanObject" ){ %][%= "Boolean" %][% } %]
-  		[% else if (eOperation.eType.name == "EString" ){ %][%= "String" %][% } %]
-  		[% else { %]	
-  		[%= eOperation.eType.name %]
-  		[% } %][% } %]
- 
-  		[% if (eOperation.upperBound == -1){ %]>
-  		[% } %]
-  		[%=eOperation.name%]
-  		(
-  		[%var count : Integer = 0; %]
-  		[%for (eParameter in eOperation.eParameters) { %]
-  			[% if (count >= 1) { %], [% } %]
-  			[%=eParameter.eType.name%] [%=eParameter.name%]
-  			[% count++; %]
-  		[% } %]
-  		) throw Exception;
-	[%}%]
 }

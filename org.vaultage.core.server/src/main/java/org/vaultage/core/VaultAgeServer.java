@@ -1,11 +1,11 @@
-package org.vaultage.demo.fairnet;
+package org.vaultage.core;
 
-public class Fairnet {
+public class VaultAgeServer {
 
 	private String address;
 
 
-	public Fairnet(String address) {
+	public VaultAgeServer(String address) {
 		this.address = address;		
 	}
 	

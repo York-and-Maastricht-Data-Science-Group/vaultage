@@ -1,0 +1,34 @@
+[% import 'util.eol'; %]
+package [%=packageName%];
+
+import java.util.List;
+
+public class [%=class.name%] {
+[% for (feature in class.eAttributes){ %]
+	private [%=feature.getType()%] [%=feature.name%];
+[%	} %]
+
+	// getter
+[% for (feature in class.eAttributes){ %]
+	public [%=feature.getType()%] get[%=feature.name.firstToUpperCase()%]() {
+		return this.[%=feature.name%];
+	}
+[%	} %]
+
+	// setter
+[% for (feature in class.eAttributes){ %]
+	public void set[%=feature.name.firstToUpperCase()%]([%=feature.getType()%] [%=feature.name%]) {
+		this.[%=feature.name%] = [%=feature.name%];
+	}
+[%	} %]
+
+	// operations
+[% for (eOperation in class.eOperations){ %]
+	[%= eOperation.getAccessModifier()%] [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
+		throw new Exception();
+	}
+	
+[% } %]	
+	
+			
+}

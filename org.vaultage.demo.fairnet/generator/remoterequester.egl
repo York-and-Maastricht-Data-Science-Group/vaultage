@@ -1,0 +1,17 @@
+[% import 'util.eol'; %]
+package [%=packageName%];
+
+import org.vaultage.core.VaultAgeMessage;
+import org.vaultage.core.VaultAgeServer;
+
+public class RemoteRequester {
+
+	protected VaultAgeServer vaultageServer;
+	protected FairnetVault localVault;
+
+	public RemoteRequester(VaultAgeServer vaultageServer, FairnetVault vault) throws Exception {
+		this.vaultageServer = vaultageServer;
+		this.localVault = vault;
+	}
+
+}

@@ -189,9 +189,9 @@ public class VaultAgeEncryption {
 	public static String doubleEncrypt(String plainMessage, PublicKey receiverPublicKey, PrivateKey senderPrivateKey)
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		String encryptedMessage1 = encrypt(plainMessage, (Key) receiverPublicKey);
+		String encryptedMessage1 = encrypt(plainMessage, (Key) senderPrivateKey);
 		System.out.println("intermediateEncryptedMessage: " + encryptedMessage1);
-		return encrypt(encryptedMessage1, (Key) senderPrivateKey);
+		return encrypt(encryptedMessage1, (Key) receiverPublicKey);
 	}
 
 	/***
@@ -271,9 +271,10 @@ public class VaultAgeEncryption {
 	}
 
 	public static String doubleDecrypt(String encryptedMessage, String senderPublicKeyString,
-			String receiverPrivateKeyString) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
-			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
-		
+			String receiverPrivateKeyString)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
+			NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
+
 		KeyFactory keyFactory = KeyFactory.getInstance(VaultAgeEncryption.ALGORITHM);
 		byte[] privateKeyBytes = Base64.getDecoder().decode(receiverPrivateKeyString);
 		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
@@ -282,10 +283,10 @@ public class VaultAgeEncryption {
 		byte[] publicKeyBytes = Base64.getDecoder().decode(senderPublicKeyString);
 		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
 		PublicKey senderPublicKey = keyFactory.generatePublic(publicKeySpec);
-		
+
 		return doubleDecrypt(encryptedMessage, senderPublicKey, receiverPrivateKey);
 	}
-	
+
 	/***
 	 * A method to double decrypt an encrypted message using sender public key and
 	 * receiver private key.
@@ -305,9 +306,9 @@ public class VaultAgeEncryption {
 	public static String doubleDecrypt(String encryptedMessage, PublicKey senderPublicKey,
 			PrivateKey receiverPrivateKey) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		String decryptedMessage1 = decrypt(encryptedMessage, (Key) senderPublicKey);
+		String decryptedMessage1 = decrypt(encryptedMessage, (Key) receiverPrivateKey);
 		System.out.println("intermediateDecryptedMessage: " + decryptedMessage1);
-		return decrypt(decryptedMessage1, (Key) receiverPrivateKey);
+		return decrypt(decryptedMessage1, (Key) senderPublicKey);
 	}
 
 	/***

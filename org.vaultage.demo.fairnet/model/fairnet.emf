@@ -1,15 +1,16 @@
-@GenModel(basePackage="org.rdbd.demo.model")
+@GenModel(basePackage="org.vaultage.demo.fairnet.model")
 @namespace(uri="http://fairnet.net/", prefix="")
 package fairnet;
 
 
+@vault
 class FairnetVault {
 
 	attr String ~id;	
 	attr String name;
 	val Friend[*] friends;
 	val Post[*] posts;
-	
+		
 	@private
 	op Post createPost(String title, String body, Boolean isPublic);
 	@private
@@ -17,15 +18,15 @@ class FairnetVault {
 	@private
 	op Friend[*] getFriends();
 	
-	//@private
-	//op Post getPost(String ~id);
-	//@private
-	//op String[*] getPosts();
+	@private
+	op Post getPostById(String ~id);
+	@private
+	op String[*] getPostIdList();
  
 	@public
-	op Post getPost(Friend requester, String ~id);
+	op Post getPost(String friendPublicKey, String ~id);
 	@public
-	op String[*] getPosts(Friend requester);
+	op String[*] getPosts(String friendPublicKey);
 }
 
 class Friend {
@@ -36,8 +37,7 @@ class Friend {
 
 class Post {
 	attr String ~id;
-	attr String title;
-	attr String body;
-	attr boolean public;
+	attr String content;
+	attr boolean isPublic;
 }
 

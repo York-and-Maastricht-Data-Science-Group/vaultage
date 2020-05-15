@@ -6,12 +6,13 @@ import java.util.Map;
 
 import org.vaultage.core.VaultAge;
 import org.vaultage.core.VaultAgeHandler;
-import org.vaultage.demo.fairnet.handler.AddFriendConfirmationHandler;
+import org.vaultage.core.VaultAgeServer;
 import org.vaultage.demo.fairnet.handler.AddFriendResponseHandler;
-import org.vaultage.demo.fairnet.handler.GetPostConfirmationHandler;
+import org.vaultage.demo.fairnet.handler.AddFriendRequestHandler;
 import org.vaultage.demo.fairnet.handler.GetPostResponseHandler;
-import org.vaultage.demo.fairnet.handler.GetPostsConfirmationHandler;
+import org.vaultage.demo.fairnet.handler.GetPostRequestHandler;
 import org.vaultage.demo.fairnet.handler.GetPostsResponseHandler;
+import org.vaultage.demo.fairnet.handler.GetPostsRequestHandler;
 
 public abstract class FairnetVaultBase {
 
@@ -19,88 +20,94 @@ public abstract class FairnetVaultBase {
 	protected String publicKey;
 
 	protected boolean isListening;
-	protected VaultAge rdbd;
+	protected VaultAge vaultage;
 	protected Map<String, VaultAgeHandler> handlers;
 
+	protected AddFriendRequestHandler addFriendRequestHandler;
 	protected AddFriendResponseHandler addFriendResponseHandler;
+	protected GetPostsRequestHandler getPostsRequestHandler;
 	protected GetPostsResponseHandler getPostsResponseHandler;
+	protected GetPostRequestHandler getPostRequestHandler;
 	protected GetPostResponseHandler getPostResponseHandler;
-	protected AddFriendConfirmationHandler addFriendConfirmedHandler;
-	protected GetPostsConfirmationHandler getPostsConfirmationHandler;
-	protected GetPostConfirmationHandler getPostConfirmationHandler;
 
 	public FairnetVaultBase() {
 		this.isListening = false;
-		this.rdbd = new VaultAge();
+		this.vaultage = new VaultAge();
 		this.handlers = new HashMap<String, VaultAgeHandler>();
 	}
 
-	public VaultAge getRdbd() {
-		return rdbd;
+	public VaultAge getVaultAge() {
+		return vaultage;
 	}
 
-	public void setRdbd(VaultAge rdbd) {
-		this.rdbd = rdbd;
+	public void setVaultAge(VaultAge vaultage) {
+		this.vaultage = vaultage;
 	}
 
-	public AddFriendResponseHandler getAddFriendResponseHandler() {
-		return addFriendResponseHandler;
+	//
+	public AddFriendRequestHandler getAddFriendRequestHandler() {
+		return addFriendRequestHandler;
 	}
 
+	public void setAddFriendRequestHandler(AddFriendRequestHandler addFriendRequestHandler) {
+		this.addFriendRequestHandler = addFriendRequestHandler;
+		this.addFriendRequestHandler.setOwner(this);
+		handlers.put(AddFriendRequestHandler.class.getName(), addFriendRequestHandler);
+	}
+
+	// 
+	public GetPostsRequestHandler getGetPostsRequestHandler() {
+		return getPostsRequestHandler;
+	}
+	
+	public void setGetPostsRequestHandler(GetPostsRequestHandler getPostsRequestHandler) {
+		this.getPostsRequestHandler = getPostsRequestHandler;
+		this.getPostsRequestHandler.setOwner(this);
+		handlers.put(GetPostsRequestHandler.class.getName(), getPostsRequestHandler);
+	}
+
+	// 
+	public void setGetPostRequestHandler(GetPostRequestHandler getPostRequestHandler) {
+		this.getPostRequestHandler = getPostRequestHandler;
+		this.getPostRequestHandler.setOwner(this);
+		handlers.put(GetPostRequestHandler.class.getName(), getPostRequestHandler);
+	}
+	public GetPostRequestHandler getGetPostRequestHandler() {
+		return getPostRequestHandler;
+	}
+
+
+	//
 	public void setAddFriendResponseHandler(AddFriendResponseHandler addFriendResponseHandler) {
 		this.addFriendResponseHandler = addFriendResponseHandler;
 		this.addFriendResponseHandler.setOwner(this);
 		handlers.put(AddFriendResponseHandler.class.getName(), addFriendResponseHandler);
 	}
-
-	public GetPostsResponseHandler getGetPostsResponseHandler() {
-		return getPostsResponseHandler;
+	
+	public AddFriendResponseHandler getAddFriendResponseHandler() {
+		return addFriendResponseHandler;
 	}
 
-	public void setGetPostsResponseHandler(GetPostsResponseHandler getPostsResponseHandler) {
+	//
+	public void setGetPostsResponsenHandler(GetPostsResponseHandler getPostsResponseHandler) {
 		this.getPostsResponseHandler = getPostsResponseHandler;
 		this.getPostsResponseHandler.setOwner(this);
 		handlers.put(GetPostsResponseHandler.class.getName(), getPostsResponseHandler);
 	}
-
-	public GetPostResponseHandler getGetPostResponseHandler() {
-		return getPostResponseHandler;
+	
+	public GetPostsResponseHandler getGetPostsResponseHandler() {
+		return getPostsResponseHandler;
 	}
-
+	
+	//
 	public void setGetPostResponseHandler(GetPostResponseHandler getPostResponseHandler) {
 		this.getPostResponseHandler = getPostResponseHandler;
 		this.getPostResponseHandler.setOwner(this);
 		handlers.put(GetPostResponseHandler.class.getName(), getPostResponseHandler);
 	}
 
-	public void setAddFriendConfirmationHandler(AddFriendConfirmationHandler addFriendConfirmedHandler) {
-		this.addFriendConfirmedHandler = addFriendConfirmedHandler;
-		this.addFriendConfirmedHandler.setOwner(this);
-		handlers.put(AddFriendConfirmationHandler.class.getName(), addFriendConfirmedHandler);
-	}
-
-	public void setGetPostsConfirmationHandler(GetPostsConfirmationHandler getPostsConfirmationHandler) {
-		this.getPostsConfirmationHandler = getPostsConfirmationHandler;
-		this.getPostsConfirmationHandler.setOwner(this);
-		handlers.put(GetPostsConfirmationHandler.class.getName(), getPostsConfirmationHandler);
-	}
-
-	public void setGetPostConfirmationHandler(GetPostConfirmationHandler getPostConfirmationHandler) {
-		this.getPostConfirmationHandler = getPostConfirmationHandler;
-		this.getPostConfirmationHandler.setOwner(this);
-		handlers.put(GetPostConfirmationHandler.class.getName(), getPostConfirmationHandler);
-	}
-
-	public AddFriendConfirmationHandler getAddFriendConfirmedHandler() {
-		return addFriendConfirmedHandler;
-	}
-
-	public GetPostsConfirmationHandler getGetPostsConfirmationHandler() {
-		return getPostsConfirmationHandler;
-	}
-
-	public GetPostConfirmationHandler getGetPostConfirmationHandler() {
-		return getPostConfirmationHandler;
+	public GetPostResponseHandler getGetPostResponseHandler() {
+		return getPostResponseHandler;
 	}
 
 	/***
@@ -115,11 +122,11 @@ public abstract class FairnetVaultBase {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean register(Fairnet fairnet) throws Exception {
+	public boolean register(VaultAgeServer fairnet) throws Exception {
 
-		boolean isSuccess = rdbd.connect(fairnet.getAddress());
+		boolean isSuccess = vaultage.connect(fairnet.getAddress());
 		if (isSuccess) {
-			rdbd.listenMessage(publicKey, privateKey, handlers);
+			vaultage.listenMessage(publicKey, privateKey, handlers);
 			return true;
 		}
 
@@ -128,7 +135,7 @@ public abstract class FairnetVaultBase {
 	}
 
 	public void unregister() throws Exception {
-		rdbd.disconnect();
+		vaultage.disconnect();
 	}
 
 	// These are left abstract for the developer to fill in with

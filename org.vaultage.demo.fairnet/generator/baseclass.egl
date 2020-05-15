@@ -1,0 +1,89 @@
+[% import 'util.eol'; %]
+package [%=packageName%];
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.vaultage.core.VaultAge;
+import org.vaultage.core.VaultAgeHandler;
+import org.vaultage.core.VaultAgeServer;
+
+[%/* for (eOperation in class.getPublicEOperations()){ %]
+import [% %][%= eOperation.name.firstToUpperCase()%]RequestHandler;
+import [% %][%= eOperation.name.firstToUpperCase()%]ResponseHandler;	
+[% } */%]
+
+public abstract class [%=class.getBaseName()%] {
+
+	protected String privateKey;
+	protected String publicKey;
+	protected boolean isListening;
+	protected VaultAge vaultage;
+	protected Map<String, VaultAgeHandler> handlers;
+	
+
+[% for (eOperation in class.getPublicEOperations()){ %]
+	protected [%= eOperation.name.firstToUpperCase()%]RequestHandler [%=eOperation.name%]RequestHandler;
+	protected [%= eOperation.name.firstToUpperCase()%]ResponseHandler [%=eOperation.name%]ResponseHandler;	
+[% } %]	
+
+	public VaultAge getVaultAge() {
+		return vaultage;
+	}
+
+	public void setVaultAge(VaultAge vaultage) {
+		this.vaultage = vaultage;
+	}
+	
+	public [%=class.getBaseName()%]() {
+		this.isListening = false;
+		this.vaultage = new VaultAge();
+		this.handlers = new HashMap<String, VaultAgeHandler>();
+	}
+
+[% for (eOperation in class.getPublicEOperations()){ %]
+	[%= eOperation.getAccessModifier()%] void set[%= eOperation.name.firstToUpperCase()%]RequestHandler([%= eOperation.name.firstToUpperCase()%]RequestHandler [%= eOperation.name%]RequestHandler) {
+		this.[%= eOperation.name%]RequestHandler = [%= eOperation.name%]RequestHandler;
+		this.[%= eOperation.name%]RequestHandler.setOwner(this);
+		handlers.put([%= eOperation.name.firstToUpperCase()%]RequestHandler.class.getName(), [%= eOperation.name%]RequestHandler);
+	}
+	
+	public [%= eOperation.name.firstToUpperCase()%]RequestHandler get[%= eOperation.name.firstToUpperCase()%]RequestHandler() {
+		return [%= eOperation.name%]RequestHandler;
+	}
+	
+	[%= eOperation.getAccessModifier()%] void set[%= eOperation.name.firstToUpperCase()%]ResponseHandler([%= eOperation.name.firstToUpperCase()%]ResponseHandler [%= eOperation.name%]ResponseHandler) {
+		this.[%= eOperation.name%]ResponseHandler = [%= eOperation.name%]ResponseHandler;
+		this.[%= eOperation.name%]ResponseHandler.setOwner(this);
+		handlers.put([%= eOperation.name.firstToUpperCase()%]ResponseHandler.class.getName(), [%= eOperation.name%]ResponseHandler);
+	}
+	
+	public [%= eOperation.name.firstToUpperCase()%]ResponseHandler get[%= eOperation.name.firstToUpperCase()%]ResponseHandler() {
+		return [%= eOperation.name%]ResponseHandler;
+	}
+	
+[% } %]	
+	
+
+	public boolean register(VaultAgeServer fairnet) throws Exception {
+		boolean isSuccess = vaultage.connect(fairnet.getAddress());
+		if (isSuccess) {
+			vaultage.listenMessage(publicKey, privateKey, handlers);
+			return true;
+		}
+		return false;
+	}
+
+	public void unregister() throws Exception {
+		vaultage.disconnect();
+	}
+	
+	// operations
+[% for (eOperation in class.getPublicEOperations()){ %]
+	[%= eOperation.getAccessModifier()%] abstract [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception;
+	
+[% } %]	
+	
+			
+}

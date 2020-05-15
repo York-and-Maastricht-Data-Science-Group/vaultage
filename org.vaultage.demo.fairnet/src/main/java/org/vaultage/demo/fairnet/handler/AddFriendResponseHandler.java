@@ -1,35 +1,58 @@
 package org.vaultage.demo.fairnet.handler;
 
+import java.util.Set;
+
 import org.vaultage.core.VaultAgeHandler;
-import org.vaultage.core.VaultAgeMessage;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
 
+/***
+ * A class to response to the return message of a friend request sent by the
+ * owner of this handler to his/her candidate friend
+ * 
+ * @author Ryano
+ *
+ */
 public class AddFriendResponseHandler extends VaultAgeHandler {
+
+	private String status;
+	private Friend newFriend;
 
 	@Override
 	public void run() {
-		System.out.println("Add friend request");
+		System.out.println("Add friend confirmed");
 		System.out.println("------------------");
 		System.out.println("From: " + this.message.getFrom());
 		System.out.println("Message: " + this.message.getValue());
 
-		try {
-			Friend friend = new Friend(this.message.getSenderId(), this.message.getFrom());
-			FairnetVault me = (FairnetVault) this.owner;
-		
-			me.addFriend(friend);
-			VaultAgeMessage messageBack = new VaultAgeMessage();
-			messageBack.setSenderId(me.getId());
-			messageBack.setToken(this.message.getToken());
-			messageBack.setFrom(me.getPublicKey());
-			messageBack.setTo(this.message.getFrom());
-			messageBack.setOperation(AddFriendConfirmationHandler.class.getName());
-			messageBack.setValue("1");
-			me.getRdbd().sendMessage(friend.getPublicKey(), me.getPublicKey(), me.getPrivateKey(), messageBack);
-		} catch (Exception e) {
-			e.printStackTrace();
+		Set<String> expectedReplyTokens = ((FairnetVault) this.getOwner()).getVaultAge().getExpectedReplyTokens();
+
+		// if the message back from the other side is legal then
+		if (expectedReplyTokens.contains(this.message.getToken())) {
+
+			status = this.message.getValue();
+			if ("1".equals(this.status)) {
+				try {
+					Friend newFriend = new Friend(message.getSenderId(), this.message.getFrom());
+					((FairnetVault) this.owner).addFriend(newFriend);
+					this.newFriend = newFriend;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			expectedReplyTokens.remove(this.message.getToken());
+		}
+		// other wise do nothing and set status to "0"
+		else {
+			this.status = "0";
 		}
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public Friend getNewFriend() {
+		return newFriend;
+	}
 }

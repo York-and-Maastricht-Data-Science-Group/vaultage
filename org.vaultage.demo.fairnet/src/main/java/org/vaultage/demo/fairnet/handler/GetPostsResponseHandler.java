@@ -1,41 +1,36 @@
 package org.vaultage.demo.fairnet.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.vaultage.core.VaultAge;
 import org.vaultage.core.VaultAgeHandler;
-import org.vaultage.core.VaultAgeMessage;
 import org.vaultage.demo.fairnet.FairnetVault;
-import org.vaultage.demo.fairnet.Friend;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class GetPostsResponseHandler extends VaultAgeHandler {
+	private List<String> postIds;
 
 	@Override
 	public void run() {
-		System.out.println("Get Posts Request");
+		System.out.println("Get Posts Confirmation");
 		System.out.println("------------------");
 		System.out.println("From: " + this.message.getFrom());
 		System.out.println("Operation: " + this.message.getOperation());
-
+		System.out.println("Friends:"); 
 		try {
-			FairnetVault me = (FairnetVault) this.owner;
-			Friend myFriend = new Friend("", message.getFrom());
-			List<String> posts = me.getPosts(myFriend);
-			
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			String value = gson.toJson(posts);
-			 
-			VaultAgeMessage messageBack = new VaultAgeMessage();
-			messageBack.setFrom(me.getPublicKey());
-			messageBack.setTo(this.message.getFrom());
-			messageBack.setOperation(GetPostsConfirmationHandler.class.getName());
-			messageBack.setValue(value);
-			
-			me.getRdbd().sendMessage(myFriend.getPublicKey(), me.getPublicKey(), me.getPrivateKey(), messageBack);
+			postIds = VaultAge.Gson.fromJson(message.getValue(), ArrayList.class);
+			for(String postId:postIds) {
+				System.out.println(((FairnetVault)this.owner).getName() +": "+ postId);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public List<String> getPostIds() {
+		return postIds;
 	}
 }

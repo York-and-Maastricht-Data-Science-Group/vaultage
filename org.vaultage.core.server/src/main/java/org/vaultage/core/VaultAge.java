@@ -26,19 +26,20 @@ import com.google.gson.GsonBuilder;
 
 /***
  * The main class that is responsible to listen, send, and receive messages to
- * and from Apache ActiveMQ server. 
+ * and from Apache ActiveMQ server.
  * 
  * @author Ryano
  *
  */
 public class VaultAge {
-
-	private String url;
+	
+	public static Gson Gson = new GsonBuilder().setPrettyPrinting().create();
+	
+	private String address;
 	private ActiveMQConnectionFactory connectionFactory;
 	private Connection connection;
 	private Session session;
 	private boolean isListening;
-	private Gson gson;
 	private Set<VaultAgeHandler> threads;
 	private Set<String> expectedReplyTokens = new HashSet<>();
 
@@ -60,10 +61,7 @@ public class VaultAge {
 		// encryption
 		KeyPair receiverKeyPair;
 		KeyPair senderKeyPair;
-		KeyFactory keyFactory;
-
 		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultAgeEncryption.ALGORITHM);
-		keyFactory = KeyFactory.getInstance(VaultAgeEncryption.ALGORITHM);
 		keyPairGen.initialize(VaultAgeEncryption.KEY_LENGTH);
 
 		receiverKeyPair = keyPairGen.generateKeyPair();
@@ -115,11 +113,11 @@ public class VaultAge {
 	 * 
 	 */
 	public VaultAge() {
-		gson = new GsonBuilder().setPrettyPrinting().create();
 		threads = new HashSet<VaultAgeHandler>();
 	}
 
-	public Thread sendMessage(String queueId, String senderPublicKey, String senderPrivateKey, VaultAgeMessage message) {
+	public Thread sendMessage(String queueId, String senderPublicKey, String senderPrivateKey,
+			VaultAgeMessage message) {
 		return thread(new Producer(queueId, senderPublicKey, senderPrivateKey, message), false);
 	}
 
@@ -135,9 +133,9 @@ public class VaultAge {
 		return brokerThread;
 	}
 
-	public boolean connect(String url) throws Exception {
-		this.url = url;
-		connectionFactory = new ActiveMQConnectionFactory(this.url);
+	public boolean connect(String address) throws Exception {
+		this.address = address;
+		connectionFactory = new ActiveMQConnectionFactory(this.address);
 		connection = connectionFactory.createConnection();
 		connection.start();
 		session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -185,7 +183,7 @@ public class VaultAge {
 				producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
 				// Create a message
-				text = gson.toJson(message).trim();
+				text = Gson.toJson(message).trim();
 
 				// encrypt message
 				String encryptedMessage = VaultAgeEncryption.doubleEncrypt(text, queueId, senderPrivateKey).trim();
@@ -250,7 +248,7 @@ public class VaultAge {
 
 						System.out.println("RECEIVED MESSAGE: " + queueId + "\n" + json);
 
-						VaultAgeMessage rdbdMessage = gson.fromJson(json, VaultAgeMessage.class);
+						VaultAgeMessage rdbdMessage = Gson.fromJson(json, VaultAgeMessage.class);
 						String operation = rdbdMessage.getOperation();
 
 						VaultAgeHandler handler = handlers.get(operation);
@@ -273,5 +271,14 @@ public class VaultAge {
 	public void stopListening() {
 		this.isListening = false;
 	}
+	
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
 
 }

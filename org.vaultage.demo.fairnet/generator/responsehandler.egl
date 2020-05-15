@@ -1,0 +1,19 @@
+[% import 'util.eol'; %]
+package [%=packageName%];
+
+import org.vaultage.core.VaultAge;
+import org.vaultage.core.VaultAgeHandler;
+import org.vaultage.core.VaultAgeMessage;
+
+public class [%=eOperation.getClassResponseHandlerName()%] extends VaultAgeHandler {
+	
+	@Override
+	public void run() {
+	
+		try {
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
