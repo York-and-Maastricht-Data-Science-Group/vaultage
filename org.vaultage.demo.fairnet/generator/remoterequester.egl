@@ -3,16 +3,16 @@ package [%=packageName%];
 
 import java.util.List;
 
-import org.vaultage.core.VaultAgeMessage;
-import org.vaultage.core.VaultAgeServer;
+import org.vaultage.core.VaultageMessage;
+import org.vaultage.core.VaultageServer;
 
 public class RemoteRequester {
 
 	private static final int SLEEP_TIME = 40;
-	protected VaultAgeServer vaultageServer;
+	protected VaultageServer vaultageServer;
 	protected FairnetVault requesterVault;
 
-	public RemoteRequester(VaultAgeServer vaultageServer, FairnetVault vault) throws Exception {
+	public RemoteRequester(VaultageServer vaultageServer, FairnetVault vault) throws Exception {
 		this.vaultageServer = vaultageServer;
 		this.requesterVault = vault;
 	}
@@ -20,7 +20,7 @@ public class RemoteRequester {
 [% for (eOperation in class.getPublicEOperations()){ %]
 	[%= eOperation.getAccessModifier()%] [%= eOperation.getReturnType()%] [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
 		
-		VaultAgeMessage message = new VaultAgeMessage();
+		VaultageMessage message = new VaultageMessage();
 		message.setSenderId(requesterVault.getId());
 		message.setFrom(requesterVault.getPublicKey());
 		message.setTo(friendPublicKey);
@@ -32,7 +32,7 @@ public class RemoteRequester {
 [%		}	%]		
 [% 		i = i + 1; %]
 [% } %]
-		this.requesterVault.getVaultAge().sendMessage(message.getTo(), requesterVault.getPublicKey(),
+		this.requesterVault.getVaultage().sendMessage(message.getTo(), requesterVault.getPublicKey(),
 				requesterVault.getPrivateKey(), message);
 
 		Thread.sleep(SLEEP_TIME);

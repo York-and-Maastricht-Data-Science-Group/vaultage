@@ -121,11 +121,27 @@ operation EClass getPublicEOperations() : List(EOperation){
 	return eOperations;
 }
 
+operation EOperation isPublic(): Boolean{
+	var annotation = self.eAnnotations.selectOne(a | a.source = "public");
+	if (annotation <> null) {
+		return true;
+	}	
+	return false;
+}
+
 operation EOperation getClassRequestHandlerName(): String {
 	return self.name.firstToUpperCase() + "RequestHandler"; 
 }
 
+operation EOperation getRequestHandlerFileName(): String {
+	return self.name.firstToUpperCase() + "RequestHandler.java"; 
+}
+
 operation EOperation getClassResponseHandlerName(): String {
 	return self.name.firstToUpperCase() + "ResponseHandler"; 
+}
+
+operation EOperation getResponseHandlerFilename(): String {
+	return self.name.firstToUpperCase() + "ResponseHandler.java"; 
 }
 

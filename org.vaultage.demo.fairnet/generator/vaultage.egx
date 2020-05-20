@@ -1,0 +1,95 @@
+/***
+ * A generator to produce a Vaultage implementation 
+***/
+
+import 'util.eol';
+
+pre {
+	var javaSourcePath : String = "../src/";
+	var packageName = EAnnotation.allInstances.selectOne(a | a.source == "http://www.eclipse.org/emf/2002/GenModel").details.selectOne( d | d.key = "basePackage").value;
+	var outputRoot = javaSourcePath + packageName.replace("\\.", "/") + "/";
+	var requesterFilename = "RemoteRequester.java";
+}
+
+/***
+ * To generate a vault class
+***/
+rule VaultClass transform class : EClass {
+	guard : class.hasVaultAnnotation() 
+	parameters : Map {
+  		"packageName" = packageName,  
+    	"class" = class,
+    	"parentClass" = "extends " + class.name + "Base"
+    }
+  	template: "class.egl"
+  	target: outputRoot + class.filename()
+}
+
+/***
+ * To generate static classes
+***/
+rule StaticClasses transform class : EClass {
+	guard : not class.hasVaultAnnotation() 
+	parameters : Map {
+  		"packageName" = packageName,  
+    	"class" = class,
+    	"parentClass" = ""
+    }
+  	template: "class.egl"
+  	target: outputRoot + class.filename()
+}
+
+/***
+ * To generate the base class of a vault class
+***/
+rule VaultBaseClass transform class : EClass {
+	guard : class.hasVaultAnnotation() 
+	parameters : Map {
+  		"packageName" = packageName,  
+    	"class" = class
+    }
+  	template: "baseclass.egl"
+  	target: outputRoot + class.baseFilename()
+}
+
+/***
+ * To generate a remote requester class
+***/
+rule RemoteRequesterClass transform class : EClass {
+	guard : class.hasVaultAnnotation() 
+	parameters : Map {
+  		"packageName" = packageName,  
+    	"class" = class
+    }
+  	template: "remoterequester.egl"
+  	target: outputRoot + requesterFilename
+}
+
+/***
+ * To generate request handler classes
+***/
+rule RequestHandlerClasses transform eOperation : EOperation {
+	guard : eOperation.eContainer.hasVaultAnnotation() 
+		and eOperation.isPublic() 
+	parameters : Map {
+  		"packageName" = packageName,  
+    	"eOperation" = eOperation
+    }
+  	template: "requesthandler.egl"
+  	target: outputRoot + eOperation.getRequestHandlerFileName()
+}
+
+/***
+ * To generate response handler classes
+***/
+rule ResponseHandlerClasses transform eOperation : EOperation {
+	guard : eOperation.eContainer.hasVaultAnnotation() 
+		and eOperation.isPublic() 
+	parameters : Map {
+  		"packageName" = packageName,  
+    	"eOperation" = eOperation
+    }
+  	template: "responsehandler.egl"
+  	target: outputRoot + eOperation.getResponseHandlerFilename()
+}
+

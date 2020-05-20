@@ -21,7 +21,7 @@ public class FairnetTest {
 
 	// change this to a bigger value if your machine if slower than the machine I
 	// used for testing
-	private static final int SLEEP_TIME = 10;
+//	private static final int SLEEP_TIME = 10;
 
 	@Test
 	public void testRegistration() throws Exception {
@@ -38,7 +38,8 @@ public class FairnetTest {
 //		System.out.println(isSuccess ? "connected!" : "failed!");
 		assertEquals(true, isSuccess);
 		
-		Thread.sleep(SLEEP_TIME);
+		Thread.sleep(10);
+//		Thread.sleep(SLEEP_TIME);
 
 		user1.unregister();
 		//Thread.sleep(SLEEP_TIME);
