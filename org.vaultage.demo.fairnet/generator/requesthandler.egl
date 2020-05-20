@@ -1,11 +1,11 @@
 [% import 'util.eol'; %]
 package [%=packageName%];
 
-import org.vaultage.core.VaultAge;
-import org.vaultage.core.VaultAgeHandler;
-import org.vaultage.core.VaultAgeMessage;
+import org.vaultage.core.Vaultage;
+import org.vaultage.core.VaultageHandler;
+import org.vaultage.core.VaultageMessage;
 
-public class [%=eOperation.getClassRequestHandlerName()%] extends VaultAgeHandler {
+public class [%=eOperation.getClassRequestHandlerName()%] extends VaultageHandler {
 	
 	@Override
 	public void run() {

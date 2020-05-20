@@ -3,7 +3,7 @@ package [%=packageName%];
 
 import java.util.List;
 
-public class [%=class.name%] {
+public class [%=class.name%] [%=parentClass%] {
 [% for (feature in class.eAttributes){ %]
 	private [%=feature.getType()%] [%=feature.name%];
 [%	} %]

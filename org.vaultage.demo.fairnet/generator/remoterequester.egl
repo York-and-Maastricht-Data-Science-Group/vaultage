@@ -1,17 +1,47 @@
 [% import 'util.eol'; %]
 package [%=packageName%];
 
+import java.util.List;
+
 import org.vaultage.core.VaultAgeMessage;
 import org.vaultage.core.VaultAgeServer;
 
 public class RemoteRequester {
 
+	private static final int SLEEP_TIME = 40;
 	protected VaultAgeServer vaultageServer;
-	protected FairnetVault localVault;
+	protected FairnetVault requesterVault;
 
 	public RemoteRequester(VaultAgeServer vaultageServer, FairnetVault vault) throws Exception {
 		this.vaultageServer = vaultageServer;
-		this.localVault = vault;
+		this.requesterVault = vault;
 	}
 
+[% for (eOperation in class.getPublicEOperations()){ %]
+	[%= eOperation.getAccessModifier()%] [%= eOperation.getReturnType()%] [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
+		
+		VaultAgeMessage message = new VaultAgeMessage();
+		message.setSenderId(requesterVault.getId());
+		message.setFrom(requesterVault.getPublicKey());
+		message.setTo(friendPublicKey);
+		message.setOperation(GetPostRequestHandler.class.getName());
+[% var i = 1; %]
+[% for (eParamater in eOperation.eParameters) { %]
+[% 		if ( i > 1) {	%]
+		// message.putValue("eParameter.name", eParameter.name);
+[%		}	%]		
+[% 		i = i + 1; %]
+[% } %]
+		this.requesterVault.getVaultAge().sendMessage(message.getTo(), requesterVault.getPublicKey(),
+				requesterVault.getPrivateKey(), message);
+
+		Thread.sleep(SLEEP_TIME);
+		throw new Exception();
+		
+		//return requesterVault.getGetPostResponseHandler().getPost();
+	}
+	
+[% } %]	
+	
+	
 }

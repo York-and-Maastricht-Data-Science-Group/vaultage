@@ -3,13 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Fairnet
 Bundle-SymbolicName: org.vaultage.demo.fairnet
 Bundle-Version: 1.0.0.qualifier
-Export-Package: org.vaultage.demo.fairnet,
- org.vaultage.demo.fairnet.exception,
- org.vaultage.demo.fairnet.generator,
- org.vaultage.demo.fairnet.handler,
- org.vaultage.demo.fairnet.test,
- org.vaultage.demo.fairnet.util
+Automatic-Module-Name: org.vaultage.demo.fairnet
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.epsilon.egl.engine,
  org.eclipse.epsilon.emc.emf,
- org.eclipse.epsilon.eol.engine,
- org.junit
+ org.eclipse.epsilon.eol.engine

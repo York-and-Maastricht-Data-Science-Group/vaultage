@@ -8,20 +8,23 @@
 	TemplateFactory.setOutputRoot(outputRoot);
 
     for (class in EClass.allInstances()) { 
-      t.createClass(packageName, class.filename(), class);
       if (class.hasVaultAnnotation()){
       	// create the vault class
+      	t.createClass(packageName, class.filename(), class, true);
       	t.createBaseClass(packageName, class.baseFilename(), class);
+      	t.createRemoteRequester(packageName, class.baseFilename(), class);
       	
       	// create all handlers for all its public operations
       	for (eOperation in class.getPublicEOperations()){
       		t.createHandler(packageName, eOperation);
       	} 
+      } else {
+      	t.createClass(packageName, class.filename(), class, false);
       }
     }
 
 operation Template getJavaSourcePath(): String{
-	return "../src/main/java/";
+	return "../src/";
 }
 
 operation Template getBasePackage(): String{
@@ -33,12 +36,16 @@ operation Template getOutputRoot() : String {
 	return  self.getJavaSourcePath() + self.getBasePackage().replace("\\.", "/"); 
 }
 
-operation Template createClass(packageName : String, filename : String, class : EClass) {
+operation Template createClass(packageName : String, filename : String, class : EClass, isVault : Boolean) {
     var t : Template = TemplateFactory.load("class.egl");
 	
 	t.populate("packageName", packageName);    
     t.populate("class", class);
-    
+    if (isVault) {
+    	t.populate("parentClass", "extends " + class.name + "Base");
+    } else {
+    	t.populate("parentClass", "");
+    }
     t.generate(filename);
   }
   
@@ -49,6 +56,15 @@ operation Template createClass(packageName : String, filename : String, class : 
     t.populate("class", class);
     
     t.generate(baseFilename);
+  }
+  
+   operation Template createRemoteRequester(packageName : String, baseFilename : String, class : EClass) {
+    var t : Template = TemplateFactory.load("remoterequester.egl");
+	
+	t.populate("packageName", packageName);    
+    t.populate("class", class);
+    
+    t.generate("RemoteRequester.java");
   }
   
   operation Template createHandler(packageName : String, eOperation : EOperation) {

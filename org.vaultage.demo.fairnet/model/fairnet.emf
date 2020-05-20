@@ -1,4 +1,4 @@
-@GenModel(basePackage="org.vaultage.demo.fairnet.model")
+@GenModel(basePackage="org.vaultage.demo.fairnet.gen")
 @namespace(uri="http://fairnet.net/", prefix="")
 package fairnet;
 

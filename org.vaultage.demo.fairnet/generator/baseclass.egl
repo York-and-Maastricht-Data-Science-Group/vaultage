@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.vaultage.core.VaultAge;
-import org.vaultage.core.VaultAgeHandler;
-import org.vaultage.core.VaultAgeServer;
+import org.vaultage.core.Vaultage;
+import org.vaultage.core.VaultageHandler;
+import org.vaultage.core.VaultageServer;
 
 [%/* for (eOperation in class.getPublicEOperations()){ %]
 import [% %][%= eOperation.name.firstToUpperCase()%]RequestHandler;
@@ -19,8 +19,8 @@ public abstract class [%=class.getBaseName()%] {
 	protected String privateKey;
 	protected String publicKey;
 	protected boolean isListening;
-	protected VaultAge vaultage;
-	protected Map<String, VaultAgeHandler> handlers;
+	protected Vaultage vaultage;
+	protected Map<String, VaultageHandler> handlers;
 	
 
 [% for (eOperation in class.getPublicEOperations()){ %]
@@ -28,18 +28,34 @@ public abstract class [%=class.getBaseName()%] {
 	protected [%= eOperation.name.firstToUpperCase()%]ResponseHandler [%=eOperation.name%]ResponseHandler;	
 [% } %]	
 
-	public VaultAge getVaultAge() {
+	public [%=class.getBaseName()%]() {
+		this.isListening = false;
+		this.vaultage = new Vaultage();
+		this.handlers = new HashMap<String, VaultageHandler>();
+	}
+	
+	public Vaultage getVaultage() {
 		return vaultage;
 	}
 
-	public void setVaultAge(VaultAge vaultage) {
+	public void setVaultage(Vaultage vaultage) {
 		this.vaultage = vaultage;
 	}
 	
-	public [%=class.getBaseName()%]() {
-		this.isListening = false;
-		this.vaultage = new VaultAge();
-		this.handlers = new HashMap<String, VaultAgeHandler>();
+	public String getPrivateKey() {
+		return privateKey;
+	}
+
+	public void setPrivateKey(String privateKey) {
+		this.privateKey = privateKey;
+	}
+
+	public String getPublicKey() {
+		return publicKey;
+	}
+
+	public void setPublicKey(String publicKey) {
+		this.publicKey = publicKey;
 	}
 
 [% for (eOperation in class.getPublicEOperations()){ %]
@@ -66,7 +82,7 @@ public abstract class [%=class.getBaseName()%] {
 [% } %]	
 	
 
-	public boolean register(VaultAgeServer fairnet) throws Exception {
+	public boolean register(VaultageServer fairnet) throws Exception {
 		boolean isSuccess = vaultage.connect(fairnet.getAddress());
 		if (isSuccess) {
 			vaultage.listenMessage(publicKey, privateKey, handlers);
