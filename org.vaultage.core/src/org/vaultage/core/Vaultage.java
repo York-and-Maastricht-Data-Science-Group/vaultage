@@ -19,7 +19,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.vaultage.util.VaultAgeEncryption;
+import org.vaultage.util.VaultageEncryption;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -61,8 +61,8 @@ public class Vaultage {
 		// encryption
 		KeyPair receiverKeyPair;
 		KeyPair senderKeyPair;
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultAgeEncryption.ALGORITHM);
-		keyPairGen.initialize(VaultAgeEncryption.KEY_LENGTH);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.ALGORITHM);
+		keyPairGen.initialize(VaultageEncryption.KEY_LENGTH);
 
 		receiverKeyPair = keyPairGen.generateKeyPair();
 		senderKeyPair = keyPairGen.generateKeyPair();
@@ -172,7 +172,7 @@ public class Vaultage {
 
 		public void run() {
 			try {
-//				System.out.println("Send to: " + queueId);
+				System.out.println("Send to: " + queueId);
 
 				// Create the destination (Topic or Queue)
 				Destination destination = session.createQueue(queueId);
@@ -185,7 +185,7 @@ public class Vaultage {
 				text = Gson.toJson(message).trim();
 
 				// encrypt message
-				String encryptedMessage = VaultAgeEncryption.doubleEncrypt(text, queueId, senderPrivateKey).trim();
+				String encryptedMessage = VaultageEncryption.doubleEncrypt(text, queueId, senderPrivateKey).trim();
 
 				TextMessage message = session.createTextMessage(this.senderPublicKey + encryptedMessage);
 
@@ -217,6 +217,7 @@ public class Vaultage {
 			try {
 
 				// Create the destination (Topic or Queue)
+//				System.out.println(session + " - " + queueId);
 				Destination destination = session.createQueue(queueId);
 
 				// Create a MessageConsumer from the Session to the Topic or Queue
@@ -243,7 +244,7 @@ public class Vaultage {
 //						System.out.println("S:" + this.senderPublicKey.length() + ", " + encryptedMessage.length());
 //						System.out.println("A:" + textMessage.getText().length());
 
-						json = VaultAgeEncryption.doubleDecrypt(encryptedMessage, senderPublicKey, receiverPrivateKey);
+						json = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey, receiverPrivateKey);
 
 						System.out.println("RECEIVED MESSAGE: " + queueId + "\n" + json);
 
@@ -256,7 +257,7 @@ public class Vaultage {
 //							System.out.println("Run: " + handler.getName());
 							handler.execute(queueId, rdbdMessage);
 						} else {
-							System.out.println();
+//							System.out.println();
 						}
 					}
 				}

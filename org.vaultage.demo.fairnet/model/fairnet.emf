@@ -1,42 +1,41 @@
-@GenModel(basePackage="org.vaultage.demo.fairnet.gen")
+@GenModel(basePackage="org.vaultage.demo.fairnet")
 @namespace(uri="http://fairnet.net/", prefix="")
 package fairnet;
 
 
 @vault
 class FairnetVault {
-
-	attr String ~id;	
+	
 	attr String name;
 	val Friend[*] friends;
 	val Post[*] posts;
 		
-	@private
-	op Post createPost(String title, String body, Boolean isPublic);
-	@private
-	op Boolean addFriend(Friend requester);
-	@private
-	op Friend[*] getFriends();
 	
 	@private
-	op Post getPostById(String ~id);
+	op Post createPost(String content, Boolean isPublic);
+	op Boolean isFriend(String friendPublicKey);
+	//@private
+	//op Friend addFriend(String friendPublicKey);
+	//@private
+	//op Friend[*] getFriends();
+	
 	@private
-	op String[*] getPostIdList();
+	op Post getPostById(String postId);
+	//@private
+	//op Post[*] getAllPost();
  
 	@public
-	op Post getPost(String friendPublicKey, String ~id);
+	op Post getPost(String friendPublicKey, String postId);
 	@public
 	op String[*] getPosts(String friendPublicKey);
 }
 
 class Friend {
-	attr String ~id;
 	attr String name;
 	attr String publicKey;
 }
 
 class Post {
-	attr String ~id;
 	attr String content;
 	attr boolean isPublic;
 }

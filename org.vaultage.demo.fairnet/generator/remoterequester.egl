@@ -1,18 +1,23 @@
 [% import 'util.eol'; %]
-package [%=packageName%];
+package [%=packageNameGen%];
 
 import java.util.List;
 
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
+import [%=packageNameApp%].[%=vaultClassName%];
+
+[% for (eOperation in class.getPublicEOperations()){ %]
+import [%=packageNameApp%].[%= eOperation.name.firstToUpperCase()%]RequestHandler;
+import [%=packageNameApp%].[%= eOperation.name.firstToUpperCase()%]ResponseHandler;	
+[% }%]
 
 public class RemoteRequester {
 
-	private static final int SLEEP_TIME = 40;
 	protected VaultageServer vaultageServer;
-	protected FairnetVault requesterVault;
+	protected [%=vaultClassName%] requesterVault;
 
-	public RemoteRequester(VaultageServer vaultageServer, FairnetVault vault) throws Exception {
+	public RemoteRequester(VaultageServer vaultageServer, [%=vaultClassName%] vault) throws Exception {
 		this.vaultageServer = vaultageServer;
 		this.requesterVault = vault;
 	}
@@ -24,21 +29,25 @@ public class RemoteRequester {
 		message.setSenderId(requesterVault.getId());
 		message.setFrom(requesterVault.getPublicKey());
 		message.setTo(friendPublicKey);
-		message.setOperation(GetPostRequestHandler.class.getName());
+		message.setOperation([%= eOperation.getClassRequestHandlerName() %].class.getName());
 [% var i = 1; %]
 [% for (eParamater in eOperation.eParameters) { %]
 [% 		if ( i > 1) {	%]
-		// message.putValue("eParameter.name", eParameter.name);
+		message.putValue("[%=eParamater.name%]", [%=eParamater.name%]);
 [%		}	%]		
 [% 		i = i + 1; %]
 [% } %]
+		
+		this.requesterVault.get[%= eOperation.getClassResponseBaseHandlerName() %]().setCallerThread(Thread.currentThread());
+		
 		this.requesterVault.getVaultage().sendMessage(message.getTo(), requesterVault.getPublicKey(),
 				requesterVault.getPrivateKey(), message);
 
-		Thread.sleep(SLEEP_TIME);
-		throw new Exception();
+		synchronized (Thread.currentThread()) {
+			Thread.currentThread().wait();
+		}
 		
-		//return requesterVault.getGetPostResponseHandler().getPost();
+		return ([%= eOperation.getReturnType()%]) requesterVault.get[%= eOperation.getClassResponseBaseHandlerName() %]().getResult();
 	}
 	
 [% } %]	

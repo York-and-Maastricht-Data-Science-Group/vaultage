@@ -24,7 +24,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-public class VaultAgeEncryption {
+public class VaultageEncryption {
 
 	public static final String ALGORITHM = "RSA";
 	public static final int MAXIMUM_PLAIN_MESSAGE_LENGTH = 53;
@@ -83,8 +83,8 @@ public class VaultAgeEncryption {
 	}
 
 	public static KeyPair generateKeys() throws NoSuchAlgorithmException {
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultAgeEncryption.ALGORITHM);
-		keyPairGen.initialize(VaultAgeEncryption.KEY_LENGTH);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.ALGORITHM);
+		keyPairGen.initialize(VaultageEncryption.KEY_LENGTH);
 		return keyPairGen.generateKeyPair();
 	}
 
@@ -158,7 +158,7 @@ public class VaultAgeEncryption {
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
 
-		KeyFactory keyFactory = KeyFactory.getInstance(VaultAgeEncryption.ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(VaultageEncryption.ALGORITHM);
 		byte[] privateKeyBytes = Base64.getDecoder().decode(senderPrivateKeyString);
 		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 		PrivateKey senderPrivateKey = keyFactory.generatePrivate(privateKeySpec);
@@ -213,7 +213,7 @@ public class VaultAgeEncryption {
 			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException {
 
-		Cipher cipher = Cipher.getInstance(VaultAgeEncryption.ALGORITHM);
+		Cipher cipher = Cipher.getInstance(VaultageEncryption.ALGORITHM);
 		cipher.init(Cipher.ENCRYPT_MODE, key);
 //		StringBuilder sb = new StringBuilder();
 		ByteArrayInputStream in = new ByteArrayInputStream(plainMessage.getBytes(StandardCharsets.UTF_8));
@@ -275,7 +275,7 @@ public class VaultAgeEncryption {
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
 
-		KeyFactory keyFactory = KeyFactory.getInstance(VaultAgeEncryption.ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(VaultageEncryption.ALGORITHM);
 		byte[] privateKeyBytes = Base64.getDecoder().decode(receiverPrivateKeyString);
 		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 		PrivateKey receiverPrivateKey = keyFactory.generatePrivate(privateKeySpec);
@@ -330,7 +330,7 @@ public class VaultAgeEncryption {
 			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException {
 
-		Cipher cipher = Cipher.getInstance(VaultAgeEncryption.ALGORITHM);
+		Cipher cipher = Cipher.getInstance(VaultageEncryption.ALGORITHM);
 		cipher.init(Cipher.DECRYPT_MODE, key);
 		StringBuilder sb = new StringBuilder();
 		ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encryptedMessage));

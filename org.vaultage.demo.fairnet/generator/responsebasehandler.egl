@@ -1,0 +1,25 @@
+[% import 'util.eol'; %]
+package [%=packageNameGen%];
+
+import java.util.ArrayList;
+import org.vaultage.core.Vaultage;
+import org.vaultage.core.VaultageHandler;
+import org.vaultage.core.VaultageMessage;
+import [%=packageNameApp%].[%= eOperation.eContainer.name %];
+
+public class [%=eOperation.getClassResponseBaseHandlerName()%] extends VaultageHandler {
+	
+	@Override
+	public void run() {
+		try {
+			result = Vaultage.Gson.fromJson(message.getValue("result"), [%= eOperation.getReturnTypeImplementation() %].class);
+			this.result = run(message);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Object run(VaultageMessage senderMessage) throws Exception {
+		return result;
+	}
+}

@@ -2,26 +2,28 @@ package org.vaultage.demo.fairnet.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.junit.Test;
 import org.vaultage.core.VaultageServer;
-import org.vaultage.demo.fairnet.FairnetVault;
-import org.vaultage.demo.fairnet.Post;
-import org.vaultage.demo.fairnet.RemoteRequester;
-import org.vaultage.demo.fairnet.handler.AddFriendResponseHandler;
-import org.vaultage.demo.fairnet.handler.AddFriendRequestHandler;
-import org.vaultage.demo.fairnet.handler.GetPostResponseHandler;
-import org.vaultage.demo.fairnet.handler.GetPostRequestHandler;
-import org.vaultage.demo.fairnet.handler.GetPostsResponseHandler;
-import org.vaultage.demo.fairnet.handler.GetPostsRequestHandler;
-import org.vaultage.util.VaultAgeEncryption;
+import org.vaultage.demo.fairnet.app.FairnetVault;
+import org.vaultage.demo.fairnet.app.GetPostRequestHandler;
+import org.vaultage.demo.fairnet.app.GetPostResponseHandler;
+import org.vaultage.demo.fairnet.app.GetPostsRequestHandler;
+import org.vaultage.demo.fairnet.app.GetPostsResponseHandler;
+import org.vaultage.demo.fairnet.gen.Friend;
+import org.vaultage.demo.fairnet.gen.Post;
+import org.vaultage.demo.fairnet.gen.RemoteRequester;
+import org.vaultage.util.VaultageEncryption;
 
 public class FairnetTest {
 
 	// change this to a bigger value if your machine if slower than the machine I
 	// used for testing
-//	private static final int SLEEP_TIME = 10;
+	private static final int SLEEP_TIME = 50;
 
 	@Test
 	public void testRegistration() throws Exception {
@@ -30,58 +32,29 @@ public class FairnetTest {
 		VaultageServer fairnet = new VaultageServer(address);
 
 		/*** User ***/
-		FairnetVault user1 = new FairnetVault("bob[at]publickey.net");
-		user1.setName("Foo");
+		FairnetVault user1 = new FairnetVault();
+		user1.setId("bob[at]publickey.net");
+		user1.setName("Bob");
 
 		boolean isSuccess = user1.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
 
-//		System.out.println(isSuccess ? "connected!" : "failed!");
 		assertEquals(true, isSuccess);
-		
-		Thread.sleep(10);
-//		Thread.sleep(SLEEP_TIME);
 
 		user1.unregister();
-		//Thread.sleep(SLEEP_TIME);
 	}
 
 //
 	@Test
 	public void testCreatePost() throws Exception {
-		FairnetVault user1 = new FairnetVault("bob[at]publickey.net");
-		user1.setName("Foo");
-		Post post1 = user1.createPost("Hello World", "Hello world!");
-		Post post2 = user1.getPost(post1.getId());
+		FairnetVault user1 = new FairnetVault();
+		user1.setId("bob[at]publickey.net");
+		user1.setName("Bob");
+
+		Post post1 = user1.createPost("Hello World!", true);
+		Post post2 = user1.getPostById(post1.getId());
 
 		assertEquals(post1.getId(), post2.getId());
-	}
-
-	@Test
-	public void testDoubleEncryption() throws Exception {
-
-		System.out.println("\n---TestAddFriend---");
-
-		VaultageServer fairnet = new VaultageServer("vm://localhost");
-
-		FairnetVault user1 = new FairnetVault("bob[at]publickey.net");
-		System.out.println("receiverPrivateKey: " + user1.getPrivateKey());
-		user1.setName("Bob");
-		AddFriendRequestHandler h = new AddFriendRequestHandler();
-		user1.setAddFriendRequestHandler(h);
-		user1.register(fairnet);
-
-		FairnetVault user2 = new FairnetVault("alice[at]publickey.com");
-		user2.setName("Alice");
-		AddFriendResponseHandler handler = new AddFriendResponseHandler();
-		user2.setAddFriendResponseHandler(handler);
-		user2.register(fairnet);
-
-		String message = "ABC";
-		String encryptedMessage = VaultAgeEncryption.doubleEncrypt(message, user1.getPublicKey(),
-				user2.getPrivateKey());
-		String decryptedMessage = VaultAgeEncryption.doubleDecrypt(encryptedMessage, user2.getPublicKey(),
-				user1.getPrivateKey());
-		assertEquals(message, decryptedMessage);
 	}
 
 	@Test
@@ -91,32 +64,52 @@ public class FairnetTest {
 
 		VaultageServer fairnet = new VaultageServer("vm://localhost");
 
-		FairnetVault user1 = new FairnetVault("bob[at]publickey.net");
-		System.out.println("receiverPrivateKey: " + user1.getPrivateKey());
-		user1.setName("Bob");
-		AddFriendRequestHandler h1 = new AddFriendRequestHandler();
-		user1.setAddFriendRequestHandler(h1);
+		// user 1
+		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet);
 		user1.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
 
-		FairnetVault user2 = new FairnetVault("alice[at]publickey.com");
-		user2.setName("Alice");
-		AddFriendResponseHandler h2 = new AddFriendResponseHandler();
-		user2.setAddFriendResponseHandler(h2);
+		// user 2
+		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet);
 		user2.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
 
-		RemoteRequester remoteUser = new RemoteRequester(fairnet, user2);
-		remoteUser.addFriend(user1.getPublicKey());
-		//Thread.sleep(SLEEP_TIME);
+		// exchanging public keys
+		exchangePublicKeys(user1, user2);
 
-		boolean result = true;
-		if (!"1".equals(h2.getMessage().getValue("value"))) {
-			result = false;
-		}
-		assertEquals(true, result);
+		assertEquals(true, user1.getFriends().stream().anyMatch(f -> f.getPublicKey().equals(user2.getPublicKey())));
+		assertEquals(true, user2.getFriends().stream().anyMatch(f -> f.getPublicKey().equals(user1.getPublicKey())));
 
 		user1.unregister();
 		user2.unregister();
-		//Thread.sleep(SLEEP_TIME);
+	}
+
+	@Test
+	public void testDoubleEncryption() throws Exception {
+
+		System.out.println("\n---Test Double Encryption---");
+
+		VaultageServer fairnet = new VaultageServer("vm://localhost");
+
+		// user 1
+		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet);
+		user1.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
+
+		// user 2
+		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet);
+		user2.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
+
+		// exchanging public keys
+		exchangePublicKeys(user1, user2);
+
+		String message = "ABC";
+		String encryptedMessage = VaultageEncryption.doubleEncrypt(message, user1.getPublicKey(),
+				user2.getPrivateKey());
+		String decryptedMessage = VaultageEncryption.doubleDecrypt(encryptedMessage, user2.getPublicKey(),
+				user1.getPrivateKey());
+		assertEquals(message, decryptedMessage);
 	}
 
 	@Test
@@ -126,44 +119,44 @@ public class FairnetTest {
 
 		VaultageServer fairnet = new VaultageServer("vm://localhost");
 
-		FairnetVault user1 = new FairnetVault("bob[at]publickey.net");
-		System.out.println("receiverPrivateKey: " + user1.getPrivateKey());
-		user1.setName("Bob");
-		AddFriendRequestHandler h = new AddFriendRequestHandler();
-		user1.setAddFriendRequestHandler(h);
+		// user 1
+		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet);
 		user1.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
 
-		FairnetVault user2 = new FairnetVault("alice[at]publickey.com");
-		user2.setName("Alice");
-		AddFriendResponseHandler handler = new AddFriendResponseHandler();
-		user2.setAddFriendResponseHandler(handler);
+		// user 2
+		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet);
 		user2.register(fairnet);
-	
+		Thread.sleep(SLEEP_TIME);
 
-		RemoteRequester remoteUser = new RemoteRequester(fairnet, user2);
-		remoteUser.addFriend(user1.getPublicKey());
-		//Thread.sleep(SLEEP_TIME);
+		// exchanging public keys
+		exchangePublicKeys(user1, user2);
 
 		boolean result = user1.isFriend(user2.getPublicKey());
 		assertEquals(true, result);
 
 		user1.unregister();
 		user2.unregister();
-		//Thread.sleep(SLEEP_TIME);
 	}
 
 	@Test
 	public void testGetMyPosts() throws Exception {
 
-		FairnetVault user1 = new FairnetVault("bob[at]publickey.net");
-		user1.setName("Bob");
+		System.out.println("\n---test Get My Posts--");
 
-		Post post1 = user1.createPost("Hello World", "Hello world!!!");
-		Post post2 = user1.createPost("No Title", "Don't worry, be happy!");
+		VaultageServer fairnet = new VaultageServer("vm://localhost");
 
-		List<String> posts = user1.getPosts();
-		String post1id = posts.stream().filter(p -> p.equals(post1.getId())).findFirst().orElse("");
-		String post2id = posts.stream().filter(p -> p.equals(post2.getId())).findFirst().orElse("");
+		// user 1
+		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet);
+		user1.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
+
+		Post post1 = user1.createPost("Hello world!!!", true);
+		Post post2 = user1.createPost("Don't worry, be happy!", true);
+
+		List<Post> posts = user1.getPosts();
+		String post1id = posts.stream().filter(p -> p.getId().equals(post1.getId())).findFirst().orElse(null).getId();
+		String post2id = posts.stream().filter(p -> p.getId().equals(post2.getId())).findFirst().orElse(null).getId();
 
 		System.out.println(post1.getId());
 		assertEquals(post1.getId(), post1id);
@@ -177,40 +170,38 @@ public class FairnetTest {
 
 		VaultageServer fairnet = new VaultageServer("vm://localhost");
 
-		FairnetVault user1 = new FairnetVault("bob[at]publickey.net");
-		user1.setName("Bob");
-
-		Post post1 = user1.createPost("Post1 Title", "Hello world!!!");
-		//Thread.sleep(1);
-		Post post2 = user1.createPost("Post2 Title", "Stay at home, protect the NHS!");
-		//Thread.sleep(1);
-		Post post3 = user1.createPost("Post3 Title", "Don't worry, be happy!");
-
-		user1.setAddFriendRequestHandler(new AddFriendRequestHandler());
-		user1.setGetPostsRequestHandler(new GetPostsRequestHandler());
+		// user 1
+		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet);
 		user1.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
 
-		FairnetVault user2 = new FairnetVault("alice[at]publickey.com");
-		user2.setName("Alice");
-		user2.setAddFriendResponseHandler(new AddFriendResponseHandler());
-		user2.setGetPostsResponsenHandler(new GetPostsResponseHandler());
+		Post post1 = user1.createPost("Hello world!!!", true);
+		Post post2 = user1.createPost("Stay at home, protect the NHS!", false);
+		Post post3 = user1.createPost("Don't worry, be happy!", true);
+
+		user1.setGetPostsRequestBaseHandler(new GetPostsRequestHandler());
+
+		// user 2
+		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet);
 		user2.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
 
-		RemoteRequester remoteUser = new RemoteRequester(fairnet, user2);
-		remoteUser.addFriend(user1.getPublicKey());
-		//Thread.sleep(SLEEP_TIME);
+		user2.setGetPostsResponseBaseHandler(new GetPostsResponseHandler());
 
-		remoteUser.getPosts(user1.getPublicKey());
-		//Thread.sleep(SLEEP_TIME);
+		// exchange public keys
+		exchangePublicKeys(user1, user2);
 
-		List<String> postIds = user2.getGetPostsResponseHandler().getPostIds();
-		assertEquals(true, postIds.contains(post1.getId()));
-		assertEquals(true, postIds.contains(post2.getId()));
-		assertEquals(true, postIds.contains(post3.getId()));
+		// simulate request user1's post list by user 2
+		RemoteRequester remoteRequester = new RemoteRequester(fairnet, user2);
+
+		List<String> user1posts = remoteRequester.getPosts(user1.getPublicKey());
+
+		assertEquals(true, user1posts.contains(post1.getId()));
+		assertEquals(false, user1posts.contains(post2.getId()));
+		assertEquals(true, user1posts.contains(post3.getId()));
 
 		user1.unregister();
 		user2.unregister();
-		//Thread.sleep(SLEEP_TIME);
 	}
 
 	@Test
@@ -218,43 +209,71 @@ public class FairnetTest {
 
 		VaultageServer fairnet = new VaultageServer("vm://localhost");
 
-		FairnetVault user1 = new FairnetVault("bob[at]publickey.net");
-		user1.setName("Bob");
-		user1.createPost("20200421072728514T", "Hello world!!!");
-		user1.createPost("20200421072728515F", "Stay at home, protect the NHS!");
-		user1.createPost("20200421072728516T", "Don't worry, be happy!");
-
-		user1.setAddFriendRequestHandler(new AddFriendRequestHandler());
-		user1.setGetPostsRequestHandler(new GetPostsRequestHandler());
-		user1.setGetPostRequestHandler(new GetPostRequestHandler());
+		// user 1
+		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet);
 		user1.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
 
-		FairnetVault user2 = new FairnetVault("alice[at]publickey.com");
-		user2.setName("Alice");
-		user2.setAddFriendResponseHandler(new AddFriendResponseHandler());
-		user2.setGetPostsResponsenHandler(new GetPostsResponseHandler());
-		user2.setGetPostResponseHandler(new GetPostResponseHandler());
+		user1.createPost("Hello world!!!", true);
+		user1.createPost("Stay at home, protect the NHS!", false);
+		user1.createPost("Don't worry, be happy!", true);
+
+		user1.setGetPostsRequestBaseHandler(new GetPostsRequestHandler());
+		user1.setGetPostRequestBaseHandler(new GetPostRequestHandler());
+
+		// user 2
+		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet);
 		user2.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
 
-		RemoteRequester remoteUser = new RemoteRequester(fairnet, user2);
-		remoteUser.addFriend(user1.getPublicKey());
-		//Thread.sleep(SLEEP_TIME);
+		user2.setGetPostsResponseBaseHandler(new GetPostsResponseHandler());
+		user2.setGetPostResponseBaseHandler(new GetPostResponseHandler());
 
-		remoteUser.getPosts(user1.getPublicKey());
-		//Thread.sleep(SLEEP_TIME);
+		// exchange public keys
+		exchangePublicKeys(user1, user2);
 
-		List<String> postIds = user2.getGetPostsResponseHandler().getPostIds();
-		for (String postId : postIds) {
-			Post user1Post = user1.getPost(postId);
-			Post postRemote = remoteUser.getPost(user1.getPublicKey(), postId);
-			//Thread.sleep(SLEEP_TIME);
-			assertEquals(user1Post.getBody(), postRemote.getBody());
+		// simulate request user1's post list by user 2
+		RemoteRequester remoteRequester = new RemoteRequester(fairnet, user2);
+
+		List<String> user1posts = remoteRequester.getPosts(user1.getPublicKey());
+
+		// simulate request user1's post contents per post
+		for (String postId : user1posts) {
+			Post user1Post = user1.getPostById(postId);
+			Post postRemote = remoteRequester.getPost(user1.getPublicKey(), postId); //
+			assertEquals(user1Post.getContent(), postRemote.getContent());
 		}
-
-		//Thread.sleep(SLEEP_TIME);
 
 		user1.unregister();
 		user2.unregister();
-		//Thread.sleep(SLEEP_TIME);
+	}
+
+	private FairnetVault createVault(String id, String name, VaultageServer fairnet)
+			throws FileNotFoundException, IOException, NoSuchAlgorithmException, Exception, InterruptedException {
+		FairnetVault user = new FairnetVault();
+		user.setId(id);
+		user.setName(name);
+		return user;
+	}
+
+	/***
+	 * Simulate exchanging public keys between users. In the real world, this
+	 * exchange could be done manually via emails or messengers.
+	 * 
+	 * @param user1
+	 * @param user2
+	 */
+	private void exchangePublicKeys(FairnetVault user1, FairnetVault user2) {
+		// add user 2 as a friend to user 1's vault
+		Friend user1friend = new Friend();
+		user1friend.setName(user2.getName());
+		user1friend.setPublicKey(user2.getPublicKey());
+		user1.getFriends().add(user1friend);
+
+		// add user 2 as a friend to user 1's vault
+		Friend user2friend = new Friend();
+		user2friend.setName(user1.getName());
+		user2friend.setPublicKey(user1.getPublicKey());
+		user2.getFriends().add(user2friend);
 	}
 }

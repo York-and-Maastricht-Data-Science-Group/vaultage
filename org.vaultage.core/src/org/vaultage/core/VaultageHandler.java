@@ -10,6 +10,7 @@ public abstract class VaultageHandler {
 	protected String name;
 	protected Thread thread;
 	protected Thread callerThread;
+	protected Object result;
 
 	public VaultageHandler() {
 		name = this.getClass().getSimpleName() + "-" + COUNTER;
@@ -86,7 +87,7 @@ public abstract class VaultageHandler {
 			this.thread.interrupt();
 		}
 	}
-	
+
 	public Thread getCallerThread() {
 		return callerThread;
 	}
@@ -95,4 +96,11 @@ public abstract class VaultageHandler {
 		this.callerThread = callerThread;
 	}
 
+	public Object getResult() {
+		return result;
+	}
+
+	public void setResult(Object result) {
+		this.result = result;
+	}
 }

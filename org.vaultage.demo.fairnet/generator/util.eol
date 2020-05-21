@@ -30,15 +30,48 @@ operation String clean() {
 }
 
 operation EStructuralFeature getType(): String {
-	if (self.eType.name == "EString") {
-		return "String";
-	} else if (self.eType.name == "EBoolean") {
-		return "Boolean";
-	} else {
-		return self.eType.name;
+	var type = "";
+	if (self.eType <> null){
+		if (self.upperBound == -1){
+			type = type + "List<";
+		}
+		if (self.eType.name == "EBooleanObject"){
+			type = type + "Boolean";
+		} else if (self.eType.name == "EBoolean"){
+			type = type + "boolean";
+		} else if (self.eType.name == "EString"){
+			type = type + "String";
+		} else {
+			type = type + self.eType.name;
+		}
+	if (self.upperBound == -1){
+			type = type + ">";
 	}
+	} else {
+		type = "void";
+	}
+	return type;
 }
 
+operation EStructuralFeature getTypeInstance(): String {
+	var type = "";
+	if (self.eType <> null){
+		if (self.upperBound == -1){
+			type = type + "ArrayList<>";
+		} else if (self.eType.name == "EBooleanObject"){
+			type = type + "Boolean";
+		} else if (self.eType.name == "EBoolean"){
+			type = type + "boolean";
+		} else if (self.eType.name == "EString"){
+			type = type + "String";
+		} else {
+			type = type + self.eType.name;
+		}
+	} else {
+		type = "void";
+	}
+	return type;
+}
 operation EOperation getAccessModifier(): String{
 	var access = "protected";
 	if (self.eAnnotations.size() > 0){
@@ -50,6 +83,13 @@ operation EOperation getAccessModifier(): String{
 	return access;
 }
 
+operation EOperation getOverride(): String {
+	if (self.getAccessModifier() == "public") {
+		return "@Override";
+	} else {
+		return "";
+	}
+}
 
 operation EOperation getReturnType(): String{
 	var type = "";
@@ -67,6 +107,27 @@ operation EOperation getReturnType(): String{
 	if (self.upperBound == -1){
 			type = type + ">";
 	}
+	} else {
+		type = "void";
+	}
+	return type;
+}
+
+operation EOperation getReturnTypeImplementation(): String {
+	var type = "";
+	if (self.eType <> null){
+		if (self.upperBound == -1){
+			type = type + "ArrayList";
+		} else if (self.eType.name == "EBooleanObject"){
+			type = type + "Boolean";
+		} else if (self.eType.name == "EBoolean"){
+			type = type + "boolean";
+		} else if (self.eType.name == "EString"){
+			type = type + "String";
+		} else {
+			type = type + self.eType.name;
+		}
+		
 	} else {
 		type = "void";
 	}
@@ -144,4 +205,21 @@ operation EOperation getClassResponseHandlerName(): String {
 operation EOperation getResponseHandlerFilename(): String {
 	return self.name.firstToUpperCase() + "ResponseHandler.java"; 
 }
+
+operation EOperation getClassRequestBaseHandlerName(): String {
+	return self.name.firstToUpperCase() + "RequestBaseHandler"; 
+}
+
+operation EOperation getRequestBaseHandlerFileName(): String {
+	return self.name.firstToUpperCase() + "RequestBaseHandler.java"; 
+}
+
+operation EOperation getClassResponseBaseHandlerName(): String {
+	return self.name.firstToUpperCase() + "ResponseBaseHandler"; 
+}
+
+operation EOperation getResponseBaseHandlerFilename(): String {
+	return self.name.firstToUpperCase() + "ResponseBaseHandler.java"; 
+}
+
 

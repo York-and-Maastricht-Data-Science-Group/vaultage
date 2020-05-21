@@ -1,19 +1,20 @@
 [% import 'util.eol'; %]
-package [%=packageName%];
+package [%=packageNameApp%];
+[%=out.startPreserve("/*", "*/", eOperation.getClassRequestHandlerName()+"Import1", true)%]
 
-import org.vaultage.core.Vaultage;
-import org.vaultage.core.VaultageHandler;
+
+[%= out.stopPreserve() %]
 import org.vaultage.core.VaultageMessage;
+import [%=packageNameGen%].[%=eOperation.getClassRequestBaseHandlerName()%];
+[%=out.startPreserve("/*", "*/", eOperation.getClassRequestHandlerName()+"Import2", true)%]
 
-public class [%=eOperation.getClassRequestHandlerName()%] extends VaultageHandler {
+[%= out.stopPreserve() %]
+public class [%=eOperation.getClassRequestHandlerName()%] extends [%=eOperation.getClassRequestBaseHandlerName()%] {
 	
 	@Override
-	public void run() {
-	
-		try {
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	[%=out.startPreserve("/*", "*/", eOperation.getClassRequestHandlerName(), true)%]
+	public Object run(VaultageMessage senderMessage) throws Exception {
+		return result;
 	}
+	[%= out.stopPreserve() %]
 }
