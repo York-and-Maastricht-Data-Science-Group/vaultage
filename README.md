@@ -3,6 +3,16 @@
 
 ## How does **Vaultage** work?
 
+### Security
+
+![Distributed Architecture](images/security.svg)
+
+- **Public Key Exchange**. Public keys between users are exchanged via emails, messengers, etc., or further extension of the app.
+- **Double Encryption**. Messages are encrypted (decrypted) using both users' keys: sender private key + receiver public key (receiver private key + sender public key).
+- **Encryption Algorithm**. RSA, key length 512 bits.
+
+
+
 ### Distributed Architecture
 
 ![Distributed Architecture](images/rdbd_architecture.case_04.svg)
