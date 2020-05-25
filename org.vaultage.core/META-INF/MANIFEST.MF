@@ -5,3 +5,7 @@ Bundle-SymbolicName: org.vaultage.core
 Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: org.vaultage.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.epsilon.egl.engine,
+ org.eclipse.epsilon.emc.emf,
+ org.eclipse.epsilon.eol.engine
+Export-Package: org.vaultage.core

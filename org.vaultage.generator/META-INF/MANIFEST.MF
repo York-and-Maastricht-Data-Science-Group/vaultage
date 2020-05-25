@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Generator
+Bundle-SymbolicName: org.vaultage.generator
+Bundle-Version: 1.0.0.qualifier
+Automatic-Module-Name: org.vaultage.generator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.epsilon.emc.emf,
+ org.eclipse.epsilon.egl.engine,
+ org.eclipse.epsilon.eol.engine

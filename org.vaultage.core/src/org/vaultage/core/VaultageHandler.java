@@ -6,7 +6,7 @@ public abstract class VaultageHandler {
 	protected String queueId;
 	protected String senderPublicKey;
 	protected VaultageMessage message;
-	protected Object owner;
+	protected Object vault;
 	protected String name;
 	protected Thread thread;
 	protected Thread callerThread;
@@ -59,11 +59,11 @@ public abstract class VaultageHandler {
 	}
 
 	public Object getOwner() {
-		return owner;
+		return vault;
 	}
 
 	public void setOwner(Object owner) {
-		this.owner = owner;
+		this.vault = owner;
 	}
 
 	public VaultageMessage getMessage() {

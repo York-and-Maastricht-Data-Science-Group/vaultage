@@ -1,20 +1,18 @@
+/**** protected region GetPostsRequestHandler on begin ****/
 package org.vaultage.demo.fairnet.app;
-/* protected region GetPostsRequestHandlerImport1 on begin */
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-/* protected region GetPostsRequestHandlerImport1 end */
+
+import java.util.List;
+
 import org.vaultage.core.VaultageMessage;
+import org.vaultage.demo.fairnet.app.FairnetVault;
 import org.vaultage.demo.fairnet.gen.GetPostsRequestBaseHandler;
-/* protected region GetPostsRequestHandlerImport2 on begin */
-import org.vaultage.demo.fairnet.gen.Post;
-/* protected region GetPostsRequestHandlerImport2 end */
+
 public class GetPostsRequestHandler extends GetPostsRequestBaseHandler {
-	
+
 	@Override
-	/* protected region GetPostsRequestHandler on begin */
-	public Object run(VaultageMessage senderMessage) throws Exception {
-		FairnetVault localVault = (FairnetVault) this.owner;
+	public List<String> run(VaultageMessage senderMessage) throws Exception {
+		FairnetVault localVault = (FairnetVault) this.vault;
 		return localVault.getPosts(senderMessage.getFrom());
 	}
-	/* protected region GetPostsRequestHandler end */
 }
+/**** protected region GetPostsRequestHandler end ****/

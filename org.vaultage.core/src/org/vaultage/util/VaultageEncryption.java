@@ -171,8 +171,8 @@ public class VaultageEncryption {
 	}
 
 	/***
-	 * A method to double encrypt a message using receiver public key and sender
-	 * private key.
+	 * A method to double encrypt a message using sender private key and receiver
+	 * public key.
 	 * 
 	 * @param plainMessage
 	 * @param receiverPublicKey
@@ -288,8 +288,8 @@ public class VaultageEncryption {
 	}
 
 	/***
-	 * A method to double decrypt an encrypted message using sender public key and
-	 * receiver private key.
+	 * A method to double decrypt an encrypted message using receiver private key
+	 * and sender public key .
 	 * 
 	 * @param encryptedMessage
 	 * @param senderPublicKey

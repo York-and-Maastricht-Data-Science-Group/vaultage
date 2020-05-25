@@ -34,6 +34,6 @@ org.vaultage.demo.fairnet/output/*
 org.vaultage.demo.fairnet/activemq-data
 org.vaultage.core.server/activemq-data
 org.vaultage.core.server/activemq-data
-org.vaultage.demo.fairnet/src/org/vaultage/demo/fairnet/gen
+#org.vaultage.demo.fairnet/src/org/vaultage/demo/fairnet/
 /target/
 /bin/

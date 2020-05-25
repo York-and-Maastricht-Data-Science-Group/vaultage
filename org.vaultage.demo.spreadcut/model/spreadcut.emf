@@ -1,0 +1,19 @@
+@GenModel(basePackage="org.vaultage.demo.spreadcut")
+@namespace(uri="spreadcut", prefix="spreadcut")
+package spreadcut;
+
+@vault
+class SpreadCutter {
+	val ProximityContact[*] contacts;
+
+	// request all contacts of a user from a specific time stamp
+	op ProximityContact[*] getContacts(String timestamp);
+	
+	// confirm that the requested user also has a registered contact with you
+	op boolean confirmContact(String timestamp);
+}
+
+class ProximityContact {
+	attr String[1] publicKey;
+	attr String[1] timestamp;
+}

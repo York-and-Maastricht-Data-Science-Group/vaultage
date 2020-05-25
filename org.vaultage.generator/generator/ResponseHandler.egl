@@ -1,0 +1,15 @@
+[% import 'Util.eol'; %]
+[%=out.startPreserve("/****", "****/", eOperation.getClassResponseHandlerName(), true)%]
+package [%=packageNameApp%];
+
+import org.vaultage.core.VaultageMessage;
+import [%=packageNameGen%].[%=eOperation.getClassResponseBaseHandlerName()%];
+
+public class [%=eOperation.getClassResponseHandlerName()%] extends [%=eOperation.getClassResponseBaseHandlerName()%] {
+	
+	@Override
+	public Object run(VaultageMessage senderMessage) throws Exception {
+		return result;
+	}
+}
+[%= out.stopPreserve() %]

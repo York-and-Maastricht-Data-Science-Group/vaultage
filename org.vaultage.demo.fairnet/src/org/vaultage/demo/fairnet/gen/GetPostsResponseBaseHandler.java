@@ -7,7 +7,7 @@ import org.vaultage.core.VaultageMessage;
 import org.vaultage.demo.fairnet.app.FairnetVault;
 
 public class GetPostsResponseBaseHandler extends VaultageHandler {
-	
+
 	@Override
 	public void run() {
 		try {

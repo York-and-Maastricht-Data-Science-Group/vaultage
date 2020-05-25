@@ -7,7 +7,7 @@ public class Friend  {
 	private String id = UUID.randomUUID().toString();
 	private String name;
 	private String publicKey;
-
+	
 	// getter
 	public String getId(){
 		return this.id;
@@ -18,7 +18,7 @@ public class Friend  {
 	public String getPublicKey() {
 		return this.publicKey;
 	}
-
+	
 	// setter
 	public void setId(String id){
 		this.id = id;
@@ -29,9 +29,9 @@ public class Friend  {
 	public void setPublicKey(String publicKey) {
 		this.publicKey = publicKey;
 	}
-
+	
 	// operations
 	
 	
-			
+	
 }

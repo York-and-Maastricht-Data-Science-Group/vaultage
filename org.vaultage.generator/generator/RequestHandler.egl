@@ -1,0 +1,16 @@
+[% import 'Util.eol'; %]
+[%=out.startPreserve("/****", "****/", eOperation.getClassRequestHandlerName(), true)%]
+package [%=packageNameApp%];
+
+import [%=packageNameGen%].*;
+import java.util.List;
+import org.vaultage.core.VaultageMessage;
+
+public class [%=eOperation.getClassRequestHandlerName()%] extends [%=eOperation.getClassRequestBaseHandlerName()%] {
+	
+	@Override
+	public [%=eOperation.getReturnType()%] run(VaultageMessage senderMessage) throws Exception {
+		return ([%=eOperation.getReturnType()%]) result;
+	}
+}
+[%= out.stopPreserve() %]

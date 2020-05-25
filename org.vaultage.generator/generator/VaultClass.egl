@@ -1,0 +1,53 @@
+[% import 'Util.eol'; %]
+[%=out.startPreserve("/****", "****/", class.name, true)%]
+package [%=packageNameApp%];
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import org.vaultage.util.VaultageEncryption;
+[% for (eClass in EClass.allInstances){ %][% if (not eClass.hasVaultAnnotation()) { %]
+import [%=packageNameGen%].[%=eClass.name%];
+[% 	} %][% }%]
+import [%=packageNameGen%].[%=class.name%]Base;
+
+public class [%=class.name%] [%=parentClass%] {
+[% for (feature in class.eStructuralFeatures){ %]
+	private [%=feature.getType()%] [%=feature.name%] = new [%= feature.getTypeInstance()%]();
+[%	} %]
+
+	public [%=class.name%]() throws FileNotFoundException, IOException, NoSuchAlgorithmException {
+		KeyPair keyPair = VaultageEncryption.generateKeys();
+		publicKey = VaultageEncryption.getPublicKey(keyPair);
+		privateKey = VaultageEncryption.getPrivateKey(keyPair);
+	}
+	
+	// getter
+[% for (feature in class.eStructuralFeatures){ %]
+	public [%=feature.getType()%] get[%=feature.name.firstToUpperCase()%]() {
+		return this.[%=feature.name%];
+	}
+[%	} %]
+
+	// setter
+[% for (feature in class.eStructuralFeatures){ %]
+	public void set[%=feature.name.firstToUpperCase()%]([%=feature.getType()%] [%=feature.name%]) {
+		this.[%=feature.name%] = [%=feature.name%];
+	}
+[%	} %]
+
+	// operations
+[% for (eOperation in class.eOperations){ %]
+	[%= eOperation.getOverride() %]
+	public [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
+		throw new Exception();
+	}
+ 
+[% } %]		
+}
+[%= out.stopPreserve() %]

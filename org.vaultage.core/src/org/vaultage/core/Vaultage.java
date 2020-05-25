@@ -69,11 +69,11 @@ public class Vaultage {
 
 //		String address = ActiveMQConnection.DEFAULT_BROKER_URL;
 		String address = "vm://localhost";
-		Vaultage rdbd1 = new Vaultage();
-		rdbd1.connect(address);
+		Vaultage v1 = new Vaultage();
+		v1.connect(address);
 
-		Vaultage rdbd2 = new Vaultage();
-		rdbd2.connect(address);
+		Vaultage v2 = new Vaultage();
+		v2.connect(address);
 
 		HashMap<String, VaultageHandler> handlers = new HashMap<String, VaultageHandler>();
 		handlers.put(VaultageHandler.class.getName(), new VaultageHandler() {
@@ -82,7 +82,7 @@ public class Vaultage {
 
 			}
 		});
-		Thread t2 = rdbd2.listenMessage("bob",
+		Thread t2 = v2.subscribe("bob",
 				Base64.getEncoder().encodeToString(receiverKeyPair.getPrivate().getEncoded()), handlers);
 
 		VaultageMessage message = new VaultageMessage();
@@ -90,7 +90,7 @@ public class Vaultage {
 		message.setTo("bob");
 		message.setOperation(VaultageHandler.class.getName());
 		message.putValue("value", "Hello World!");
-		Thread t1 = rdbd1.sendMessage(message.getTo(),
+		Thread t1 = v1.sendMessage(message.getTo(),
 				Base64.getEncoder().encodeToString(senderKeyPair.getPublic().getEncoded()),
 				Base64.getEncoder().encodeToString(senderKeyPair.getPrivate().getEncoded()), message);
 
@@ -104,8 +104,8 @@ public class Vaultage {
 
 		Thread.sleep(1000);
 
-		rdbd1.disconnect();
-		rdbd2.disconnect();
+		v1.disconnect();
+		v2.disconnect();
 		System.out.println("Finished!");
 	}
 
@@ -124,7 +124,7 @@ public class Vaultage {
 		return brokerThread;
 	}
 
-	public Thread listenMessage(String queueId, String receiverPrivateKey, Map<String, VaultageHandler> handlers) throws InterruptedException {
+	public Thread subscribe(String queueId, String receiverPrivateKey, Map<String, VaultageHandler> handlers) throws InterruptedException {
 		this.isListening = true;
 		Thread brokerThread = new Consumer(queueId, receiverPrivateKey, handlers);
 		brokerThread.setDaemon(false);
@@ -142,7 +142,7 @@ public class Vaultage {
 	}
 
 	public void disconnect() throws Exception {
-		this.stopListening();
+		this.unsubscribe();
 
 		for (VaultageHandler h : threads) {
 			if (h.isAlive()) {
@@ -268,7 +268,7 @@ public class Vaultage {
 		}
 	}
 
-	public void stopListening() {
+	public void unsubscribe() {
 		this.isListening = false;
 	}
 

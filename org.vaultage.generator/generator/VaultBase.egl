@@ -1,0 +1,116 @@
+[% import 'Util.eol'; %]
+package [%=packageNameGen%];
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+
+import org.vaultage.core.Vaultage;
+import org.vaultage.core.VaultageHandler;
+import org.vaultage.core.VaultageServer;
+
+[% /* for (eOperation in class.eOperations){ %]
+import [%=packageNameApp%].[%= eOperation.name.firstToUpperCase()%]RequestBaseHandler;
+import [%=packageNameApp%].[%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler;	
+[% } */%]
+
+public abstract class [%=class.getBaseName()%] {
+
+	protected String id = UUID.randomUUID().toString();
+	protected String privateKey;
+	protected String publicKey;
+	protected boolean isListening;
+	protected Vaultage vaultage;
+	protected Map<String, VaultageHandler> handlers;
+	
+
+[% for (eOperation in class.eOperations){ %]
+	protected [%= eOperation.name.firstToUpperCase()%]RequestBaseHandler [%=eOperation.name%]RequestBaseHandler;
+	protected [%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler [%=eOperation.name%]ResponseBaseHandler;	
+[% } %]	
+
+	public [%=class.getBaseName()%]() {
+		this.isListening = false;
+		this.vaultage = new Vaultage();
+		this.handlers = new HashMap<String, VaultageHandler>();
+	}
+	
+	public String getId(){
+		return this.id;
+	}
+	
+	public void setId(String id){
+		this.id = id;
+	}
+	
+	public Vaultage getVaultage() {
+		return vaultage;
+	}
+
+	public void setVaultage(Vaultage vaultage) {
+		this.vaultage = vaultage;
+	}
+	
+	public String getPrivateKey() {
+		return privateKey;
+	}
+
+	public void setPrivateKey(String privateKey) {
+		this.privateKey = privateKey;
+	}
+
+	public String getPublicKey() {
+		return publicKey;
+	}
+
+	public void setPublicKey(String publicKey) {
+		this.publicKey = publicKey;
+	}
+
+[% for (eOperation in class.eOperations){ %]
+	public void set[%= eOperation.name.firstToUpperCase()%]RequestBaseHandler([%= eOperation.name.firstToUpperCase()%]RequestBaseHandler [%= eOperation.name%]RequestBaseHandler) {
+		this.[%= eOperation.name%]RequestBaseHandler = [%= eOperation.name%]RequestBaseHandler;
+		this.[%= eOperation.name%]RequestBaseHandler.setOwner(this);
+		handlers.put([%= eOperation.name%]RequestBaseHandler.getClass().getName(), [%= eOperation.name%]RequestBaseHandler);
+	}
+	
+	public [%= eOperation.name.firstToUpperCase()%]RequestBaseHandler get[%= eOperation.name.firstToUpperCase()%]RequestBaseHandler() {
+		return [%= eOperation.name%]RequestBaseHandler;
+	}
+	
+	public void set[%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler([%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler [%= eOperation.name%]ResponseBaseHandler) {
+		this.[%= eOperation.name%]ResponseBaseHandler = [%= eOperation.name%]ResponseBaseHandler;
+		this.[%= eOperation.name%]ResponseBaseHandler.setOwner(this);
+		handlers.put([%= eOperation.name%]ResponseBaseHandler.getClass().getName(), [%= eOperation.name%]ResponseBaseHandler);
+	}
+	
+	public [%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler get[%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler() {
+		return [%= eOperation.name%]ResponseBaseHandler;
+	}
+	
+[% } %]	
+	
+
+	public boolean register(VaultageServer fairnet) throws Exception {
+		boolean isSuccess = vaultage.connect(fairnet.getAddress());
+		if (isSuccess) {
+			vaultage.subscribe(publicKey, privateKey, handlers);
+			return true;
+		}
+		return false;
+	}
+
+	public void unregister() throws Exception {
+		vaultage.disconnect();
+	}
+	
+	// operations
+[% for (eOperation in class.eOperations){ %]
+	[%= eOperation.getAccessModifier()%] abstract [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception;
+	
+[% } %]	
+	
+			
+}

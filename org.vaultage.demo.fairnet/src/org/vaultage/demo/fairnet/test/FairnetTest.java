@@ -9,11 +9,14 @@ import java.util.List;
 
 import org.junit.Test;
 import org.vaultage.core.VaultageServer;
+import org.vaultage.demo.fairnet.app.AddFriendRequestHandler;
+import org.vaultage.demo.fairnet.app.AddFriendResponseHandler;
 import org.vaultage.demo.fairnet.app.FairnetVault;
 import org.vaultage.demo.fairnet.app.GetPostRequestHandler;
 import org.vaultage.demo.fairnet.app.GetPostResponseHandler;
 import org.vaultage.demo.fairnet.app.GetPostsRequestHandler;
 import org.vaultage.demo.fairnet.app.GetPostsResponseHandler;
+import org.vaultage.demo.fairnet.gen.AddFriendResponseBaseHandler;
 import org.vaultage.demo.fairnet.gen.Friend;
 import org.vaultage.demo.fairnet.gen.Post;
 import org.vaultage.demo.fairnet.gen.RemoteRequester;
@@ -58,7 +61,7 @@ public class FairnetTest {
 	}
 
 	@Test
-	public void testAddFriend() throws Exception {
+	public void testAddFriendLocally() throws Exception {
 
 		System.out.println("\n---TestAddFriend---");
 
@@ -166,8 +169,40 @@ public class FairnetTest {
 	}
 
 	@Test
-	public void testGetFriendPosts() throws Exception {
+	public void testAddFriend() throws Exception {
+ 
+		VaultageServer fairnet = new VaultageServer("vm://localhost");
 
+		// user 1
+		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet);
+		user1.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
+		
+		user1.setAddFriendRequestBaseHandler(new AddFriendRequestHandler());
+
+		// user 2
+		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet);
+		user2.register(fairnet);
+		Thread.sleep(SLEEP_TIME);
+
+		user2.setAddFriendResponseBaseHandler(new AddFriendResponseHandler());
+
+		//add friend using remote requester
+		RemoteRequester remoteRequester = new RemoteRequester(fairnet, user2);
+
+		// simulate request user1's post list by user 2
+		remoteRequester.addFriend(user1.getPublicKey());
+		
+		assertEquals(true, user1.getFriends().stream().anyMatch(f -> f.getPublicKey().equals(user2.getPublicKey())));
+		assertEquals(true, user2.getFriends().stream().anyMatch(f -> f.getPublicKey().equals(user1.getPublicKey())));
+
+		user1.unregister();
+		user2.unregister();
+	}
+	
+	@Test
+	public void testGetFriendPosts() throws Exception {
+ 
 		VaultageServer fairnet = new VaultageServer("vm://localhost");
 
 		// user 1

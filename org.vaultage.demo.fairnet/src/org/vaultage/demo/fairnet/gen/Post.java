@@ -7,7 +7,7 @@ public class Post  {
 	private String id = UUID.randomUUID().toString();
 	private String content;
 	private boolean isPublic;
-
+	
 	// getter
 	public String getId(){
 		return this.id;
@@ -18,7 +18,7 @@ public class Post  {
 	public boolean getIsPublic() {
 		return this.isPublic;
 	}
-
+	
 	// setter
 	public void setId(String id){
 		this.id = id;
@@ -29,9 +29,9 @@ public class Post  {
 	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
-
+	
 	// operations
 	
 	
-			
+	
 }

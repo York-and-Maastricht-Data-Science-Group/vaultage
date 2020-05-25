@@ -1,0 +1,43 @@
+[% import 'Util.eol'; %]
+package [%=packageNameGen%];
+
+import java.util.List;
+import java.util.UUID;
+
+public class [%=class.name%] [%=parentClass%] {
+	private String id = UUID.randomUUID().toString();
+[% for (feature in class.eStructuralFeatures){ %]
+	private [%=feature.getType()%] [%=feature.name%];
+[%	} %]
+
+	// getter
+	public String getId(){
+		return this.id;
+	}
+[% for (feature in class.eStructuralFeatures){ %]
+	public [%=feature.getType()%] get[%=feature.name.firstToUpperCase()%]() {
+		return this.[%=feature.name%];
+	}
+[%	} %]
+
+	// setter
+	public void setId(String id){
+		this.id = id;
+	}
+[% for (feature in class.eStructuralFeatures){ %]
+	public void set[%=feature.name.firstToUpperCase()%]([%=feature.getType()%] [%=feature.name%]) {
+		this.[%=feature.name%] = [%=feature.name%];
+	}
+[%	} %]
+
+	// operations
+[% for (eOperation in class.eOperations){ %]
+	[%= eOperation.getOverride() %]
+	[%= eOperation.getAccessModifier()%] [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
+		throw new Exception();
+	}
+	
+[% } %]	
+	
+			
+}

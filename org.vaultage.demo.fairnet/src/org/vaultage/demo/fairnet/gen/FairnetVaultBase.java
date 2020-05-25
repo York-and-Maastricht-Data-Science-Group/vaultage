@@ -20,13 +20,15 @@ public abstract class FairnetVaultBase {
 	protected Vaultage vaultage;
 	protected Map<String, VaultageHandler> handlers;
 	
-
+	
+	protected AddFriendRequestBaseHandler addFriendRequestBaseHandler;
+	protected AddFriendResponseBaseHandler addFriendResponseBaseHandler;	
 	protected GetPostRequestBaseHandler getPostRequestBaseHandler;
 	protected GetPostResponseBaseHandler getPostResponseBaseHandler;	
 	protected GetPostsRequestBaseHandler getPostsRequestBaseHandler;
 	protected GetPostsResponseBaseHandler getPostsResponseBaseHandler;	
 	
-
+	
 	public FairnetVaultBase() {
 		this.isListening = false;
 		this.vaultage = new Vaultage();
@@ -44,7 +46,7 @@ public abstract class FairnetVaultBase {
 	public Vaultage getVaultage() {
 		return vaultage;
 	}
-
+	
 	public void setVaultage(Vaultage vaultage) {
 		this.vaultage = vaultage;
 	}
@@ -52,19 +54,39 @@ public abstract class FairnetVaultBase {
 	public String getPrivateKey() {
 		return privateKey;
 	}
-
+	
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
-
+	
 	public String getPublicKey() {
 		return publicKey;
 	}
-
+	
 	public void setPublicKey(String publicKey) {
 		this.publicKey = publicKey;
 	}
-
+	
+	public void setAddFriendRequestBaseHandler(AddFriendRequestBaseHandler addFriendRequestBaseHandler) {
+		this.addFriendRequestBaseHandler = addFriendRequestBaseHandler;
+		this.addFriendRequestBaseHandler.setOwner(this);
+		handlers.put(addFriendRequestBaseHandler.getClass().getName(), addFriendRequestBaseHandler);
+	}
+	
+	public AddFriendRequestBaseHandler getAddFriendRequestBaseHandler() {
+		return addFriendRequestBaseHandler;
+	}
+	
+	public void setAddFriendResponseBaseHandler(AddFriendResponseBaseHandler addFriendResponseBaseHandler) {
+		this.addFriendResponseBaseHandler = addFriendResponseBaseHandler;
+		this.addFriendResponseBaseHandler.setOwner(this);
+		handlers.put(addFriendResponseBaseHandler.getClass().getName(), addFriendResponseBaseHandler);
+	}
+	
+	public AddFriendResponseBaseHandler getAddFriendResponseBaseHandler() {
+		return addFriendResponseBaseHandler;
+	}
+	
 	public void setGetPostRequestBaseHandler(GetPostRequestBaseHandler getPostRequestBaseHandler) {
 		this.getPostRequestBaseHandler = getPostRequestBaseHandler;
 		this.getPostRequestBaseHandler.setOwner(this);
@@ -107,26 +129,28 @@ public abstract class FairnetVaultBase {
 	
 	
 	
-
+	
 	public boolean register(VaultageServer fairnet) throws Exception {
 		boolean isSuccess = vaultage.connect(fairnet.getAddress());
 		if (isSuccess) {
-			vaultage.listenMessage(publicKey, privateKey, handlers);
+			vaultage.subscribe(publicKey, privateKey, handlers);
 			return true;
 		}
 		return false;
 	}
-
+	
 	public void unregister() throws Exception {
 		vaultage.disconnect();
 	}
 	
 	// operations
-	public abstract Post getPost(String friendPublicKey, String postId) throws Exception;
+	protected abstract Boolean addFriend(String requesterPublicKey) throws Exception;
 	
-	public abstract List<String> getPosts(String friendPublicKey) throws Exception;
+	protected abstract Post getPost(String requesterPublicKey, String postId) throws Exception;
+	
+	protected abstract List<String> getPosts(String requesterPublicKey) throws Exception;
 	
 	
 	
-			
+	
 }
