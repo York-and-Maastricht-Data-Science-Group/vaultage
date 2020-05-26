@@ -5,7 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 
+import org.vaultage.util.VaultageEncryption;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageHandler;
 import org.vaultage.core.VaultageServer;
@@ -18,8 +23,7 @@ public abstract class SpreadCutterBase {
 	protected String publicKey;
 	protected boolean isListening;
 	protected Vaultage vaultage;
-	protected Map<String, VaultageHandler> handlers;
-	
+	protected Map<String, VaultageHandler> handlers;	
 	
 	protected GetContactsRequestBaseHandler getContactsRequestBaseHandler;
 	protected GetContactsResponseBaseHandler getContactsResponseBaseHandler;	
@@ -27,10 +31,14 @@ public abstract class SpreadCutterBase {
 	protected ConfirmContactResponseBaseHandler confirmContactResponseBaseHandler;	
 	
 	
-	public SpreadCutterBase() {
+	public SpreadCutterBase() throws FileNotFoundException, IOException, NoSuchAlgorithmException {
 		this.isListening = false;
 		this.vaultage = new Vaultage();
 		this.handlers = new HashMap<String, VaultageHandler>();
+		
+		KeyPair keyPair = VaultageEncryption.generateKeys();
+		this.publicKey = VaultageEncryption.getPublicKey(keyPair);
+		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
 	}
 	
 	public String getId(){

@@ -44,7 +44,9 @@ public class RemoteRequester {
 			Thread.currentThread().wait();
 		}
 		
+[% if (eOperation.getReturnType() <> "void") { %]
 		return ([%= eOperation.getReturnType()%]) requesterVault.get[%= eOperation.getClassResponseBaseHandlerName() %]().getResult();
+[% } %]		
 	}
 	
 [% } %]	

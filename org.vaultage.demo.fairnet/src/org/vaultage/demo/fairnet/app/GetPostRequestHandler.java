@@ -11,7 +11,7 @@ public class GetPostRequestHandler extends GetPostRequestBaseHandler {
 	@Override
 	public Post run(VaultageMessage senderMessage) throws Exception {
 		FairnetVault localVault = (FairnetVault) this.vault;
-		String postId = senderMessage.getValue("postId");
+		String postId = (String) senderMessage.getValue("postId");
 		return localVault.getPost(senderMessage.getFrom(), postId);
 	}
 }

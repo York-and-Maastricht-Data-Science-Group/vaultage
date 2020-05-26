@@ -11,7 +11,7 @@ public class AddFriendResponseBaseHandler extends VaultageHandler {
 	@Override
 	public void run() {
 		try {
-			result = Vaultage.Gson.fromJson(message.getValue("result"), Boolean.class);
+			result = Vaultage.Gson.fromJson((String) message.getValue("result"), Boolean.class);
 			this.result = run(message);
 		} catch (Exception e) {
 			e.printStackTrace();
