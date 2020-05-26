@@ -11,7 +11,7 @@ public class [%=eOperation.getClassRequestHandlerName()%] extends [%=eOperation.
 	@Override
 	public [%=eOperation.getReturnType()%] run(VaultageMessage senderMessage) throws Exception {	
 [% if (eOperation.getReturnType() <> "void") { %]
-		return ([%= returnType %]) result;
+		return ([%= eOperation.getReturnType() %]) result;
 [% } %] 
 	}
 }

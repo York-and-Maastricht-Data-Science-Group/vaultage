@@ -27,11 +27,13 @@ operation String clean() {
 	return clean;
 }
 
-operation EStructuralFeature getType(): String {
+operation ETypedElement getTypeName(): String {
 	var type = "";
-	var auxType = "";
-	if (self.eType <> null){
-		if (self.isTypeOf(EAttribute)) {
+	if (self.eType <> null) {
+		var auxType = "";
+		if (self.eType.isTypeOf(EClass)) {
+			auxType = self.eType.name;
+		} else {
 			auxType = self.eType.instanceTypeName;
 			if (auxType == "java.lang.String") {
 				auxType = "String";
@@ -40,15 +42,21 @@ operation EStructuralFeature getType(): String {
 				auxType = "Integer";
 			}
 		}
-		else {
-			auxType = self.eType.name;
-		}
+		type = auxType;
+	}
+	return type;
+}
 
-		if (self.upperBound <> 1){
-			type += "List<" + auxType.firstToUpperCase() + ">";
+operation ETypedElement getType(): String {
+	var type = "";
+	if (self.eType <> null) {
+		var auxType = self.getTypeName();
+
+		if (self.upperBound <> 1) {
+			type = "List<" + auxType.firstToUpperCase() + ">";
 		}
 		else {
-			type += auxType;
+			type = auxType;
 		}
 	}
 	return type;
@@ -57,22 +65,40 @@ operation EStructuralFeature getType(): String {
 operation EStructuralFeature getTypeInstance(): String {
 	var type = "";
 	if (self.eType <> null){
-		if (self.upperBound == -1){
-			type = type + "ArrayList<>";
-		} else if (self.eType.name == "EBooleanObject"){
-			type = type + "Boolean";
-		} else if (self.eType.name == "EBoolean"){
-			type = type + "boolean";
-		} else if (self.eType.name == "EString"){
-			type = type + "String";
+		var auxType = self.getTypeName();
+
+		if (self.upperBound <> 1) {
+			type = "ArrayList<" + auxType.firstToUpperCase() + ">";
+		}
+		else {
+			type = auxType;
+		}
+	}
+	return type;
+}
+
+operation EOperation getReturnType(): String {
+	var type = self.getType();
+	if (type == "") {
+		type = "void";
+	}
+	return type;
+}
+
+operation EOperation getReturnTypeImplementation(): String {
+	var type = "";
+	if (self.eType <> null){
+		if (self.upperBound <> 1) {
+			type = "ArrayList";
 		} else {
-			type = type + self.eType.name;
+			type = self.getTypeName();
 		}
 	} else {
 		type = "void";
 	}
 	return type;
 }
+
 operation EOperation getAccessModifier(): String{
 	var access = "protected";
 	if (self.eAnnotations.size() > 0){
@@ -90,70 +116,6 @@ operation EOperation getOverride(): String {
 	} else {
 		return "";
 	}
-}
-
-operation EOperation getReturnType(): String{
-	var type = "";
-	if (self.eType <> null){
-		if (self.upperBound == -1){
-			type = type + "List<";
-		} 
-		if (self.eType.name == "EBoolean"){
-			type = type + "Boolean";
-		} else if (self.eType.name == "EBooleanObject"){
-			type = type + "Boolean";
-		} else if (self.eType.name == "EString"){
-			type = type + "String";
-		} else {
-			type = type + self.eType.name;
-		}
-		if (self.upperBound == -1){
-				type = type + ">";
-		}
-	} else {
-		type = "void";
-	}
-	return type;
-}
-
-operation EOperation getReturnTypeImplementation(): String {
-	var type = "";
-	if (self.eType <> null){
-		if (self.upperBound == -1){
-			type = type + "ArrayList";
-		} else if (self.eType.name == "EBooleanObject"){
-			type = type + "Boolean";
-		} else if (self.eType.name == "EBoolean"){
-			type = type + "boolean";
-		} else if (self.eType.name == "EString"){
-			type = type + "String";
-		} else {
-			type = type + self.eType.name;
-		}
-		
-	} else {
-		type = "void";
-	}
-	return type;
-}
-
-operation EParameter getType(): String{
-	var type = "";
-	if (self.eType <> null){
-		if (self.upperBound == -1){
-			type = type + "List<";
-		}
-		if (self.eType.name == "EBooleanObject"){
-			type = type + "Boolean";
-		} else if (self.eType.name == "EString"){
-			type = type + "String";
-		}else {
-			type = type + self.eType.name;
-		}
-	} else {
-		type = "void";
-	}
-	return type;
 }
 
 operation EOperation isPublic() : Boolean{
