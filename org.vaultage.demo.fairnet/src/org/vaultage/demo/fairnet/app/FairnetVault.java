@@ -3,13 +3,11 @@ package org.vaultage.demo.fairnet.app;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import org.vaultage.util.VaultageEncryption;
 import org.vaultage.demo.fairnet.gen.Friend;
 import org.vaultage.demo.fairnet.gen.Post;
 import org.vaultage.demo.fairnet.gen.FairnetVaultBase;
@@ -19,10 +17,8 @@ public class FairnetVault extends FairnetVaultBase {
 	private List<Friend> friends = new ArrayList<>();
 	private List<Post> posts = new ArrayList<>();
 
-	public FairnetVault() throws FileNotFoundException, IOException, NoSuchAlgorithmException {
-		KeyPair keyPair = VaultageEncryption.generateKeys();
-		publicKey = VaultageEncryption.getPublicKey(keyPair);
-		privateKey = VaultageEncryption.getPrivateKey(keyPair);
+	public FairnetVault() throws FileNotFoundException, NoSuchAlgorithmException, IOException {
+		super();
 	}
 
 	// getter
