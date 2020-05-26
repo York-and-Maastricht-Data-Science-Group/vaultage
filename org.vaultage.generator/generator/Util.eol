@@ -29,24 +29,24 @@ operation String clean() {
 
 operation EStructuralFeature getType(): String {
 	var type = "";
+	var auxType = "";
 	if (self.eType <> null){
-		if (self.upperBound == -1){
-			type = type + "List<";
+		if (self.isTypeOf(EAttribute)) {
+			auxType = self.eType.instanceTypeName;
+			if (auxType == "java.lang.String") {
+				auxType = "String";
+			}
 		}
-		if (self.eType.name == "EBooleanObject"){
-			type = type + "Boolean";
-		} else if (self.eType.name == "EBoolean"){
-			type = type + "boolean";
-		} else if (self.eType.name == "EString"){
-			type = type + "String";
-		} else {
-			type = type + self.eType.name;
+		else {
+			auxType = self.eType.name;
 		}
-	if (self.upperBound == -1){
-			type = type + ">";
-	}
-	} else {
-		type = "void";
+
+		if (self.upperBound <> 1){
+			type += "List<" + auxType.firstToUpperCase() + ">";
+		}
+		else {
+			type += auxType;
+		}
 	}
 	return type;
 }
