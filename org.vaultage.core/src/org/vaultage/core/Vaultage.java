@@ -175,7 +175,7 @@ public class Vaultage {
 				System.out.println("Send to: " + queueId);
 
 				// Create the destination (Topic or Queue)
-				Destination destination = session.createQueue(queueId);
+				Destination destination = session.createTopic(queueId);
 
 				// Create a MessageProducer from the Session to the Topic or Queue
 				MessageProducer producer = session.createProducer(destination);
@@ -218,7 +218,7 @@ public class Vaultage {
 
 				// Create the destination (Topic or Queue)
 //				System.out.println(session + " - " + queueId);
-				Destination destination = session.createQueue(queueId);
+				Destination destination = session.createTopic(queueId);
 
 				// Create a MessageConsumer from the Session to the Topic or Queue
 				MessageConsumer consumer = session.createConsumer(destination);
