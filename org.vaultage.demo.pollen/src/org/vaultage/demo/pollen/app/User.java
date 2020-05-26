@@ -4,9 +4,12 @@ package org.vaultage.demo.pollen.app;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import org.vaultage.demo.pollen.gen.MultivaluedPoll;
 import org.vaultage.demo.pollen.gen.NumberPoll;
+import org.vaultage.demo.pollen.gen.MultivaluedPoll;
 import org.vaultage.demo.pollen.gen.UserBase;
 
 public class User extends UserBase {
@@ -28,12 +31,12 @@ public class User extends UserBase {
 	
 	// operations
 	
-	public void sendNumberPoll(String requesterPublicKey, NumberPoll poll) throws Exception {
+	public double sendNumberPoll(String requesterPublicKey, NumberPoll poll) throws Exception {
 		throw new Exception();
 	}
 	
 	
-	public void sendMultivaluedPoll(String requesterPublicKey, MultivaluedPoll poll) throws Exception {
+	public List<Integer> sendMultivaluedPoll(String requesterPublicKey, MultivaluedPoll poll) throws Exception {
 		throw new Exception();
 	}
 	

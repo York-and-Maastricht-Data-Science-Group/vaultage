@@ -19,25 +19,21 @@ templates are more mature.
 class User {
 	attr String name;
 
-	op void sendNumberPoll(NumberPoll poll);
-	op void sendMultivaluedPoll(MultivaluedPoll poll);
+	op double sendNumberPoll(NumberPoll poll);
+	op int[*] sendMultivaluedPoll(MultivaluedPoll poll);
 }
 
 class NumberPoll {
 	attr String originator; // public key
 	attr String[*] participants; // again public keys
 
-	// Could be extracted into a NumberQuestion type
 	attr String question;
-	attr double[1] accumValue;
 }
 
 class MultivaluedPoll {
 	attr String originator;
 	attr String[*] participants;
 
-	// Could be extracted into a MultiValuedQuestion type
 	attr String question;
 	attr String[*] options;
-	attr int[*] accumOptionValues;
 }
