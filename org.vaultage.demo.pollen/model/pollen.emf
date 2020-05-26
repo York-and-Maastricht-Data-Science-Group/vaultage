@@ -19,8 +19,8 @@ templates are more mature.
 class User {
 	attr String name;
 
-	op void sendPoll(NumberPoll poll);
-	op void sendPoll(MultiValuedPoll poll);
+	op void sendNumberPoll(NumberPoll poll);
+	op void sendMultivaluedPoll(MultivaluedPoll poll);
 }
 
 class NumberPoll {
@@ -33,7 +33,7 @@ class NumberPoll {
 	attr double[1] accumValue;
 }
 
-class MultiValuedPoll {
+class MultivaluedPoll {
 	attr String Id;
 	attr String originator;
 	attr String[*] participants;
