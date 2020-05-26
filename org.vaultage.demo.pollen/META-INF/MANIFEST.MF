@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Pollen
+Bundle-SymbolicName: org.vaultage.demo.pollen
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.vaultage.core;bundle-version="1.0.0"
