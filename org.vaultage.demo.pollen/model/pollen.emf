@@ -39,5 +39,5 @@ class MultivaluedPoll {
 	// Could be extracted into a MultiValuedQuestion type
 	attr String question;
 	attr String[*] options;
-	attr long[*] accumOptionValues;
+	attr int[*] accumOptionValues;
 }
