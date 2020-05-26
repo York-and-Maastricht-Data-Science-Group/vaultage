@@ -24,7 +24,6 @@ class User {
 }
 
 class NumberPoll {
-	attr String Id;
 	attr String originator; // public key
 	attr String[*] participants; // again public keys
 
@@ -34,7 +33,6 @@ class NumberPoll {
 }
 
 class MultivaluedPoll {
-	attr String Id;
 	attr String originator;
 	attr String[*] participants;
 
