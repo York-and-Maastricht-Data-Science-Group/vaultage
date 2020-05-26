@@ -36,6 +36,9 @@ operation EStructuralFeature getType(): String {
 			if (auxType == "java.lang.String") {
 				auxType = "String";
 			}
+			else if (auxType == "int") {
+				auxType = "Integer";
+			}
 		}
 		else {
 			auxType = self.eType.name;
