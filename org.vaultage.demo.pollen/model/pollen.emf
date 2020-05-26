@@ -1,0 +1,45 @@
+@GenModel(basePackage="org.vaultage.demo.pollen")
+@namespace(uri="pollen", prefix="pollen")
+package pollen;
+
+/*
+
+Initial naive version.
+
+Assumes:
+- All participants end up participating
+- Participants do not mess with the accumValue (i.e. they only add their own)
+
+Avoids inheritance (the example asks for it). Introduce it later when the m2t
+templates are more mature. 
+
+*/
+
+@vault
+class User {
+	attr String name;
+
+	op void sendPoll(NumberPoll poll);
+	op void sendPoll(MultiValuedPoll poll);
+}
+
+class NumberPoll {
+	attr String Id;
+	attr String originator; // public key
+	attr String[*] participants; // again public keys
+
+	// Could be extracted into a NumberQuestion type
+	attr String question;
+	attr double[1] accumValue;
+}
+
+class MultiValuedPoll {
+	attr String Id;
+	attr String originator;
+	attr String[*] participants;
+
+	// Could be extracted into a MultiValuedQuestion type
+	attr String question;
+	attr String[*] options;
+	attr long[*] accumOptionValues;
+}
