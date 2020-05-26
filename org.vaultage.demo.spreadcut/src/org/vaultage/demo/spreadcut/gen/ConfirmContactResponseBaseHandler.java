@@ -11,7 +11,7 @@ public class ConfirmContactResponseBaseHandler extends VaultageHandler {
 	@Override
 	public void run() {
 		try {
-			result = Vaultage.Gson.fromJson((String) message.getValue("result"), boolean.class);
+			result = Vaultage.Gson.fromJson(message.getValue("result"), boolean.class);
 			this.result = run(message);
 		} catch (Exception e) {
 			e.printStackTrace();

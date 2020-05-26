@@ -9,10 +9,8 @@ import org.vaultage.core.VaultageMessage;
 public class [%=eOperation.getClassRequestHandlerName()%] extends [%=eOperation.getClassRequestBaseHandlerName()%] {
 	
 	@Override
-	public [%=eOperation.getReturnType()%] run(VaultageMessage senderMessage) throws Exception {	
-[% if (eOperation.getReturnType() <> "void") { %]
-		return ([%= returnType %]) result;
-[% } %] 
+	public [%=eOperation.getReturnType()%] run(VaultageMessage senderMessage) throws Exception {
+		return ([%=eOperation.getReturnType()%]) result;
 	}
 }
 [%= out.stopPreserve() %]

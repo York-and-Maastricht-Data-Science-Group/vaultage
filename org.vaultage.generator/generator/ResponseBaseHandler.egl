@@ -12,7 +12,7 @@ public class [%=eOperation.getClassResponseBaseHandlerName()%] extends VaultageH
 	@Override
 	public void run() {
 		try {
-			result = Vaultage.Gson.fromJson((String) message.getValue("result"), [%= eOperation.getReturnTypeImplementation() %].class);
+			result = Vaultage.Gson.fromJson(message.getValue("result"), [%= eOperation.getReturnTypeImplementation() %].class);
 			this.result = run(message);
 		} catch (Exception e) {
 			e.printStackTrace();

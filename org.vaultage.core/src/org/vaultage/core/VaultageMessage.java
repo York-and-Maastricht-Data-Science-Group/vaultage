@@ -10,7 +10,7 @@ public class VaultageMessage {
 	private String from;
 	private String to;
 	private String operation;
-	private Map<String, Object> values = new HashMap<>();
+	private Map<String, String> values = new HashMap<>();
 	private String token;
 
 	public VaultageMessage() {
@@ -49,11 +49,11 @@ public class VaultageMessage {
 		this.operation = operation;
 	}
 
-	public Object getValue(String key) {
+	public String getValue(String key) {
 		return values.get(key);
 	}
 
-	public void putValue(String key, Object value) {
+	public void putValue(String key, String value) {
 		this.values.put(key, value);
 	}
 
