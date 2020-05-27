@@ -2,6 +2,7 @@ package org.vaultage.demo.spreadcut.gen;
 
 import java.util.List;
 
+import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.spreadcut.app.SpreadCutter;
@@ -29,7 +30,7 @@ public class RemoteRequester {
 		message.setTo(requesteePublicKey);
 		message.setOperation(GetContactsRequestHandler.class.getName());
 		
-		message.putValue("timestamp", timestamp);
+		message.putValue("timestamp", Vaultage.Gson.toJson(timestamp));
 		
 		this.requesterVault.getGetContactsResponseBaseHandler().setCallerThread(Thread.currentThread());
 		
@@ -41,9 +42,10 @@ public class RemoteRequester {
 		}
 		
 		return (List<ProximityContact>) requesterVault.getGetContactsResponseBaseHandler().getResult();
+		
 	}
 	
-	public Boolean confirmContact(String requesteePublicKey, String timestamp) throws Exception {
+	public boolean confirmContact(String requesteePublicKey, String timestamp) throws Exception {
 	
 		VaultageMessage message = new VaultageMessage();
 		message.setSenderId(requesterVault.getId());
@@ -51,7 +53,7 @@ public class RemoteRequester {
 		message.setTo(requesteePublicKey);
 		message.setOperation(ConfirmContactRequestHandler.class.getName());
 		
-		message.putValue("timestamp", timestamp);
+		message.putValue("timestamp", Vaultage.Gson.toJson(timestamp));
 		
 		this.requesterVault.getConfirmContactResponseBaseHandler().setCallerThread(Thread.currentThread());
 		
@@ -62,7 +64,8 @@ public class RemoteRequester {
 			Thread.currentThread().wait();
 		}
 		
-		return (Boolean) requesterVault.getConfirmContactResponseBaseHandler().getResult();
+		return (boolean) requesterVault.getConfirmContactResponseBaseHandler().getResult();
+		
 	}
 	
 	

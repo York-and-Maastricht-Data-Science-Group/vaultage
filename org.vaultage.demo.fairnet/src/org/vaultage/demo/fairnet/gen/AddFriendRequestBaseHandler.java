@@ -32,7 +32,8 @@ public abstract class AddFriendRequestBaseHandler extends VaultageHandler {
 		}
 	}
 	
-	public Boolean run(VaultageMessage senderMessage) throws Exception {
-		return null;
+	public java.lang.Boolean run(VaultageMessage senderMessage) throws Exception {
+	
+		return (java.lang.Boolean) result;
 	}
 }

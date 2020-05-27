@@ -33,6 +33,7 @@ public abstract class GetContactsRequestBaseHandler extends VaultageHandler {
 	}
 	
 	public List<ProximityContact> run(VaultageMessage senderMessage) throws Exception {
-		return null;
+	
+		return (List<ProximityContact>) result;
 	}
 }

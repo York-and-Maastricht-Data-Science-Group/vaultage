@@ -3,6 +3,7 @@ package [%=packageNameGen%];
 
 import java.util.List;
 
+import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
 import [%=packageNameApp%].[%=vaultClassName%];
@@ -32,7 +33,7 @@ public class RemoteRequester {
 		message.setOperation([%= eOperation.getClassRequestHandlerName() %].class.getName());
 		
 [% for (eParamater in eOperation.eParameters) { %]
-		message.putValue("[%=eParamater.name%]", [%=eParamater.name%]);
+		message.putValue("[%=eParamater.name%]", Vaultage.Gson.toJson([%=eParamater.name%]));
 [% } %]
 		
 		this.requesterVault.get[%= eOperation.getClassResponseBaseHandlerName() %]().setCallerThread(Thread.currentThread());

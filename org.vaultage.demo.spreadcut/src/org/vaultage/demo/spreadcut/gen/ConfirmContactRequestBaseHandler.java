@@ -32,7 +32,8 @@ public abstract class ConfirmContactRequestBaseHandler extends VaultageHandler {
 		}
 	}
 	
-	public Boolean run(VaultageMessage senderMessage) throws Exception {
-		return null;
+	public boolean run(VaultageMessage senderMessage) throws Exception {
+	
+		return (boolean) result;
 	}
 }

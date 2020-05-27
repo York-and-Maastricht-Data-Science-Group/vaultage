@@ -5,7 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.vaultage.demo.pollen.gen.NumberPoll;
@@ -14,6 +16,7 @@ import org.vaultage.demo.pollen.gen.UserBase;
 
 public class User extends UserBase {
 	private String name = new String();
+	private Map<String, NumberPoll> polls = new HashMap<>();
 	
 	public User() throws FileNotFoundException, NoSuchAlgorithmException, IOException {
 		super();
@@ -38,6 +41,14 @@ public class User extends UserBase {
 	
 	public List<Integer> sendMultivaluedPoll(String requesterPublicKey, MultivaluedPoll poll) throws Exception {
 		throw new Exception();
+	}
+
+	public Map<String, NumberPoll> getPolls() {
+		return polls;
+	}
+
+	public void setPolls(Map<String, NumberPoll> polls) {
+		this.polls = polls;
 	}
 	
 	

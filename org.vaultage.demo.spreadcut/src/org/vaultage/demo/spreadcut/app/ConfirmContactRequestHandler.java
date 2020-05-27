@@ -8,8 +8,9 @@ import org.vaultage.core.VaultageMessage;
 public class ConfirmContactRequestHandler extends ConfirmContactRequestBaseHandler {
 
 	@Override
-	public Boolean run(VaultageMessage senderMessage) throws Exception {
-		return (Boolean) result;
+	public boolean run(VaultageMessage senderMessage) throws Exception {	
+		return (boolean) result;
+		
 	}
 }
 /**** protected region ConfirmContactRequestHandler end ****/

@@ -2,6 +2,7 @@ package org.vaultage.demo.fairnet.gen;
 
 import java.util.List;
 
+import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.fairnet.app.FairnetVault;
@@ -23,7 +24,7 @@ public class RemoteRequester {
 		this.requesterVault = vault;
 	}
 	
-	public Boolean addFriend(String requesteePublicKey) throws Exception {
+	public java.lang.Boolean addFriend(String requesteePublicKey) throws Exception {
 	
 		VaultageMessage message = new VaultageMessage();
 		message.setSenderId(requesterVault.getId());
@@ -41,7 +42,8 @@ public class RemoteRequester {
 			Thread.currentThread().wait();
 		}
 		
-		return (Boolean) requesterVault.getAddFriendResponseBaseHandler().getResult();
+		return (java.lang.Boolean) requesterVault.getAddFriendResponseBaseHandler().getResult();
+		
 	}
 	
 	public Post getPost(String requesteePublicKey, String postId) throws Exception {
@@ -52,7 +54,7 @@ public class RemoteRequester {
 		message.setTo(requesteePublicKey);
 		message.setOperation(GetPostRequestHandler.class.getName());
 		
-		message.putValue("postId", postId);
+		message.putValue("postId", Vaultage.Gson.toJson(postId));
 		
 		this.requesterVault.getGetPostResponseBaseHandler().setCallerThread(Thread.currentThread());
 		
@@ -64,6 +66,7 @@ public class RemoteRequester {
 		}
 		
 		return (Post) requesterVault.getGetPostResponseBaseHandler().getResult();
+		
 	}
 	
 	public List<String> getPosts(String requesteePublicKey) throws Exception {
@@ -85,6 +88,7 @@ public class RemoteRequester {
 		}
 		
 		return (List<String>) requesterVault.getGetPostsResponseBaseHandler().getResult();
+		
 	}
 	
 	

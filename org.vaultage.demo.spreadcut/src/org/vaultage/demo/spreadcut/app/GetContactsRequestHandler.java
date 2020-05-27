@@ -8,8 +8,9 @@ import org.vaultage.core.VaultageMessage;
 public class GetContactsRequestHandler extends GetContactsRequestBaseHandler {
 
 	@Override
-	public List<ProximityContact> run(VaultageMessage senderMessage) throws Exception {
+	public List<ProximityContact> run(VaultageMessage senderMessage) throws Exception {	
 		return (List<ProximityContact>) result;
+		
 	}
 }
 /**** protected region GetContactsRequestHandler end ****/

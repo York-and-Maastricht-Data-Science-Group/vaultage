@@ -81,7 +81,11 @@ public abstract class [%=class.getBaseName()%] {
 	public void set[%= eOperation.name.firstToUpperCase()%]RequestBaseHandler([%= eOperation.name.firstToUpperCase()%]RequestBaseHandler [%= eOperation.name%]RequestBaseHandler) {
 		this.[%= eOperation.name%]RequestBaseHandler = [%= eOperation.name%]RequestBaseHandler;
 		this.[%= eOperation.name%]RequestBaseHandler.setOwner(this);
-		handlers.put([%= eOperation.name%]RequestBaseHandler.getClass().getName(), [%= eOperation.name%]RequestBaseHandler);
+		if ([%= eOperation.name%]RequestBaseHandler.getClass().isAnonymousClass()) {
+			handlers.put([%= eOperation.name%]RequestBaseHandler.getClass().getSuperclass().getName(), [%= eOperation.name%]RequestBaseHandler);
+		} else {
+			handlers.put([%= eOperation.name%]RequestBaseHandler.getClass().getName(), [%= eOperation.name%]RequestBaseHandler);
+		}
 	}
 	
 	public [%= eOperation.name.firstToUpperCase()%]RequestBaseHandler get[%= eOperation.name.firstToUpperCase()%]RequestBaseHandler() {
@@ -91,7 +95,11 @@ public abstract class [%=class.getBaseName()%] {
 	public void set[%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler([%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler [%= eOperation.name%]ResponseBaseHandler) {
 		this.[%= eOperation.name%]ResponseBaseHandler = [%= eOperation.name%]ResponseBaseHandler;
 		this.[%= eOperation.name%]ResponseBaseHandler.setOwner(this);
-		handlers.put([%= eOperation.name%]ResponseBaseHandler.getClass().getName(), [%= eOperation.name%]ResponseBaseHandler);
+		if ([%= eOperation.name%]ResponseBaseHandler.getClass().isAnonymousClass()) {
+			handlers.put([%= eOperation.name%]ResponseBaseHandler.getClass().getSuperclass().getName(), [%= eOperation.name%]ResponseBaseHandler);
+		} else {
+			handlers.put([%= eOperation.name%]ResponseBaseHandler.getClass().getName(), [%= eOperation.name%]ResponseBaseHandler);
+		}
 	}
 	
 	public [%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler get[%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler() {

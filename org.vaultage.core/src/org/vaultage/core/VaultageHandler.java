@@ -13,11 +13,12 @@ public abstract class VaultageHandler {
 	protected Object result;
 
 	public VaultageHandler() {
-		name = this.getClass().getSimpleName() + "-" + COUNTER;
-		COUNTER++;
+		
 	}
 
 	public void execute(String queueId, VaultageMessage message) throws InterruptedException {
+		this.name = message.getOperation() + "-" + COUNTER;
+		COUNTER++;
 		this.message = message;
 		this.start();
 	}
@@ -31,8 +32,8 @@ public abstract class VaultageHandler {
 			}
 		};
 		thread.start();
-		thread.join();
 		if (callerThread != null) {
+			thread.join();
 			synchronized (callerThread) {
 				callerThread.notify();
 			}

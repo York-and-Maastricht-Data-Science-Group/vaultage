@@ -3,23 +3,19 @@ package org.vaultage.demo.spreadcut.app;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import org.vaultage.util.VaultageEncryption;
 import org.vaultage.demo.spreadcut.gen.ProximityContact;
 import org.vaultage.demo.spreadcut.gen.SpreadCutterBase;
 
 public class SpreadCutter extends SpreadCutterBase {
-	private List<ProximityContact> contacts = new ArrayList<>();
+	private List<ProximityContact> contacts = new ArrayList<ProximityContact>();
 	
-	public SpreadCutter() throws FileNotFoundException, IOException, NoSuchAlgorithmException {
-		KeyPair keyPair = VaultageEncryption.generateKeys();
-		publicKey = VaultageEncryption.getPublicKey(keyPair);
-		privateKey = VaultageEncryption.getPrivateKey(keyPair);
+	public SpreadCutter() throws FileNotFoundException, NoSuchAlgorithmException, IOException {
+		super();
 	}
 	
 	// getter
@@ -39,7 +35,7 @@ public class SpreadCutter extends SpreadCutterBase {
 	}
 	
 	
-	public Boolean confirmContact(String requesterPublicKey, String timestamp) throws Exception {
+	public boolean confirmContact(String requesterPublicKey, String timestamp) throws Exception {
 		throw new Exception();
 	}
 	

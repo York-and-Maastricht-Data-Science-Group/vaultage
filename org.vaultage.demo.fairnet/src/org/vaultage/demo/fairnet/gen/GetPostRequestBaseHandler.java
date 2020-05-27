@@ -33,6 +33,7 @@ public abstract class GetPostRequestBaseHandler extends VaultageHandler {
 	}
 	
 	public Post run(VaultageMessage senderMessage) throws Exception {
-		return null;
+	
+		return (Post) result;
 	}
 }

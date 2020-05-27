@@ -116,18 +116,20 @@ public class Vaultage {
 		threads = new HashSet<VaultageHandler>();
 	}
 
-	public Thread sendMessage(String queueId, String senderPublicKey, String senderPrivateKey,
+	public Thread sendMessage(String topicId, String senderPublicKey, String senderPrivateKey,
 			VaultageMessage message) throws InterruptedException {
-		Thread brokerThread = new Producer(queueId, senderPublicKey, senderPrivateKey, message);
+		Thread brokerThread = new Producer(topicId, senderPublicKey, senderPrivateKey, message);
 		brokerThread.setDaemon(false);
+		brokerThread.setName(brokerThread.getClass().getName() + "-" + topicId);
 		brokerThread.start();
 		return brokerThread;
 	}
 
-	public Thread subscribe(String queueId, String receiverPrivateKey, Map<String, VaultageHandler> handlers) throws InterruptedException {
+	public Thread subscribe(String topicId, String receiverPrivateKey, Map<String, VaultageHandler> handlers) throws InterruptedException {
 		this.isListening = true;
-		Thread brokerThread = new Consumer(queueId, receiverPrivateKey, handlers);
-		brokerThread.setDaemon(false);
+		Thread brokerThread = new Consumer(topicId, receiverPrivateKey, handlers);
+		brokerThread.setDaemon(true);
+		brokerThread.setName(brokerThread.getClass().getName() + "-" + topicId);
 		brokerThread.start();
 		return brokerThread;
 	}
@@ -157,14 +159,14 @@ public class Vaultage {
 
 	private class Producer extends Thread {
 
-		String queueId;
+		String topicId;
 		String senderPublicKey;
 		String senderPrivateKey;
 		VaultageMessage message;
 		String text;
 
-		public Producer(String queue, String senderPublicKey, String senderPrivateKey, VaultageMessage message) {
-			this.queueId = queue;
+		public Producer(String topicId, String senderPublicKey, String senderPrivateKey, VaultageMessage message) {
+			this.topicId = topicId;
 			this.senderPublicKey = senderPublicKey;
 			this.senderPrivateKey = senderPrivateKey;
 			this.message = message;
@@ -172,10 +174,10 @@ public class Vaultage {
 
 		public void run() {
 			try {
-				System.out.println("Send to: " + queueId);
+				System.out.println("Send to: " + topicId);
 
 				// Create the destination (Topic or Queue)
-				Destination destination = session.createTopic(queueId);
+				Destination destination = session.createTopic(topicId);
 
 				// Create a MessageProducer from the Session to the Topic or Queue
 				MessageProducer producer = session.createProducer(destination);
@@ -185,14 +187,14 @@ public class Vaultage {
 				text = Gson.toJson(message).trim();
 
 				// encrypt message
-				String encryptedMessage = VaultageEncryption.doubleEncrypt(text, queueId, senderPrivateKey).trim();
+				String encryptedMessage = VaultageEncryption.doubleEncrypt(text, topicId, senderPrivateKey).trim();
 
 				TextMessage message = session.createTextMessage(this.senderPublicKey + encryptedMessage);
 
 				producer.send(message);
 
 				expectedReplyTokens.add(this.message.getToken());
-				System.out.println("SENT MESSAGE: " + queueId + "\n" + text);
+				System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -201,14 +203,14 @@ public class Vaultage {
 	}
 
 	private class Consumer extends Thread {
-		private String queueId;
+		private String topicId;
 		private String senderPublicKey;
 		private String receiverPrivateKey;
 		private String json;
 		private Map<String, VaultageHandler> handlers;
 
-		public Consumer(String queueId, String receiverPrivateKey, Map<String, VaultageHandler> handlers) {
-			this.queueId = queueId;
+		public Consumer(String topicId, String receiverPrivateKey, Map<String, VaultageHandler> handlers) {
+			this.topicId = topicId;
 			this.handlers = handlers;
 			this.receiverPrivateKey = receiverPrivateKey;
 		}
@@ -218,12 +220,12 @@ public class Vaultage {
 
 				// Create the destination (Topic or Queue)
 //				System.out.println(session + " - " + queueId);
-				Destination destination = session.createTopic(queueId);
+				Destination destination = session.createTopic(topicId);
 
 				// Create a MessageConsumer from the Session to the Topic or Queue
 				MessageConsumer consumer = session.createConsumer(destination);
 
-				System.out.println("Listening to " + queueId);
+				System.out.println("Listening to " + topicId);
 				// listen forever until listening is turned off
 				while (isListening) {
 
@@ -246,16 +248,16 @@ public class Vaultage {
 
 						json = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey, receiverPrivateKey);
 
-						System.out.println("RECEIVED MESSAGE: " + queueId + "\n" + json);
+						System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + json);
 
-						VaultageMessage rdbdMessage = Gson.fromJson(json, VaultageMessage.class);
-						String operation = rdbdMessage.getOperation();
-
+						VaultageMessage vaultageMessage = Gson.fromJson(json, VaultageMessage.class);
+						String operation = vaultageMessage.getOperation();
+						
 						VaultageHandler handler = handlers.get(operation);
 						if (handler != null && !handler.isAlive()) {
 							threads.add(handler);
 //							System.out.println("Run: " + handler.getName());
-							handler.execute(queueId, rdbdMessage);
+							handler.execute(topicId, vaultageMessage);
 						} else {
 //							System.out.println();
 						}

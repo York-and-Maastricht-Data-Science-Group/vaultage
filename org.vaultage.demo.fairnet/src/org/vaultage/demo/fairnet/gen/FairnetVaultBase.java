@@ -152,7 +152,7 @@ public abstract class FairnetVaultBase {
 	}
 	
 	// operations
-	protected abstract Boolean addFriend(String requesterPublicKey) throws Exception;
+	protected abstract java.lang.Boolean addFriend(String requesterPublicKey) throws Exception;
 	
 	protected abstract Post getPost(String requesterPublicKey, String postId) throws Exception;
 	

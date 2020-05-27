@@ -132,7 +132,7 @@ public abstract class SpreadCutterBase {
 	// operations
 	protected abstract List<ProximityContact> getContacts(String requesterPublicKey, String timestamp) throws Exception;
 	
-	protected abstract Boolean confirmContact(String requesterPublicKey, String timestamp) throws Exception;
+	protected abstract boolean confirmContact(String requesterPublicKey, String timestamp) throws Exception;
 	
 	
 	
