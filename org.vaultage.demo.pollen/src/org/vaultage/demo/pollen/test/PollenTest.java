@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.junit.Test;
 import org.vaultage.core.Vaultage;
@@ -25,6 +26,8 @@ public class PollenTest {
 	@Test
 	public void testSalaryPoll() throws Exception {
 
+		Scanner scan = new Scanner(System.in);
+
 		// setting the address of Vaultage server
 		String address = "vm://localhost";
 		final VaultageServer pollenBroker = new VaultageServer(address);
@@ -37,7 +40,7 @@ public class PollenTest {
 		PollenUtil.savePublicKey(alice);
 		alice.register(pollenBroker);
 		final RemoteRequester aliceRequester = new RemoteRequester(pollenBroker, alice);
-		alice.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler() {
+		alice.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
 			@Override
 			public double run(VaultageMessage senderMessage) throws Exception {
 				User localVault = (User) this.vault;
@@ -73,7 +76,7 @@ public class PollenTest {
 		PollenUtil.savePublicKey(bob);
 		bob.register(pollenBroker);
 		final RemoteRequester bobRequester = new RemoteRequester(pollenBroker, bob);
-		bob.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler() {
+		bob.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
 			@Override
 			public double run(VaultageMessage senderMessage) throws Exception {
 				User localVault = (User) this.vault;
@@ -109,7 +112,7 @@ public class PollenTest {
 		PollenUtil.savePublicKey(charlie);
 		charlie.register(pollenBroker);
 		final RemoteRequester charlieRequester = new RemoteRequester(pollenBroker, charlie);
-		charlie.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler() {
+		charlie.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
 			@Override
 			public double run(VaultageMessage senderMessage) throws Exception {
 				User localVault = (User) this.vault;
@@ -153,10 +156,11 @@ public class PollenTest {
 		// send poll, initiated by Alice
 		double fakeTotal = aliceRequester.sendNumberPoll(participants.get(0), salaryPoll);
 		System.out.println("Total real salary = fakeTotal - aliceFakeSalary + aliceRealSalary");
-		System.out.println("Total real salary = " + String.valueOf(fakeTotal) + " - " + String.valueOf(aliceFakeSalary) + " + " + String.valueOf(aliceRealSalary));
+		System.out.println("Total real salary = " + String.valueOf(fakeTotal) + " - " + String.valueOf(aliceFakeSalary)
+				+ " + " + String.valueOf(aliceRealSalary));
 		double realTotal = fakeTotal - aliceFakeSalary + aliceRealSalary;
 		System.out.println("Total real salary = " + realTotal);
-		 
+
 		assertEquals(300.0, realTotal, 0);
 
 		alice.unregister();

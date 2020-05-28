@@ -174,7 +174,7 @@ public class Vaultage {
 
 		public void run() {
 			try {
-				System.out.println("Send to: " + topicId);
+//				System.out.println("Send to: " + topicId);
 
 				// Create the destination (Topic or Queue)
 				Destination destination = session.createTopic(topicId);
@@ -194,7 +194,7 @@ public class Vaultage {
 				producer.send(message);
 
 				expectedReplyTokens.add(this.message.getToken());
-				System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
+//				System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -225,7 +225,7 @@ public class Vaultage {
 				// Create a MessageConsumer from the Session to the Topic or Queue
 				MessageConsumer consumer = session.createConsumer(destination);
 
-				System.out.println("Listening to " + topicId);
+//				System.out.println("Listening to " + topicId);
 				// listen forever until listening is turned off
 				while (isListening) {
 
@@ -248,7 +248,7 @@ public class Vaultage {
 
 						json = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey, receiverPrivateKey);
 
-						System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + json);
+//						System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + json);
 
 						VaultageMessage vaultageMessage = Gson.fromJson(json, VaultageMessage.class);
 						String operation = vaultageMessage.getOperation();

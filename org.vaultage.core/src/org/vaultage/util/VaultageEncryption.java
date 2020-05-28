@@ -190,7 +190,7 @@ public class VaultageEncryption {
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException {
 		String encryptedMessage1 = encrypt(plainMessage, (Key) senderPrivateKey);
-		System.out.println("intermediateEncryptedMessage: " + encryptedMessage1);
+//		System.out.println("intermediateEncryptedMessage: " + encryptedMessage1);
 		return encrypt(encryptedMessage1, (Key) receiverPublicKey);
 	}
 
@@ -307,7 +307,7 @@ public class VaultageEncryption {
 			PrivateKey receiverPrivateKey) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
 		String decryptedMessage1 = decrypt(encryptedMessage, (Key) receiverPrivateKey);
-		System.out.println("intermediateDecryptedMessage: " + decryptedMessage1);
+//		System.out.println("intermediateDecryptedMessage: " + decryptedMessage1);
 		return decrypt(decryptedMessage1, (Key) senderPublicKey);
 	}
 
@@ -341,7 +341,7 @@ public class VaultageEncryption {
 			byte[] cipherText = cipher.doFinal(buffer, 0, len);
 			String temp = new String(cipherText, StandardCharsets.UTF_8);
 			sb.append(temp);
-			System.out.println("Message Part-" + count + ": " + temp);
+//			System.out.println("Message Part-" + count + ": " + temp);
 			count++;
 		}
 		return sb.toString();

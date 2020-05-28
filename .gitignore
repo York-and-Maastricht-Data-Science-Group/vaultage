@@ -35,5 +35,7 @@ org.vaultage.demo.fairnet/activemq-data
 org.vaultage.core.server/activemq-data
 org.vaultage.core.server/activemq-data
 #org.vaultage.demo.fairnet/src/org/vaultage/demo/fairnet/
+org.vaultage.demo.pollen/activemq-data/localhost/KahaDB
 /target/
 /bin/
+org.vaultage.demo.pollen/keys/*

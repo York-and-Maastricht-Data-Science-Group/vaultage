@@ -29,6 +29,7 @@ public abstract class [%=class.getBaseName()%] {
 	protected boolean isListening;
 	protected Vaultage vaultage;
 	protected Map<String, VaultageHandler> handlers;	
+	protected VaultageServer vaultageServer;
 
 [% for (eOperation in class.eOperations){ %]
 	protected [%= eOperation.name.firstToUpperCase()%]RequestBaseHandler [%=eOperation.name%]RequestBaseHandler;
@@ -43,6 +44,10 @@ public abstract class [%=class.getBaseName()%] {
 		KeyPair keyPair = VaultageEncryption.generateKeys();
 		this.publicKey = VaultageEncryption.getPublicKey(keyPair);
 		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
+	}
+	
+	public VaultageServer getVaultageServer(){
+		return this.vaultageServer;
 	}
 	
 	public String getId(){
@@ -107,10 +112,9 @@ public abstract class [%=class.getBaseName()%] {
 	}
 	
 [% } %]	
-	
-
-	public boolean register(VaultageServer fairnet) throws Exception {
-		boolean isSuccess = vaultage.connect(fairnet.getAddress());
+	public boolean register(VaultageServer vaultageServer) throws Exception {
+		boolean isSuccess = vaultage.connect(vaultageServer.getAddress());
+		this.vaultageServer = vaultageServer;
 		if (isSuccess) {
 			vaultage.subscribe(publicKey, privateKey, handlers);
 			return true;

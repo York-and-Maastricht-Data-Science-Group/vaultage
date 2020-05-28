@@ -21,6 +21,9 @@ public class PollenUtil {
 	public static String savePublicKey(User user) throws IOException {
 		String pathString = PATH + user.getName();
 		Path path = Paths.get(pathString);
+		if (Files.notExists(Paths.get(PATH))) {
+			Files.createDirectory(Paths.get(PATH));
+		}
 		Files.write(path, user.getPublicKey().getBytes());
 		return getPublicKey(user.getName());
 	}
@@ -31,9 +34,13 @@ public class PollenUtil {
 		return new String(Files.readAllBytes(path));
 	}
 	
-	 public static List<String> getColleagues() throws IOException{
+	 public static List<String> getParticipants() throws IOException{
 		 Path path = Paths.get(PATH);
-		 List<String> files = Files.list(path).map(p -> p.getFileName().toString()).collect(Collectors.toList());
-		 return files;
+		 List<String> names = Files.list(path).map(p -> p.getFileName().toString()).collect(Collectors.toList());
+		 List<String> participants = new ArrayList<>();
+		 for (String name : names) {
+			 participants.add(getPublicKey(name));
+		 }
+		 return participants;
 	 }
 }
