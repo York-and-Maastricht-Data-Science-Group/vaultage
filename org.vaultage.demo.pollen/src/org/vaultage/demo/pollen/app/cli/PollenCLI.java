@@ -41,6 +41,13 @@ public class PollenCLI {
 		}
 	}
 
+	public static NumberPoll createNumberPoll(Scanner s) {
+		NumberPoll poll = new NumberPoll();
+		System.out.println("Insert the poll question: ");
+		poll.setQuestion(s.nextLine());
+		return poll;
+	}
+
 	public static void greetUser(User user) {
 		System.out.printf("%s, welcome to Pollen\n", user.getName());
 		System.out.printf("Your public key is %s\n", user.getPublicKey());
@@ -54,15 +61,29 @@ public class PollenCLI {
 				System.out.printf("  %d. %s\n", i + 1, options.get(i));
 			}
 			System.out.print("Insert your selection: ");
-			choice = s.nextInt();
+			String line = s.nextLine();
+			try {
+				choice = Integer.parseInt(line);
+			}
+			catch (NumberFormatException n) {
+			}
 		} while (choice < 0 || choice > options.size());
 
 		return choice - 1;
 	}
 
 	public static double readValue(Scanner s) {
-		System.out.print("Value : ");
-		double d = s.nextDouble();
-		return d;
+		boolean properValue = false;
+		double result = -288.0;
+		do {
+			try {
+				System.out.print("Value : ");
+				result = Double.parseDouble(s.nextLine());
+				properValue = true;
+			}
+			catch (NumberFormatException n) {
+			}
+		} while (!properValue);
+		return result;
 	}
 }
