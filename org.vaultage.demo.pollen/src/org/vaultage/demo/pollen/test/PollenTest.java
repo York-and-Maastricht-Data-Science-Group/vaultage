@@ -13,12 +13,12 @@ import org.junit.Test;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
-import org.vaultage.demo.pollen.app.SendNumberPollRequestHandler;
-import org.vaultage.demo.pollen.app.SendNumberPollResponseHandler;
-import org.vaultage.demo.pollen.app.User;
+import org.vaultage.demo.pollen.SendNumberPollRequestHandler;
+import org.vaultage.demo.pollen.SendNumberPollResponseHandler;
+import org.vaultage.demo.pollen.User;
 import org.vaultage.demo.pollen.data.PollRepository;
-import org.vaultage.demo.pollen.gen.NumberPoll;
-import org.vaultage.demo.pollen.gen.RemoteRequester;
+import org.vaultage.demo.pollen.NumberPoll;
+import org.vaultage.demo.pollen.RemoteRequester;
 import org.vaultage.demo.pollen.util.PollenUtil;
 
 public class PollenTest {

@@ -1,16 +1,16 @@
 [% import 'Util.eol'; %]
-package [%=packageNameGen%];
+package [%=packageName%];
 
 import java.util.List;
 
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
-import [%=packageNameApp%].[%=vaultClassName%];
+// import [%=packageName%].[%=vaultClassName%];
 
 [% for (eOperation in class.eOperations){ %]
-import [%=packageNameApp%].[%= eOperation.name.firstToUpperCase()%]RequestHandler;
-import [%=packageNameApp%].[%= eOperation.name.firstToUpperCase()%]ResponseHandler;	
+// import [%=packageName%].[%= eOperation.name.firstToUpperCase()%]RequestHandler;
+// import [%=packageName%].[%= eOperation.name.firstToUpperCase()%]ResponseHandler;	
 [% }%]
 
 public class RemoteRequester {

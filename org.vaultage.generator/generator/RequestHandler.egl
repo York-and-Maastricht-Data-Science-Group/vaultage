@@ -1,8 +1,8 @@
 [% import 'Util.eol'; %]
 [%=out.startPreserve("/****", "****/", eOperation.getClassRequestHandlerName(), true)%]
-package [%=packageNameApp%];
+package [%=packageName%];
 
-import [%=packageNameGen%].*;
+// import [%=packageName%].*;
 import java.util.List;
 import org.vaultage.core.VaultageMessage;
 

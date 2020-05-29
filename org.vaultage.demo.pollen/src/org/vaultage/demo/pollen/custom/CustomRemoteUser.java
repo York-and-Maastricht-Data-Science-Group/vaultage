@@ -5,11 +5,11 @@ import java.util.List;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
-import org.vaultage.demo.pollen.app.SendMultivaluedPollRequestHandler;
-import org.vaultage.demo.pollen.app.SendNumberPollRequestHandler;
-import org.vaultage.demo.pollen.app.User;
-import org.vaultage.demo.pollen.gen.MultivaluedPoll;
-import org.vaultage.demo.pollen.gen.NumberPoll;
+import org.vaultage.demo.pollen.SendMultivaluedPollRequestHandler;
+import org.vaultage.demo.pollen.SendNumberPollRequestHandler;
+import org.vaultage.demo.pollen.User;
+import org.vaultage.demo.pollen.MultivaluedPoll;
+import org.vaultage.demo.pollen.NumberPoll;
 
 public class CustomRemoteUser {
 

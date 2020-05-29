@@ -5,13 +5,12 @@
 import 'Util.eol';
 
 pre {
-	var javaSourcePath : String = "../src/";
+	var javaSourcePath = "../src/";
+	var javaGenPath = "../gen/";
 	var packageName = EAnnotation.allInstances.selectOne(a | a.source == "http://www.eclipse.org/emf/2002/GenModel").details.selectOne( d | d.key = "basePackage").value;
-	var packageNameGen = packageName + ".gen";
-	var packageNameApp = packageName + ".app";
-	var outputRoot = javaSourcePath + packageName.replace("\\.", "/") + "/";
-	var outputGen = outputRoot + "/gen/";
-	var outputApp = outputRoot + "/app/";
+	var packagePath =  packageName.replace("\\.", "/") + "/";
+	var outputSource = javaSourcePath + packagePath;
+	var outputGen = javaGenPath + packagePath;
 	var requesterFilename = "RemoteRequester.java";
 	var vaultClassName = EClass.allInstances.selectOne( c | c.hasVaultAnnotation()).name;
 	var requesterPublicKey = "String requesterPublicKey";
@@ -24,15 +23,13 @@ pre {
 rule VaultClass transform class : EClass {
 	guard : class.hasVaultAnnotation() 
 	parameters : Map {
-  		"packageName" = packageName,  
-  		"packageNameApp" = packageNameApp,  
-  		"packageNameGen" = packageNameGen,
+  		"packageName" = packageName,    
     	"class" = class,
     	"parentClass" = "extends " + class.name + "Base",
     	"requesterPublicKey" = requesterPublicKey
     }
   	template: "VaultClass.egl"
-  	target: outputApp + class.filename()
+  	target: outputSource + class.filename()
 }
 
 /***
@@ -41,9 +38,7 @@ rule VaultClass transform class : EClass {
 rule StaticClasses transform class : EClass {
 	guard : not class.hasVaultAnnotation() 
 	parameters : Map {
-  		"packageName" = packageName,  
-  		"packageNameApp" = packageNameApp,  
-  		"packageNameGen" = packageNameGen, 
+  		"packageName" = packageName,     
     	"class" = class,
     	"parentClass" = "",
     	"requesterPublicKey"= requesterPublicKey
@@ -59,8 +54,6 @@ rule VaultBaseClass transform class : EClass {
 	guard : class.hasVaultAnnotation() 
 	parameters : Map {
   		"packageName" = packageName,  
-  		"packageNameApp" = packageNameApp,  
-  		"packageNameGen" = packageNameGen,
     	"class" = class,
     	"requesterPublicKey"= requesterPublicKey
     }
@@ -75,8 +68,6 @@ rule RemoteRequesterClass transform class : EClass {
 	guard : class.hasVaultAnnotation() 
 	parameters : Map {
   		"packageName" = packageName,  
-  		"packageNameApp" = packageNameApp,  
-  		"packageNameGen" = packageNameGen,
     	"class" = class,
     	"vaultClassName" = vaultClassName,
     	"requesterPublicKey"= requesterPublicKey,
@@ -93,13 +84,11 @@ rule RequestHandlerClasses transform eOperation : EOperation {
 	guard : eOperation.eContainer.hasVaultAnnotation() 
 	parameters : Map {
   		"packageName" = packageName,  
-  		"packageNameApp" = packageNameApp,  
-  		"packageNameGen" = packageNameGen,
     	"eOperation" = eOperation,
     	"requesterPublicKey"= requesterPublicKey
     }
   	template: "RequestHandler.egl"
-  	target: outputApp + eOperation.getRequestHandlerFileName()
+  	target: outputSource + eOperation.getRequestHandlerFileName()
 }
 
 /***
@@ -108,14 +97,12 @@ rule RequestHandlerClasses transform eOperation : EOperation {
 rule ResponseHandlerClasses transform eOperation : EOperation {
 	guard : eOperation.eContainer.hasVaultAnnotation() 
 	parameters : Map {
-  		"packageName" = packageName,  
-  		"packageNameApp" = packageNameApp,  
-  		"packageNameGen" = packageNameGen, 
+  		"packageName" = packageName, 
     	"eOperation" = eOperation,
     	"requesterPublicKey"= requesterPublicKey
     }
   	template: "ResponseHandler.egl"
-  	target: outputApp + eOperation.getResponseHandlerFilename()
+  	target: outputSource + eOperation.getResponseHandlerFilename()
 }
 
 /***
@@ -124,9 +111,7 @@ rule ResponseHandlerClasses transform eOperation : EOperation {
 rule RequestBaseHandlerClasses transform eOperation : EOperation {
 	guard : eOperation.eContainer.hasVaultAnnotation() 
 	parameters : Map {
-  		"packageName" = packageName,  
-  		"packageNameApp" = packageNameApp,  
-  		"packageNameGen" = packageNameGen,
+  		"packageName" = packageName,
     	"eOperation" = eOperation,
     	"requesterPublicKey"= requesterPublicKey
     }
@@ -140,9 +125,7 @@ rule RequestBaseHandlerClasses transform eOperation : EOperation {
 rule ResponseBaseHandlerClasses transform eOperation : EOperation {
 	guard : eOperation.eContainer.hasVaultAnnotation() 
 	parameters : Map {
-  		"packageName" = packageName,  
-  		"packageNameApp" = packageNameApp,  
-  		"packageNameGen" = packageNameGen, 
+  		"packageName" = packageName, 
     	"eOperation" = eOperation,
     	"requesterPublicKey"= requesterPublicKey
     }

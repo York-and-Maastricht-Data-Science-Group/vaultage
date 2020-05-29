@@ -9,17 +9,16 @@ import java.util.List;
 
 import org.junit.Test;
 import org.vaultage.core.VaultageServer;
-import org.vaultage.demo.fairnet.app.AddFriendRequestHandler;
-import org.vaultage.demo.fairnet.app.AddFriendResponseHandler;
-import org.vaultage.demo.fairnet.app.FairnetVault;
-import org.vaultage.demo.fairnet.app.GetPostRequestHandler;
-import org.vaultage.demo.fairnet.app.GetPostResponseHandler;
-import org.vaultage.demo.fairnet.app.GetPostsRequestHandler;
-import org.vaultage.demo.fairnet.app.GetPostsResponseHandler;
-import org.vaultage.demo.fairnet.gen.AddFriendResponseBaseHandler;
-import org.vaultage.demo.fairnet.gen.Friend;
-import org.vaultage.demo.fairnet.gen.Post;
-import org.vaultage.demo.fairnet.gen.RemoteRequester;
+import org.vaultage.demo.fairnet.AddFriendRequestHandler;
+import org.vaultage.demo.fairnet.AddFriendResponseHandler;
+import org.vaultage.demo.fairnet.FairnetVault;
+import org.vaultage.demo.fairnet.GetPostRequestHandler;
+import org.vaultage.demo.fairnet.GetPostResponseHandler;
+import org.vaultage.demo.fairnet.GetPostsRequestHandler;
+import org.vaultage.demo.fairnet.GetPostsResponseHandler;
+import org.vaultage.demo.fairnet.Friend;
+import org.vaultage.demo.fairnet.Post;
+import org.vaultage.demo.fairnet.RemoteRequester;
 import org.vaultage.util.VaultageEncryption;
 
 public class FairnetTest {

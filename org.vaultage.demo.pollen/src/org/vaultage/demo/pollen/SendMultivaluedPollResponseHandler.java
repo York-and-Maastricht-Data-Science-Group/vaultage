@@ -1,8 +1,7 @@
 /**** protected region SendMultivaluedPollResponseHandler on begin ****/
-package org.vaultage.demo.pollen.app;
+package org.vaultage.demo.pollen;
 
 import org.vaultage.core.VaultageMessage;
-import org.vaultage.demo.pollen.gen.SendMultivaluedPollResponseBaseHandler;
 
 public class SendMultivaluedPollResponseHandler extends SendMultivaluedPollResponseBaseHandler {
 

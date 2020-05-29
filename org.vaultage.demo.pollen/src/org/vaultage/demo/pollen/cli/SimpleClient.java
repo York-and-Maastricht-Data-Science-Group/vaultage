@@ -1,4 +1,4 @@
-package org.vaultage.demo.pollen.app.cli;
+package org.vaultage.demo.pollen.cli;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,11 +11,11 @@ import org.apache.activemq.ActiveMQConnection;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
-import org.vaultage.demo.pollen.app.SendNumberPollRequestHandler;
-import org.vaultage.demo.pollen.app.SendNumberPollResponseHandler;
-import org.vaultage.demo.pollen.app.User;
+import org.vaultage.demo.pollen.SendNumberPollRequestHandler;
+import org.vaultage.demo.pollen.SendNumberPollResponseHandler;
+import org.vaultage.demo.pollen.User;
 import org.vaultage.demo.pollen.custom.CustomRemoteUser;
-import org.vaultage.demo.pollen.gen.NumberPoll;
+import org.vaultage.demo.pollen.NumberPoll;
 import org.vaultage.demo.pollen.util.PollenUtil;
 
 /***

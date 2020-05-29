@@ -1,12 +1,12 @@
-package org.vaultage.demo.pollen.app.cli;
+package org.vaultage.demo.pollen.cli;
 
 import java.util.List;
 import java.util.Scanner;
 
-import org.vaultage.demo.pollen.app.User;
+import org.vaultage.demo.pollen.User;
 import org.vaultage.demo.pollen.data.PollRepository;
-import org.vaultage.demo.pollen.gen.MultivaluedPoll;
-import org.vaultage.demo.pollen.gen.NumberPoll;
+import org.vaultage.demo.pollen.MultivaluedPoll;
+import org.vaultage.demo.pollen.NumberPoll;
 
 public class PollenCLI {
 

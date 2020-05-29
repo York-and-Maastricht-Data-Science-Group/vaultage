@@ -1,5 +1,5 @@
 /**** protected region User on begin ****/
-package org.vaultage.demo.pollen.app;
+package org.vaultage.demo.pollen;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.vaultage.demo.pollen.gen.NumberPoll;
-import org.vaultage.demo.pollen.gen.MultivaluedPoll;
-import org.vaultage.demo.pollen.gen.UserBase;
 
 public class User extends UserBase {
 	private String name = new String();

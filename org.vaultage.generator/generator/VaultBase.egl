@@ -1,5 +1,5 @@
 [% import 'Util.eol'; %]
-package [%=packageNameGen%];
+package [%=packageName%];
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +17,8 @@ import org.vaultage.core.VaultageHandler;
 import org.vaultage.core.VaultageServer;
 
 [% /* for (eOperation in class.eOperations){ %]
-import [%=packageNameApp%].[%= eOperation.name.firstToUpperCase()%]RequestBaseHandler;
-import [%=packageNameApp%].[%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler;	
+// import [%=packageName%].[%= eOperation.name.firstToUpperCase()%]RequestBaseHandler;
+// import [%=packageName%].[%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler;	
 [% } */%]
 
 public abstract class [%=class.getBaseName()%] {

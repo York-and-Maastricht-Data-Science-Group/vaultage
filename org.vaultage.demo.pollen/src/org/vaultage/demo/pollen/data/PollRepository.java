@@ -3,8 +3,8 @@ package org.vaultage.demo.pollen.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.vaultage.demo.pollen.gen.MultivaluedPoll;
-import org.vaultage.demo.pollen.gen.NumberPoll;
+import org.vaultage.demo.pollen.MultivaluedPoll;
+import org.vaultage.demo.pollen.NumberPoll;
 
 public class PollRepository {
 

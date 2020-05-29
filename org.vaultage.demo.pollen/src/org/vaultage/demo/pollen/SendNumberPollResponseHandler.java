@@ -1,8 +1,7 @@
 /**** protected region SendNumberPollResponseHandler on begin ****/
-package org.vaultage.demo.pollen.app;
+package org.vaultage.demo.pollen;
 
 import org.vaultage.core.VaultageMessage;
-import org.vaultage.demo.pollen.gen.SendNumberPollResponseBaseHandler;
 
 public class SendNumberPollResponseHandler extends SendNumberPollResponseBaseHandler {
 

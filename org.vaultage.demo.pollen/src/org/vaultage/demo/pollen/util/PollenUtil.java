@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.vaultage.demo.pollen.app.User;
+import org.vaultage.demo.pollen.User;
 
 public class PollenUtil {
 

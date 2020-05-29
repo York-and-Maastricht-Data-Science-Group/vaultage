@@ -1,11 +1,11 @@
 [% import 'Util.eol'; %]
-package [%=packageNameGen%];
+package [%=packageName%];
 
 import java.util.ArrayList;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageHandler;
 import org.vaultage.core.VaultageMessage;
-import [%=packageNameApp%].[%= eOperation.eContainer.name %];
+// import [%=packageName%].[%= eOperation.eContainer.name %];
 
 public class [%=eOperation.getClassResponseBaseHandlerName()%] extends VaultageHandler {
 	

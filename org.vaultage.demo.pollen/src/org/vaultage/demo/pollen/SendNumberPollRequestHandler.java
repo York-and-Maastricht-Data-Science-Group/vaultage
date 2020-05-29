@@ -1,7 +1,6 @@
 /**** protected region SendNumberPollRequestHandler on begin ****/
-package org.vaultage.demo.pollen.app;
+package org.vaultage.demo.pollen;
 
-import org.vaultage.demo.pollen.gen.*;
 import java.util.List;
 import java.util.Scanner;
 

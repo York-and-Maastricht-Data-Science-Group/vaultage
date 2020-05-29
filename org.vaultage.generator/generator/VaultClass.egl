@@ -1,6 +1,6 @@
 [% import 'Util.eol'; %]
 [%=out.startPreserve("/****", "****/", class.name, true)%]
-package [%=packageNameApp%];
+package [%=packageName%];
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 [% for (eClass in EClass.allInstances){ %][% if (not eClass.hasVaultAnnotation()) { %]
-import [%=packageNameGen%].[%=eClass.name%];
+// import [%=packageName%].[%=eClass.name%];
 [% 	} %][% }%]
-import [%=packageNameGen%].[%=class.name%]Base;
+// import [%=packageName%].[%=class.name%]Base;
 
 public class [%=class.name%] [%=parentClass%] {
 [% for (feature in class.eStructuralFeatures){ %]

@@ -1,13 +1,13 @@
 [% import 'Util.eol'; %]
-package [%=packageNameGen%];
+package [%=packageName%];
 
 import java.util.ArrayList;
 import java.util.List;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageHandler;
 import org.vaultage.core.VaultageMessage;
-import [%=packageNameApp%].[%= eOperation.eContainer.name %];
-import [%=packageNameApp%].[%= eOperation.getClassResponseHandlerName() %];
+// import [%=packageName%].[%= eOperation.eContainer.name %];
+// import [%=packageName%].[%= eOperation.getClassResponseHandlerName() %];
 
 public abstract class [%=eOperation.getClassRequestBaseHandlerName()%] extends VaultageHandler {
 	

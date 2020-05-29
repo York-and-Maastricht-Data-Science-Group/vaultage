@@ -1,5 +1,5 @@
 [% import 'Util.eol'; %]
-package [%=packageNameGen%];
+package [%=packageName%];
 
 import java.util.List;
 import java.util.UUID;
