@@ -12,7 +12,11 @@ operation EClass getBaseName() : String {
 operation EClass baseFilename() : String {
     return self.getBaseName() + ".java";
 }
-  
+
+operation EPackage getBrokerName() {
+	return self.name.firstToUpperCase() + "Broker";
+}
+
 operation String clean() {
 	var clean;
 	var badChars = Sequence{'?','\\', '/'};
@@ -210,5 +214,3 @@ operation EOperation getClassResponseBaseHandlerName(): String {
 operation EOperation getResponseBaseHandlerFilename(): String {
 	return self.name.firstToUpperCase() + "ResponseBaseHandler.java"; 
 }
-
-
