@@ -7,8 +7,9 @@
 <intAttribute key="egxGenerateTo" value="2"/>
 <booleanAttribute key="fine_grained_profiling" value="false"/>
 <intAttribute key="generateTo" value="1"/>
+<stringAttribute key="implementation_name" value="Sequential EGX"/>
 <listAttribute key="models">
-<listEntry value="#Mon May 25 17:46:32 BST 2020&#13;&#10;isMetamodelFileBased=false&#13;&#10;name=M&#13;&#10;readOnLoad=true&#13;&#10;storeOnDisposal=true&#13;&#10;aliases=M&#13;&#10;cached=true&#13;&#10;fileBasedMetamodelUri=&#13;&#10;metamodelUri=http\://www.eclipse.org/emf/2002/Ecore&#13;&#10;modelUri=platform\:/resource/org.vaultage.demo.spreadcut/model/spreadcut.ecore&#13;&#10;reuseUnmodifiedFileBasedMetamodels=true&#13;&#10;type=EMF&#13;&#10;modelFile=/org.vaultage.demo.spreadcut/model/spreadcut.ecore&#13;&#10;expand=true&#13;&#10;metamodelFile="/>
+<listEntry value="isMetamodelFileBased=false&#10;name=M&#10;readOnLoad=true&#10;storeOnDisposal=false&#10;aliases=M&#10;cached=true&#10;fileBasedMetamodelUri=&#10;metamodelUri=http\://www.eclipse.org/emf/2002/Ecore&#10;modelUri=platform\:/resource/org.vaultage.demo.spreadcut/model/spreadcut.ecore&#10;concurrent=false&#10;reuseUnmodifiedFileBasedMetamodels=true&#10;type=EMF&#10;modelFile=/org.vaultage.demo.spreadcut/model/spreadcut.ecore&#10;expand=true&#10;metamodelFile="/>
 </listAttribute>
 <stringAttribute key="outputDirPath" value="/org.vaultage.demo.spreadcut/src"/>
 <stringAttribute key="outputFilePath" value=""/>
