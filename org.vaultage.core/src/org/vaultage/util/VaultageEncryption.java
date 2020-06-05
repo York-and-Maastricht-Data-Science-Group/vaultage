@@ -26,6 +26,19 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+/***
+ * A class that is responsible for encryption and decryption in Vaultage. This
+ * class use RSA for generating keys and RSA/ECB/OAEPWithSHA-256AndMGF1Padding
+ * for cipher. Since the cipher's default implementation in JRE can only encrypt
+ * using public keys (cannot be done using private keys), double encryption
+ * cannot be implemented. Therefore, Bouncy Castle library is used as the
+ * provider for ciphering. Apparently, the library works well for encryption and
+ * decryption using private keys and public keys.
+ * 
+ * @author Alfa Yohannis
+ *
+ */
+
 public class VaultageEncryption {
 
 	private static Provider bouncyCastleProvider = initBouncyCastleProvider();
@@ -40,12 +53,22 @@ public class VaultageEncryption {
 	public static final int MAXIMUM_ENCRYPTED_MESSAGE_LENGTH = 256;
 	public static final int KEY_LENGTH = 2048;
 
+	/***
+	 * A test/demo for encryption and decryption
+	 * 
+	 * @param args
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 */
 	public static void main(String[] args)
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchPaddingException, IOException {
 
-		initBouncyCastleProvider();
-		
 		String message = "01234567890123456789012345678901234567890123456789"
 				+ "01234567890123456789012345678901234567890123456789"
 				+ "01234567890123456789012345678901234567890123456789" + "01234567890123456789012345678901234567890";
@@ -100,6 +123,11 @@ public class VaultageEncryption {
 
 	}
 
+	/***
+	 * initialisation to use Bouncy Castle as the provider for en(de)cryption
+	 * 
+	 * @return
+	 */
 	public static Provider initBouncyCastleProvider() {
 		Provider p = bouncyCastleProvider;
 		if (Security.getProvider("BC") == null) {
@@ -109,16 +137,34 @@ public class VaultageEncryption {
 		return p;
 	}
 
+	/***
+	 * A method to generate key pair
+	 * 
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 */
 	public static KeyPair generateKeys() throws NoSuchAlgorithmException {
 		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.CIPHER_ALGORITHM);
 		keyPairGen.initialize(VaultageEncryption.KEY_LENGTH);
 		return keyPairGen.generateKeyPair();
 	}
 
+	/***
+	 * Get the Base64 String private key from a key pair
+	 * 
+	 * @param keyPair
+	 * @return
+	 */
 	public static String getPrivateKey(KeyPair keyPair) {
 		return Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
 	}
 
+	/***
+	 * Get the Base64 String public key from a key pair
+	 * 
+	 * @param keyPair
+	 * @return
+	 */
 	public static String getPublicKey(KeyPair keyPair) {
 		return Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
 	}
