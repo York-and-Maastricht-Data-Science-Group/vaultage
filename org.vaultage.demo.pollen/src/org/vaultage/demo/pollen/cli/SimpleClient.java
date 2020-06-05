@@ -7,15 +7,15 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.activemq.ActiveMQConnection;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
+import org.vaultage.demo.pollen.NumberPoll;
+import org.vaultage.demo.pollen.PollenBroker;
 import org.vaultage.demo.pollen.SendNumberPollRequestHandler;
 import org.vaultage.demo.pollen.SendNumberPollResponseHandler;
 import org.vaultage.demo.pollen.User;
 import org.vaultage.demo.pollen.custom.CustomRemoteUser;
-import org.vaultage.demo.pollen.NumberPoll;
 import org.vaultage.demo.pollen.util.PollenUtil;
 
 /***
@@ -57,9 +57,7 @@ public class SimpleClient {
 		PollenUtil.savePublicKey(user);
 
 		// set the address of Vaultage server
-		String address = ActiveMQConnection.DEFAULT_BROKER_URL;
-//		String address = "vm://localhost";
-		VaultageServer pollenServer = new VaultageServer(address);
+		VaultageServer pollenServer = new VaultageServer(PollenBroker.BROKER_ADDRESS);
 		user.register(pollenServer);
 
 		// set handlers
