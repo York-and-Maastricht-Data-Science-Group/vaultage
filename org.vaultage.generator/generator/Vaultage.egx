@@ -15,6 +15,7 @@ pre {
 	var vaultClassName = EClass.allInstances.selectOne( c | c.hasVaultAnnotation()).name;
 	var requesterPublicKey = "String requesterPublicKey";
 	var requesteePublicKey = "String requesteePublicKey";
+	var ePackage = EPackage.all().first();
 }
 
 /***
@@ -133,3 +134,15 @@ rule ResponseBaseHandlerClasses transform eOperation : EOperation {
   	target: outputGen + eOperation.getResponseBaseHandlerFilename()
 }
 
+/***
+ *  Generate a class to start the broker service
+***/
+rule BrokerService { 
+	parameters : Map {
+		"packageName" = packageName,
+		"brokerName" = ePackage.getBrokerName()
+	}
+	template: "BrokerService.egl"
+	target: outputSource + ePackage.getBrokerName() + ".java"
+	overwrite: false
+}
