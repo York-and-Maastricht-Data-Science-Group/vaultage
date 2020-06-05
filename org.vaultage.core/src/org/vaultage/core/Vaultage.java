@@ -72,7 +72,7 @@ public class Vaultage {
 		// encryption
 		KeyPair receiverKeyPair;
 		KeyPair senderKeyPair;
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.ALGORITHM);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.CIPHER_ALGORITHM);
 		keyPairGen.initialize(VaultageEncryption.KEY_LENGTH);
 
 		receiverKeyPair = keyPairGen.generateKeyPair();
