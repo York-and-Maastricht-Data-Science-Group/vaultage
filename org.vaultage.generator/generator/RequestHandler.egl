@@ -1,5 +1,4 @@
 [% import 'Util.eol'; %]
-[%=out.startPreserve("/****", "****/", eOperation.getClassRequestHandlerName(), true)%]
 package [%=packageName%];
 
 // import [%=packageName%].*;
@@ -9,10 +8,9 @@ import org.vaultage.core.VaultageMessage;
 public class [%=eOperation.getClassRequestHandlerName()%] extends [%=eOperation.getClassRequestBaseHandlerName()%] {
 	
 	@Override
-	public [%=eOperation.getReturnType()%] run(VaultageMessage senderMessage) throws Exception {	
+	public [%=eOperation.getReturnType()%] run(VaultageMessage message[%=eOperation.getParams()%]) throws Exception {	
 [% if (eOperation.getReturnType() <> "void") { %]
 		return ([%= eOperation.getReturnType() %]) result;
 [% } %] 
 	}
 }
-[%= out.stopPreserve() %]

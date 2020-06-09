@@ -15,7 +15,7 @@ public class User extends UserBase {
 	private String name = new String();
 	private Map<String, NumberPoll> polls = new HashMap<>();
 	
-	public User() throws FileNotFoundException, NoSuchAlgorithmException, IOException {
+	public User() throws Exception {
 		super();
 	}
 	

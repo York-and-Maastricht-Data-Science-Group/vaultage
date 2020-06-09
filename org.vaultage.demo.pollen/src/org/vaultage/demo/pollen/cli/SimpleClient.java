@@ -64,10 +64,8 @@ public class SimpleClient {
 		user.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
 
 			@Override
-			public double run(VaultageMessage senderMessage) throws Exception {
+			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
 				User localVault = (User) this.vault;
-				String json = senderMessage.getValue("poll");
-				NumberPoll poll = Vaultage.Gson.fromJson(json, NumberPoll.class);
 
 				if (localVault.getPublicKey().equals(poll.getOriginator())) {
 

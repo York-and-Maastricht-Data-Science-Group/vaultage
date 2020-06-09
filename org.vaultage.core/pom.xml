@@ -47,6 +47,5 @@
 			<artifactId>bcpkix-jdk15on</artifactId>
 			<version>1.65</version>
 		</dependency>
-
 	</dependencies>
 </project>

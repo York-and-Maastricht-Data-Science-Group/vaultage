@@ -15,7 +15,7 @@ public class SendNumberPollRequestHandler extends SendNumberPollRequestBaseHandl
 	}
 
 	@Override
-	public double run(VaultageMessage senderMessage) throws Exception {
+	public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
 		return (double) result;
 
 	}

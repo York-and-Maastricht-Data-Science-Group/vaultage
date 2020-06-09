@@ -1,5 +1,4 @@
 [% import 'Util.eol'; %]
-[%=out.startPreserve("/****", "****/", eOperation.getClassResponseHandlerName(), true)%]
 package [%=packageName%];
 
 import org.vaultage.core.VaultageMessage;
@@ -12,4 +11,3 @@ public class [%=eOperation.getClassResponseHandlerName()%] extends [%=eOperation
 		return result;
 	}
 }
-[%= out.stopPreserve() %]

@@ -42,10 +42,8 @@ public class PollenTest {
 		final RemoteRequester aliceRequester = new RemoteRequester(pollenBroker, alice);
 		alice.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
 			@Override
-			public double run(VaultageMessage senderMessage) throws Exception {
+			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
 				User localVault = (User) this.vault;
-				String json = senderMessage.getValue("poll");
-				NumberPoll poll = Vaultage.Gson.fromJson(json, NumberPoll.class);
 
 				if (localVault.getPublicKey().equals(poll.getOriginator())) {
 					double myFakeSalary = aliceFakeSalary;
@@ -78,10 +76,8 @@ public class PollenTest {
 		final RemoteRequester bobRequester = new RemoteRequester(pollenBroker, bob);
 		bob.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
 			@Override
-			public double run(VaultageMessage senderMessage) throws Exception {
+			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
 				User localVault = (User) this.vault;
-				String json = senderMessage.getValue("poll");
-				NumberPoll poll = Vaultage.Gson.fromJson(json, NumberPoll.class);
 
 				if (localVault.getPublicKey().equals(poll.getOriginator())) {
 					double myFakeSalary = 25;
@@ -114,11 +110,9 @@ public class PollenTest {
 		final RemoteRequester charlieRequester = new RemoteRequester(pollenBroker, charlie);
 		charlie.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
 			@Override
-			public double run(VaultageMessage senderMessage) throws Exception {
+			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
 				User localVault = (User) this.vault;
-				String json = senderMessage.getValue("poll");
-				NumberPoll poll = Vaultage.Gson.fromJson(json, NumberPoll.class);
-
+				
 				if (localVault.getPublicKey().equals(poll.getOriginator())) {
 					double myFakeSalary = 25;
 					result = myFakeSalary;

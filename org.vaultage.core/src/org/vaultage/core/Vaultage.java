@@ -150,7 +150,7 @@ public class Vaultage {
 
 			producer.send(m);
 			
-			System.out.println("Send to: " + topicId);
+//			System.out.println("Send to: " + topicId);
 			
 			expectedReplyTokens.add(message.getToken());
 //			System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
@@ -185,8 +185,8 @@ public class Vaultage {
 						TextMessage textMessage = (TextMessage) message;
 
 						String mergedMessage = textMessage.getText();
-						String senderPublicKey = mergedMessage.substring(0, 128);
-						String encryptedMessage = mergedMessage.substring(128, mergedMessage.length());
+						String senderPublicKey = mergedMessage.substring(0, 392);
+						String encryptedMessage = mergedMessage.substring(392, mergedMessage.length());
 
 						String json = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
 								receiverPrivateKey);
@@ -208,7 +208,7 @@ public class Vaultage {
 				}
 			});
 
-			 System.out.println("Listening to: " + topicId);
+//			 System.out.println("Listening to: " + topicId);
 //			// Wait for a message, 0 means listen forever
 //			Message message = consumer.receive(0);
 

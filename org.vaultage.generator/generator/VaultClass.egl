@@ -1,5 +1,4 @@
 [% import 'Util.eol'; %]
-[%=out.startPreserve("/****", "****/", class.name, true)%]
 package [%=packageName%];
 
 import java.io.FileNotFoundException;
@@ -19,7 +18,7 @@ public class [%=class.name%] [%=parentClass%] {
 	private [%=feature.getType()%] [%=feature.name%] = new [%= feature.getTypeInstance()%]();
 [%	} %]
 
-	public [%=class.name%]() throws FileNotFoundException, NoSuchAlgorithmException, IOException {
+	public [%=class.name%]() throws Exception {
 		super();
 	}
 	
@@ -40,10 +39,9 @@ public class [%=class.name%] [%=parentClass%] {
 	// operations
 [% for (eOperation in class.eOperations){ %]
 	[%= eOperation.getOverride() %]
-	public [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
+	public [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception {
 		throw new Exception();
 	}
- 
+	
 [% } %]		
 }
-[%= out.stopPreserve() %]

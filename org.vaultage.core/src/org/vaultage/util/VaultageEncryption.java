@@ -144,7 +144,7 @@ public class VaultageEncryption {
 	 * @throws NoSuchAlgorithmException
 	 */
 	public static KeyPair generateKeys() throws NoSuchAlgorithmException {
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.CIPHER_ALGORITHM);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.KEY_GENERATOR_ALGORITHM);
 		keyPairGen.initialize(VaultageEncryption.KEY_LENGTH);
 		return keyPairGen.generateKeyPair();
 	}
@@ -231,7 +231,7 @@ public class VaultageEncryption {
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
 
-		KeyFactory keyFactory = KeyFactory.getInstance(VaultageEncryption.CIPHER_ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(VaultageEncryption.KEY_GENERATOR_ALGORITHM);
 		byte[] privateKeyBytes = Base64.getDecoder().decode(senderPrivateKeyString);
 		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 		PrivateKey senderPrivateKey = keyFactory.generatePrivate(privateKeySpec);
@@ -348,7 +348,7 @@ public class VaultageEncryption {
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
 
-		KeyFactory keyFactory = KeyFactory.getInstance(VaultageEncryption.CIPHER_ALGORITHM);
+		KeyFactory keyFactory = KeyFactory.getInstance(VaultageEncryption.KEY_GENERATOR_ALGORITHM);
 		byte[] privateKeyBytes = Base64.getDecoder().decode(receiverPrivateKeyString);
 		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 		PrivateKey receiverPrivateKey = keyFactory.generatePrivate(privateKeySpec);

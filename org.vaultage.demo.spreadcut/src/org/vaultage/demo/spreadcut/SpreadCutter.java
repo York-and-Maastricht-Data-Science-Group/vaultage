@@ -1,4 +1,3 @@
-/**** protected region SpreadCutter on begin ****/
 package org.vaultage.demo.spreadcut;
 
 import java.io.FileNotFoundException;
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 public class SpreadCutter extends SpreadCutterBase {
 	private List<ProximityContact> contacts = new ArrayList<ProximityContact>();
 	
-	public SpreadCutter() throws FileNotFoundException, NoSuchAlgorithmException, IOException {
+	public SpreadCutter() throws Exception {
 		super();
 	}
 	
@@ -41,4 +40,3 @@ public class SpreadCutter extends SpreadCutterBase {
 	
 	
 }
-/**** protected region SpreadCutter end ****/

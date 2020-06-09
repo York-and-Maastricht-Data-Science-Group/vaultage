@@ -81,6 +81,21 @@ operation EStructuralFeature getTypeInstance(): String {
 	return type;
 }
 
+operation ETypedElement getTypeImplementation(): String {
+	var type = "";
+	if (self.eType <> null){
+		var auxType = self.getTypeName();
+
+		if (self.upperBound <> 1) {
+			type = "ArrayList";
+		}
+		else {
+			type = auxType;
+		}
+	}
+	return type;
+}
+
 operation EOperation getReturnType(): String {
 	var type = self.getType();
 	if (type == "") {
@@ -132,12 +147,38 @@ operation EOperation isPublic() : Boolean{
 
 operation EOperation getParams(): String {
 	var params = "";
+  	for (eParameter in self.eParameters) {
+  	  params = params + ", ";
+      params = params + eParameter.getType() + " " + eParameter.name;
+  	}
+   return params;
+}
+
+operation EOperation getParamsWithoutTypes(): String {
+	var params = "";
+	var count = 0;
+  	for (eParameter in self.eParameters) {
+  	  params = params + ", ";
+      params = params +  eParameter.name;
+  	}
+   return params;
+}
+
+operation EOperation getRespondToParams(): String {
+	var params = "";
 	if (not self.isPublic()){
 		params = params + requesterPublicKey;
 	}
-  	for (eParameter in self.eParameters) {
-  	  params = params + ", ";
-      params = params + eParameter.getType() + " " + eParameter.name; 
+  	if (self.eType <> null or self.eType <> ""){
+  	  params = params + "," + self.getType() + " result";	
+  	}
+   return params;
+}
+
+operation EOperation getRespondToParamsWithoutTypes(): String {
+	var params = "";
+  	if (self.eType <> null or self.eType <> ""){
+  	  params = params + ", " + "("+self.getType() + ")" + " result";	
   	}
    return params;
 }
@@ -154,6 +195,17 @@ operation EOperation getRequesteeParams(): String {
    return params;
 }
 
+operation EOperation getRequesterParams(): String {
+	var params = "";
+	if (not self.isPublic()){
+		params = params + requesterPublicKey;
+	}
+  	for (eParameter in self.eParameters) {
+  	  params = params + ", ";
+      params = params + eParameter.getType() + " " + eParameter.name; 
+  	}
+   return params;
+}
 
 operation EClass hasVaultAnnotation(): Boolean{
 	var annotation = self.eAnnotations.selectOne(a | a.source = "vault");

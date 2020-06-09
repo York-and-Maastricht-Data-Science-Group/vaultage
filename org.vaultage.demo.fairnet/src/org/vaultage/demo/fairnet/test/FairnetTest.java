@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 import java.util.List;
 
 import org.junit.Test;
@@ -112,6 +113,9 @@ public class FairnetTest {
 		String decryptedMessage = VaultageEncryption.doubleDecrypt(encryptedMessage, user2.getPublicKey(),
 				user1.getPrivateKey());
 		assertEquals(message, decryptedMessage);
+		
+		user1.unregister();
+		user2.unregister();
 	}
 
 	@Test

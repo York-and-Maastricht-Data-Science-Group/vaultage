@@ -1,9 +1,6 @@
 /**** protected region FairnetVault on begin ****/
 package org.vaultage.demo.fairnet;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,11 +10,12 @@ public class FairnetVault extends FairnetVaultBase {
 	private List<Friend> friends = new ArrayList<>();
 	private List<Post> posts = new ArrayList<>();
 
-	public FairnetVault() throws FileNotFoundException, NoSuchAlgorithmException, IOException {
+	public FairnetVault() throws Exception {
 		super();
 	}
 
 	// getter
+	
 	public String getName() {
 		return this.name;
 	}

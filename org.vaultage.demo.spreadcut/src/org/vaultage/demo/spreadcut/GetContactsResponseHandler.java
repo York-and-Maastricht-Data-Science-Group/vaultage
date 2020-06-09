@@ -1,4 +1,3 @@
-/**** protected region GetContactsResponseHandler on begin ****/
 package org.vaultage.demo.spreadcut;
 
 import org.vaultage.core.VaultageMessage;
@@ -11,4 +10,3 @@ public class GetContactsResponseHandler extends GetContactsResponseBaseHandler {
 		return result;
 	}
 }
-/**** protected region GetContactsResponseHandler end ****/

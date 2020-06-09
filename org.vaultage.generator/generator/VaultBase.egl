@@ -30,13 +30,14 @@ public abstract class [%=class.getBaseName()%] {
 	protected Vaultage vaultage;
 	protected Map<String, VaultageHandler> handlers;	
 	protected VaultageServer vaultageServer;
+	protected RemoteRequester remoteRequester;
 
 [% for (eOperation in class.eOperations){ %]
 	protected [%= eOperation.name.firstToUpperCase()%]RequestBaseHandler [%=eOperation.name%]RequestBaseHandler;
 	protected [%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler [%=eOperation.name%]ResponseBaseHandler;	
 [% } %]	
 
-	public [%=class.getBaseName()%]() throws FileNotFoundException, IOException, NoSuchAlgorithmException {
+	public [%=class.getBaseName()%]() throws Exception {
 		this.isListening = false;
 		this.vaultage = new Vaultage();
 		this.handlers = new HashMap<String, VaultageHandler>();
@@ -44,10 +45,15 @@ public abstract class [%=class.getBaseName()%] {
 		KeyPair keyPair = VaultageEncryption.generateKeys();
 		this.publicKey = VaultageEncryption.getPublicKey(keyPair);
 		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
+		remoteRequester = new RemoteRequester(vaultageServer, this);
 	}
 	
 	public VaultageServer getVaultageServer(){
 		return this.vaultageServer;
+	}
+	
+	public RemoteRequester getRemoteRequester() {
+		return remoteRequester;
 	}
 	
 	public String getId(){
@@ -128,7 +134,7 @@ public abstract class [%=class.getBaseName()%] {
 	
 	// operations
 [% for (eOperation in class.eOperations){ %]
-	[%= eOperation.getAccessModifier()%] abstract [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception;
+	[%= eOperation.getAccessModifier()%] abstract [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception;
 	
 [% } %]	
 	

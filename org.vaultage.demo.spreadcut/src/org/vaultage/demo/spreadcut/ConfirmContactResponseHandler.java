@@ -1,4 +1,3 @@
-/**** protected region ConfirmContactResponseHandler on begin ****/
 package org.vaultage.demo.spreadcut;
 
 import org.vaultage.core.VaultageMessage;
@@ -11,4 +10,3 @@ public class ConfirmContactResponseHandler extends ConfirmContactResponseBaseHan
 		return result;
 	}
 }
-/**** protected region ConfirmContactResponseHandler end ****/
