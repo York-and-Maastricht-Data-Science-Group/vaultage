@@ -80,7 +80,7 @@ public class PollenTest {
 				User localVault = (User) this.vault;
 
 				if (localVault.getPublicKey().equals(poll.getOriginator())) {
-					double myFakeSalary = 25;
+					double myFakeSalary = 26;
 					result = myFakeSalary;
 					return (double) result;
 				} else {
@@ -114,7 +114,7 @@ public class PollenTest {
 				User localVault = (User) this.vault;
 				
 				if (localVault.getPublicKey().equals(poll.getOriginator())) {
-					double myFakeSalary = 25;
+					double myFakeSalary = 27;
 					result = myFakeSalary;
 					return (double) result;
 				} else {

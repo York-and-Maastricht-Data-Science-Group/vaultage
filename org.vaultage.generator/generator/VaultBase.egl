@@ -119,7 +119,7 @@ public abstract class [%=class.getBaseName()%] {
 	
 [% } %]	
 	public boolean register(VaultageServer vaultageServer) throws Exception {
-		boolean isSuccess = vaultage.connect(vaultageServer.getAddress());
+		boolean isSuccess = vaultage.connect(vaultageServer.getAddress(), publicKey);
 		this.vaultageServer = vaultageServer;
 		if (isSuccess) {
 			vaultage.subscribe(publicKey, privateKey, handlers);

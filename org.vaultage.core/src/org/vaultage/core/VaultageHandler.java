@@ -25,15 +25,16 @@ public abstract class VaultageHandler {
 
 	public void start() throws InterruptedException {
 
-		thread = new Thread(VaultageHandler.this.getName()) {
-			@Override
-			public void run() {
-				VaultageHandler.this.run();
-			}
-		};
-		thread.start();
+//		thread = new Thread(VaultageHandler.this.getName()) {
+//			@Override
+//			public void run() {
+//				VaultageHandler.this.run();
+//			}
+//		};
+//		thread.start();
+		this.run();
 		if (callerThread != null) {
-			thread.join();
+//			thread.join();
 			synchronized (callerThread) {
 				callerThread.notify();
 			}

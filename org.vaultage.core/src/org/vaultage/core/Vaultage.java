@@ -20,6 +20,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
+import javax.jms.TopicSubscriber;
 
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -68,7 +69,7 @@ public class Vaultage {
 
 		BrokerService broker = BrokerFactory.createBroker(new URI("broker:(tcp://localhost:61616)"));
 		broker.start();
-		
+
 		// encryption
 		KeyPair receiverKeyPair;
 		KeyPair senderKeyPair;
@@ -87,10 +88,10 @@ public class Vaultage {
 		String address = ActiveMQConnection.DEFAULT_BROKER_URL;
 //		String address = "vm://localhost";
 		Vaultage v1 = new Vaultage();
-		v1.connect(address);
+		v1.connect(address, senderPublicKey);
 
 		Vaultage v2 = new Vaultage();
-		v2.connect(address);
+		v2.connect(address, receiverPublicKey);
 
 		Thread.sleep(SLEEP_TIME);
 
@@ -138,7 +139,7 @@ public class Vaultage {
 
 			// Create a MessageProducer from the Session to the Topic or Queue
 			MessageProducer producer = session.createProducer(destination);
-			producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+			producer.setDeliveryMode(DeliveryMode.PERSISTENT);
 
 			// Create a message
 			String text = Gson.toJson(message).trim();
@@ -149,11 +150,11 @@ public class Vaultage {
 			TextMessage m = session.createTextMessage(senderPublicKey + encryptedMessage);
 
 			producer.send(m);
-			
+
 //			System.out.println("Send to: " + topicId);
-			
+
 			expectedReplyTokens.add(message.getToken());
-//			System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
+			System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -175,9 +176,11 @@ public class Vaultage {
 			Topic destination = session.createTopic(topicId);
 
 			// Create a MessageConsumer from the Session to the Topic or Queue
-			MessageConsumer consumer = session.createConsumer(destination);
+//			MessageConsumer consumer = session.createConsumer(destination);
 
-			consumer.setMessageListener(new MessageListener() {
+			TopicSubscriber subscriber = session.createDurableSubscriber(destination, receiverPrivateKey);
+
+			subscriber.setMessageListener(new MessageListener() {
 
 				@Override
 				public void onMessage(Message message) {
@@ -185,23 +188,24 @@ public class Vaultage {
 						TextMessage textMessage = (TextMessage) message;
 
 						String mergedMessage = textMessage.getText();
-						String senderPublicKey = mergedMessage.substring(0, 392);
-						String encryptedMessage = mergedMessage.substring(392, mergedMessage.length());
+						String senderPublicKey = mergedMessage.substring(0, VaultageEncryption.PUBLIC_KEY_LENGTH);
+						String encryptedMessage = mergedMessage.substring(VaultageEncryption.PUBLIC_KEY_LENGTH,
+								mergedMessage.length());
 
 						String json = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
 								receiverPrivateKey);
 
-//						System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + json);
+						System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + json);
 
 						VaultageMessage vaultageMessage = Gson.fromJson(json, VaultageMessage.class);
 						String operation = vaultageMessage.getOperation();
 
 						VaultageHandler handler = handlers.get(operation);
-						if (handler != null && !handler.isAlive()) {
-							threads.add(handler);
+//						if (handler != null && !handler.isAlive()) {
+//							threads.add(handler);
 //							System.out.println("Run: " + handler.getName());
-							handler.execute(topicId, vaultageMessage);
-						}
+						handler.execute(topicId, vaultageMessage);
+//						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -225,11 +229,12 @@ public class Vaultage {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean connect(String address) throws Exception {
+	public boolean connect(String address, String clientID) throws Exception {
 		try {
 			this.address = address;
 			connectionFactory = new ActiveMQConnectionFactory(this.address);
 			connection = connectionFactory.createConnection();
+			connection.setClientID(clientID);
 			connection.start();
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		} catch (Exception e) {

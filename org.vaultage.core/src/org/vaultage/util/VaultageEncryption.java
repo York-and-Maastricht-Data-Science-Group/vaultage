@@ -52,6 +52,7 @@ public class VaultageEncryption {
 	public static final int MAXIMUM_PLAIN_MESSAGE_LENGTH = 190;
 	public static final int MAXIMUM_ENCRYPTED_MESSAGE_LENGTH = 256;
 	public static final int KEY_LENGTH = 2048;
+	public static final int PUBLIC_KEY_LENGTH = 392;
 
 	/***
 	 * A test/demo for encryption and decryption
