@@ -7,7 +7,7 @@ import org.vaultage.core.VaultageMessage;
 public class SendMultivaluedPollRequestHandler extends SendMultivaluedPollRequestBaseHandler {
 
 	@Override
-	public List<Integer> run(VaultageMessage senderMessage) throws Exception {	
+	public List<Integer> run(VaultageMessage senderMessage, MultivaluedPoll poll) throws Exception {	
 		return (List<Integer>) result;
 		
 	}

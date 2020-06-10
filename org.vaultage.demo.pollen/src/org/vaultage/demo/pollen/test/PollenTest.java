@@ -23,126 +23,81 @@ import org.vaultage.demo.pollen.util.PollenUtil;
 
 public class PollenTest {
 
+	Scanner scanner = new Scanner(System.in);
+
 	@Test
 	public void testSalaryPoll() throws Exception {
-
-		Scanner scan = new Scanner(System.in);
 
 		// setting the address of Vaultage server
 		String address = "vm://localhost";
 		final VaultageServer pollenBroker = new VaultageServer(address);
 
 		// Alice
-		double aliceFakeSalary = 25;
 		double aliceRealSalary = 50;
 		User alice = new User();
+		alice.setId("Alice");
 		alice.setName("Alice");
 		PollenUtil.savePublicKey(alice);
-		alice.register(pollenBroker);
-		final RemoteRequester aliceRequester = new RemoteRequester(pollenBroker, alice);
-		alice.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
+		alice.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scanner) {
 			@Override
-			public double run(VaultageMessage senderMessage) throws Exception {
+			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
 				User localVault = (User) this.vault;
-				String json = senderMessage.getValue("poll");
-				NumberPoll poll = Vaultage.Gson.fromJson(json, NumberPoll.class);
-
-				if (localVault.getPublicKey().equals(poll.getOriginator())) {
-					double myFakeSalary = aliceFakeSalary;
-					result = myFakeSalary;
-					return (double) result;
-				} else {
-					localVault.getPolls().put(poll.getId(), poll);
-					double total = 0;
-					for (String publicKey : poll.getParticipants()) {
-						if (!publicKey.equals(localVault.getPublicKey())
-								&& !publicKey.equals(senderMessage.getFrom())) {
-							total = total + aliceRequester.sendNumberPoll(publicKey, poll);
-						}
-					}
-
-					// this should be prompted to user to fill in his/her answer
-					double mySalary = aliceFakeSalary;
-					result = total + mySalary;
-					return (double) result;
-				}
+				double total = localVault.sendNumberPoll(senderMessage.getFrom(), poll);
+				double mySalary = aliceRealSalary;
+				localVault.addPollRealValue(poll.getId(), mySalary);
+				result = total + mySalary;
+				return (double) result;
 			}
 		});
 		alice.setSendNumberPollResponseBaseHandler(new SendNumberPollResponseHandler());
 
 		// Bob
 		User bob = new User();
+		bob.setId("Bob");
 		bob.setName("Bob");
 		PollenUtil.savePublicKey(bob);
-		bob.register(pollenBroker);
-		final RemoteRequester bobRequester = new RemoteRequester(pollenBroker, bob);
-		bob.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
+		bob.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scanner) {
 			@Override
-			public double run(VaultageMessage senderMessage) throws Exception {
+			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
 				User localVault = (User) this.vault;
-				String json = senderMessage.getValue("poll");
-				NumberPoll poll = Vaultage.Gson.fromJson(json, NumberPoll.class);
+//				System.out.print("(" + bob.getName() + ") My salary is = ");
 
-				if (localVault.getPublicKey().equals(poll.getOriginator())) {
-					double myFakeSalary = 25;
-					result = myFakeSalary;
-					return (double) result;
-				} else {
-					localVault.getPolls().put(poll.getId(), poll);
-					double total = 0;
-					for (String publicKey : poll.getParticipants()) {
-						if (!publicKey.equals(localVault.getPublicKey())
-								&& !publicKey.equals(senderMessage.getFrom())) {
-							total = total + bobRequester.sendNumberPoll(publicKey, poll);
-						}
-					}
+				double total = localVault.sendNumberPoll(senderMessage.getFrom(), poll);
 
-					// this should be prompted to user to fill in his/her answer
-					double mySalary = 100.0;
-					result = total + mySalary;
-					return (double) result;
-				}
+				double mySalary = 100.0;
+				localVault.addPollRealValue(poll.getId(), mySalary);
+
+				result = total + mySalary;
+				return (double) result;
 			}
 		});
 		bob.setSendNumberPollResponseBaseHandler(new SendNumberPollResponseHandler());
 
 		// Charlie
 		User charlie = new User();
+		charlie.setId("Charlie");
 		charlie.setName("Charlie");
 		PollenUtil.savePublicKey(charlie);
-		charlie.register(pollenBroker);
-		final RemoteRequester charlieRequester = new RemoteRequester(pollenBroker, charlie);
-		charlie.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
+		charlie.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scanner) {
+
 			@Override
-			public double run(VaultageMessage senderMessage) throws Exception {
+			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
 				User localVault = (User) this.vault;
-				String json = senderMessage.getValue("poll");
-				NumberPoll poll = Vaultage.Gson.fromJson(json, NumberPoll.class);
 
-				if (localVault.getPublicKey().equals(poll.getOriginator())) {
-					double myFakeSalary = 25;
-					result = myFakeSalary;
-					return (double) result;
-				} else {
-					localVault.getPolls().put(poll.getId(), poll);
-					double total = 0;
-					for (String publicKey : poll.getParticipants()) {
-						if (!publicKey.equals(localVault.getPublicKey())
-								&& !publicKey.equals(senderMessage.getFrom())) {
-							total = total + charlieRequester.sendNumberPoll(publicKey, poll);
-						}
-					}
-
-					// this should be prompted to user to fill in his/her answer
-					double mySalary = 150.0;
-					result = total + mySalary;
-					return (double) result;
-				}
+				double total = localVault.sendNumberPoll(senderMessage.getFrom(), poll);
+				double mySalary = 150.0;
+				localVault.addPollRealValue(poll.getId(), mySalary);
+				result = total + mySalary;
+				return (double) result;
 			}
 		});
 		charlie.setSendNumberPollResponseBaseHandler(new SendNumberPollResponseHandler());
 
 		// register participants
+		alice.register(pollenBroker);
+		bob.register(pollenBroker);
+		charlie.register(pollenBroker);
+
 		List<String> participants = new ArrayList<>();
 		participants.add(bob.getPublicKey());
 		participants.add(charlie.getPublicKey());
@@ -154,14 +109,130 @@ public class PollenTest {
 		salaryPoll.setParticipants(participants);
 
 		// send poll, initiated by Alice
-		double fakeTotal = aliceRequester.sendNumberPoll(participants.get(0), salaryPoll);
-		System.out.println("Total real salary = fakeTotal - aliceFakeSalary + aliceRealSalary");
-		System.out.println("Total real salary = " + String.valueOf(fakeTotal) + " - " + String.valueOf(aliceFakeSalary)
-				+ " + " + String.valueOf(aliceRealSalary));
-		double realTotal = fakeTotal - aliceFakeSalary + aliceRealSalary;
+		double fakeTotal = alice.getRemoteRequester().sendNumberPoll(participants.get(0), salaryPoll);
+		double aliceFakeSalary = alice.getPollFakeValue(salaryPoll.getId());
+		System.out.println("Total real salary = fakeTotal - aliceFakeSalary");
+		System.out
+				.println("Total real salary = " + String.valueOf(fakeTotal) + " - " + String.valueOf(aliceFakeSalary));
+		double realTotal = fakeTotal - aliceFakeSalary;
 		System.out.println("Total real salary = " + realTotal);
+		double expectedTotal = alice.getPollRealValue(salaryPoll.getId()) + bob.getPollRealValue(salaryPoll.getId())
+				+ charlie.getPollRealValue(salaryPoll.getId());
+		System.out.println("expectedTotal = " + alice.getPollRealValue(salaryPoll.getId()) + " + "
+				+ bob.getPollRealValue(salaryPoll.getId()) + " + " + charlie.getPollRealValue(salaryPoll.getId()));
+		assertEquals(expectedTotal, realTotal, 0);
 
-		assertEquals(300.0, realTotal, 0);
+		alice.unregister();
+		bob.unregister();
+		charlie.unregister();
+	}
+	
+	@Test
+	public void testSalaryPollWithScanner() throws Exception {
+
+		// setting the address of Vaultage server
+		String address = "vm://localhost";
+		final VaultageServer pollenBroker = new VaultageServer(address);
+
+		// Alice
+//		double aliceRealSalary = 50;
+		User alice = new User();
+//		alice.waitTime = 30000;
+		alice.setId("Alice");
+		alice.setName("Alice");
+		PollenUtil.savePublicKey(alice);
+		alice.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scanner) {
+			@Override
+			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
+				User localVault = (User) this.vault;
+				
+				System.out.print("(" + localVault.getName() + ") My salary is = ");
+				double mySalary = scanner.nextDouble();
+				localVault.addPollRealValue(poll.getId(), mySalary);
+				
+				double total = localVault.sendNumberPoll(senderMessage.getFrom(), poll);
+			
+				result = total + mySalary;
+				return (double) result;
+			}
+		});
+		alice.setSendNumberPollResponseBaseHandler(new SendNumberPollResponseHandler());
+
+		// Bob
+		User bob = new User();
+//		bob.waitTime = 20000;
+		bob.setId("Bob");
+		bob.setName("Bob");
+		PollenUtil.savePublicKey(bob);
+		bob.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scanner) {
+			@Override
+			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
+				User localVault = (User) this.vault;
+				
+				System.out.print("(" + localVault.getName() + ") My salary is = ");
+				double mySalary = scanner.nextDouble();
+				localVault.addPollRealValue(poll.getId(), mySalary);
+
+				double total = localVault.sendNumberPoll(senderMessage.getFrom(), poll);
+
+				result = total + mySalary;
+				return (double) result;
+			}
+		});
+		bob.setSendNumberPollResponseBaseHandler(new SendNumberPollResponseHandler());
+
+		// Charlie
+		User charlie = new User();
+//		charlie.waitTime = 10000;
+		charlie.setId("Charlie");
+		charlie.setName("Charlie");
+		PollenUtil.savePublicKey(charlie);
+		charlie.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scanner) {
+
+			@Override
+			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
+				User localVault = (User) this.vault;
+
+				System.out.print("(" + localVault.getName() + ") My salary is = ");
+				double mySalary = scanner.nextDouble();
+				localVault.addPollRealValue(poll.getId(), mySalary);
+				
+				double total = localVault.sendNumberPoll(senderMessage.getFrom(), poll);
+
+				result = total + mySalary;
+				return (double) result;
+			}
+		});
+		charlie.setSendNumberPollResponseBaseHandler(new SendNumberPollResponseHandler());
+
+		// register participants
+		alice.register(pollenBroker);
+		bob.register(pollenBroker);
+		charlie.register(pollenBroker);
+
+		List<String> participants = new ArrayList<>();
+		participants.add(bob.getPublicKey());
+		participants.add(charlie.getPublicKey());
+		participants.add(alice.getPublicKey());
+
+		// initialise salary poll
+		NumberPoll salaryPoll = PollRepository.createSalaryPoll();
+		salaryPoll.setOriginator(alice.getPublicKey());
+		salaryPoll.setParticipants(participants);
+
+		// send poll, initiated by Alice
+		double fakeTotal = alice.getRemoteRequester().sendNumberPoll(participants.get(0), salaryPoll);
+		double aliceFakeSalary = alice.getPollFakeValue(salaryPoll.getId());
+		System.out.println("Total real salary = fakeTotal - aliceFakeSalary");
+		System.out
+				.println("Total real salary = " + String.valueOf(fakeTotal) + " - " + String.valueOf(aliceFakeSalary));
+		double realTotal = fakeTotal - aliceFakeSalary;
+		System.out.println("Total real salary = " + realTotal);
+		double expectedTotal = alice.getPollRealValue(salaryPoll.getId()) + bob.getPollRealValue(salaryPoll.getId())
+				+ charlie.getPollRealValue(salaryPoll.getId());
+		System.out.println("expectedTotal = " + alice.getPollRealValue(salaryPoll.getId()) + " + "
+				+ bob.getPollRealValue(salaryPoll.getId()) + " + " + charlie.getPollRealValue(salaryPoll.getId()));
+		assertEquals(expectedTotal, realTotal, 0);
 
 		alice.unregister();
 		bob.unregister();

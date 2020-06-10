@@ -31,6 +31,7 @@ rule VaultClass transform class : EClass {
     }
   	template: "VaultClass.egl"
   	target: outputSource + class.filename()
+  	overwrite: false
 }
 
 /***
@@ -90,6 +91,7 @@ rule RequestHandlerClasses transform eOperation : EOperation {
     }
   	template: "RequestHandler.egl"
   	target: outputSource + eOperation.getRequestHandlerFileName()
+  	overwrite: false
 }
 
 /***
@@ -104,6 +106,7 @@ rule ResponseHandlerClasses transform eOperation : EOperation {
     }
   	template: "ResponseHandler.egl"
   	target: outputSource + eOperation.getResponseHandlerFilename()
+  	overwrite: false
 }
 
 /***
@@ -114,7 +117,8 @@ rule RequestBaseHandlerClasses transform eOperation : EOperation {
 	parameters : Map {
   		"packageName" = packageName,
     	"eOperation" = eOperation,
-    	"requesterPublicKey"= requesterPublicKey
+    	"requesterPublicKey"= requesterPublicKey,
+    	"requesteePublicKey"= requesteePublicKey
     }
   	template: "RequestBaseHandler.egl"
   	target: outputGen + eOperation.getRequestBaseHandlerFileName()

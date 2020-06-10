@@ -5,12 +5,17 @@ import static org.junit.Assert.assertEquals;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 import java.util.List;
 
+import org.apache.activemq.ActiveMQConnection;
 import org.junit.Test;
 import org.vaultage.core.VaultageServer;
+import org.vaultage.demo.fairnet.AddFriendRequestBaseHandler;
 import org.vaultage.demo.fairnet.AddFriendRequestHandler;
+import org.vaultage.demo.fairnet.AddFriendResponseBaseHandler;
 import org.vaultage.demo.fairnet.AddFriendResponseHandler;
+import org.vaultage.demo.fairnet.FairnetBroker;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.GetPostRequestHandler;
 import org.vaultage.demo.fairnet.GetPostResponseHandler;
@@ -29,8 +34,9 @@ public class FairnetTest {
 
 	@Test
 	public void testRegistration() throws Exception {
-
+		
 		String address = "vm://localhost";
+		
 		VaultageServer fairnet = new VaultageServer(address);
 
 		/*** User ***/
@@ -112,6 +118,9 @@ public class FairnetTest {
 		String decryptedMessage = VaultageEncryption.doubleDecrypt(encryptedMessage, user2.getPublicKey(),
 				user1.getPrivateKey());
 		assertEquals(message, decryptedMessage);
+
+		user1.unregister();
+		user2.unregister();
 	}
 
 	@Test
@@ -169,14 +178,14 @@ public class FairnetTest {
 
 	@Test
 	public void testAddFriend() throws Exception {
- 
+
 		VaultageServer fairnet = new VaultageServer("vm://localhost");
 
 		// user 1
 		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet);
 		user1.register(fairnet);
 		Thread.sleep(SLEEP_TIME);
-		
+
 		user1.setAddFriendRequestBaseHandler(new AddFriendRequestHandler());
 
 		// user 2
@@ -186,22 +195,22 @@ public class FairnetTest {
 
 		user2.setAddFriendResponseBaseHandler(new AddFriendResponseHandler());
 
-		//add friend using remote requester
+		// add friend using remote requester
 		RemoteRequester remoteRequester = new RemoteRequester(fairnet, user2);
 
 		// simulate request user1's post list by user 2
 		remoteRequester.addFriend(user1.getPublicKey());
-		
+
 		assertEquals(true, user1.getFriends().stream().anyMatch(f -> f.getPublicKey().equals(user2.getPublicKey())));
 		assertEquals(true, user2.getFriends().stream().anyMatch(f -> f.getPublicKey().equals(user1.getPublicKey())));
 
 		user1.unregister();
 		user2.unregister();
 	}
-	
+
 	@Test
 	public void testGetFriendPosts() throws Exception {
- 
+
 		VaultageServer fairnet = new VaultageServer("vm://localhost");
 
 		// user 1
@@ -280,6 +289,80 @@ public class FairnetTest {
 
 		user1.unregister();
 		user2.unregister();
+	}
+
+	@Test
+	public void testAsycAddFriend() throws Exception {
+
+		String address = "tcp://localhost:61616";
+		
+		FairnetBroker broker = new FairnetBroker();
+		broker.start(address);
+		
+		VaultageServer fairnet = new VaultageServer(address);
+
+		// user 1
+		FairnetVault bob = createVault("bob[at]publickey.net", "Bob", fairnet);
+		bob.setAddFriendRequestBaseHandler(new AddFriendRequestHandler());
+		bob.setAddFriendResponseBaseHandler(new AddFriendResponseHandler());
+
+		// user 2
+		FairnetVault alice = createVault("alice[at]publickey.com", "Alice", fairnet);
+		alice.setAddFriendRequestBaseHandler(new AddFriendRequestHandler());
+		alice.setAddFriendResponseBaseHandler(new AddFriendResponseHandler());
+
+		// user 3
+		FairnetVault charlie = createVault("charlie[at]publickey.io", "Charlie", fairnet);
+		charlie.setAddFriendRequestBaseHandler(new AddFriendRequestHandler());
+		charlie.setAddFriendResponseBaseHandler(new AddFriendResponseHandler());
+		
+		
+		bob.getAddFriendRequestBaseHandler().isImmediatelyResponded(false);
+		charlie.getAddFriendRequestBaseHandler().isImmediatelyResponded(false);
+		
+		alice.connect(fairnet);
+		alice.subscribe();
+
+		bob.connect(fairnet);
+		bob.subscribe();
+		
+		charlie.connect(fairnet);
+		charlie.subscribe();
+		
+		Thread.sleep(SLEEP_TIME);
+		
+		bob.disconnect();
+		charlie.disconnect();
+		Thread.sleep(SLEEP_TIME);
+		
+		alice.getRemoteRequester().requestAddFriend(bob.getPublicKey());
+		alice.getRemoteRequester().requestAddFriend(charlie.getPublicKey());
+				
+		Thread.sleep(SLEEP_TIME);
+		
+		broker.stop();
+		broker.start(address);
+		
+		Thread.sleep(SLEEP_TIME);
+		
+		bob.connect(fairnet);
+		charlie.connect(fairnet);
+		bob.subscribe();
+		charlie.subscribe();
+		
+		
+		Thread.sleep(SLEEP_TIME);
+		assertEquals(true, bob.isFriend(alice.getPublicKey()));
+		assertEquals(false, alice.isFriend(bob.getPublicKey()));
+		
+		Thread.sleep(SLEEP_TIME);
+		assertEquals(true, charlie.isFriend(alice.getPublicKey()));
+		assertEquals(false, alice.isFriend(charlie.getPublicKey()));
+
+		
+		alice.unregister();
+		bob.unregister();
+		charlie.unregister();
 	}
 
 	private FairnetVault createVault(String id, String name, VaultageServer fairnet)

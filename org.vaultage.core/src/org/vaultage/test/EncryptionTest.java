@@ -1,6 +1,5 @@
 package org.vaultage.test;
 
-
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -40,8 +39,8 @@ public class EncryptionTest {
 	private KeyFactory keyFactory;
 
 	public EncryptionTest() throws NoSuchAlgorithmException {
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.ALGORITHM);
-		keyFactory = KeyFactory.getInstance(VaultageEncryption.ALGORITHM);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.KEY_GENERATOR_ALGORITHM);
+		keyFactory = KeyFactory.getInstance(VaultageEncryption.KEY_GENERATOR_ALGORITHM);
 		keyPairGen.initialize(VaultageEncryption.KEY_LENGTH);
 
 		receiverKeyPair = keyPairGen.generateKeyPair();
@@ -63,7 +62,10 @@ public class EncryptionTest {
 	@Test
 	public void testDecryptionWithKeysFromFiles() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException,
 			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException {
-		String message = "Foo Bar!";
+		String message = "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789";
 
 		PublicKey publicKey = receiverKeyPair.getPublic();
 		PrivateKey privateKey = receiverKeyPair.getPrivate();
@@ -94,21 +96,15 @@ public class EncryptionTest {
 		assertEquals(publicKeyString, loadedPublicKeyString);
 		assertEquals(message, decryptedMessage);
 	}
-
+	
 	@Test
 	public void testDoubleEncryptionWithKeysFromFiles()
 			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException {
-		String message = "Boo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
-				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
-				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
-				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
-				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
-				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
-				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
-				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
-				+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!"
-		+ " Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar! Foo Bar!";
+		String message = "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789";
 
 		// RECEIVER
 		PublicKey receiverPublicKey = receiverKeyPair.getPublic();
@@ -158,11 +154,13 @@ public class EncryptionTest {
 
 		// ENCRYPT / DECRYPT
 		System.out.println("Original Message: " + message);
-		String encryptedMessage = VaultageEncryption.doubleEncrypt(message, receiverLoadedPublicKey, senderLoadedPrivateKey);
+		String encryptedMessage = VaultageEncryption.doubleEncrypt(message, receiverLoadedPublicKey,
+				senderLoadedPrivateKey);
 		System.out.println("Double Encrypted Message: " + encryptedMessage);
-		String decryptedMessage = VaultageEncryption.doubleDecrypt(encryptedMessage, senderLoadedPublicKey, receiverLoadedPrivateKey); 	
+		String decryptedMessage = VaultageEncryption.doubleDecrypt(encryptedMessage, senderLoadedPublicKey,
+				receiverLoadedPrivateKey);
 		System.out.println("Double Decrypted Message: " + decryptedMessage);
-		
+
 		assertEquals(message, decryptedMessage);
 	}
 
@@ -222,9 +220,10 @@ public class EncryptionTest {
 	public void testLongDecryption() throws NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException,
 			BadPaddingException, UnsupportedEncodingException, NoSuchPaddingException, IOException {
 
-		String message = "Not all sequences of bytes can be mapped to characters in UTF-16. "
-				+ "Not all sequences of bytes can be mapped to characters in UTF-16. "
-				+ "Not all sequences of bytes can be mapped to characters in UTF-16. ";
+		String message = "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789";
 
 		PublicKey publicKey = receiverKeyPair.getPublic();
 		PrivateKey privateKey = receiverKeyPair.getPrivate();

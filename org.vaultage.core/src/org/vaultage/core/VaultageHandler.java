@@ -32,6 +32,7 @@ public abstract class VaultageHandler {
 			}
 		};
 		thread.start();
+//		this.run();
 		if (callerThread != null) {
 			thread.join();
 			synchronized (callerThread) {
