@@ -1,13 +1,14 @@
 [% import 'Util.eol'; %]
 package [%=packageName%];
 
+import java.util.List;
 import org.vaultage.core.VaultageMessage;
 // import [%=packageName%].[%=eOperation.getClassResponseBaseHandlerName()%];
 
 public class [%=eOperation.getClassResponseHandlerName()%] extends [%=eOperation.getClassResponseBaseHandlerName()%] {
 	
 	@Override
-	public Object run(VaultageMessage senderMessage) throws Exception {
+	public Object run(VaultageMessage senderMessage[%=eOperation.getResponseHandlerParams()%]) throws Exception {
 		return result;
 	}
 }

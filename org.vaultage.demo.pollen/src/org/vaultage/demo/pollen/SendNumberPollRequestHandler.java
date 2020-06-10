@@ -11,6 +11,7 @@ public class SendNumberPollRequestHandler extends SendNumberPollRequestBaseHandl
 	private Scanner scanner;
 
 	public SendNumberPollRequestHandler(Scanner scanner) {
+		isImmediatelyResponded = true;
 		this.scanner = scanner;
 	}
 

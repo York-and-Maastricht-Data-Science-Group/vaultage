@@ -10,7 +10,7 @@ import org.vaultage.core.VaultageMessage;
 // import [%=packageName%].[%= eOperation.getClassResponseHandlerName() %];
 
 public abstract class [%=eOperation.getClassRequestBaseHandlerName()%] extends VaultageHandler {
-	public boolean isImmediatelyResponded = true;
+	protected boolean isImmediatelyResponded = true;
 	
 	public void isImmediatelyResponded (boolean isImmediatelyResponded) {
 		this.isImmediatelyResponded = isImmediatelyResponded;

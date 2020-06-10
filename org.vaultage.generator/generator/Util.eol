@@ -170,7 +170,15 @@ operation EOperation getRespondToParams(): String {
 		params = params + requesterPublicKey;
 	}
   	if (self.eType <> null or self.eType <> ""){
-  	  params = params + "," + self.getType() + " result";	
+  	  params = params + ", " + self.getType() + " result";	
+  	}
+   return params;
+}
+
+operation EOperation getResponseHandlerParams(): String {
+	var params = "";
+  	if (self.eType <> null or self.eType <> ""){
+  	  params = params + ", " + self.getType() + " result";	
   	}
    return params;
 }

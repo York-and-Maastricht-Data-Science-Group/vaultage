@@ -1,6 +1,7 @@
 [% import 'Util.eol'; %]
 package [%=packageName%];
 
+import java.util.List;
 import java.util.ArrayList;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageHandler;
@@ -13,13 +14,13 @@ public class [%=eOperation.getClassResponseBaseHandlerName()%] extends VaultageH
 	public void run() {
 		try {
 			result = Vaultage.Gson.fromJson((String) message.getValue("result"), [%= eOperation.getReturnTypeImplementation() %].class);
-			this.result = run(message);
+			this.result = run(message, ([%=eOperation.getReturnType()%]) result);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public Object run(VaultageMessage senderMessage) throws Exception {
+	public Object run(VaultageMessage senderMessage[%=eOperation.getResponseHandlerParams()%]) throws Exception {
 		return result;
 	}
 }

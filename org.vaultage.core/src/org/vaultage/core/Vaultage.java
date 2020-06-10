@@ -154,7 +154,7 @@ public class Vaultage {
 //			System.out.println("Send to: " + topicId);
 
 			expectedReplyTokens.add(message.getToken());
-			System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
+//			System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -195,7 +195,7 @@ public class Vaultage {
 						String json = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
 								receiverPrivateKey);
 
-						System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + json);
+//						System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + json);
 
 						VaultageMessage vaultageMessage = Gson.fromJson(json, VaultageMessage.class);
 						String operation = vaultageMessage.getOperation();
@@ -204,7 +204,7 @@ public class Vaultage {
 //						if (handler != null && !handler.isAlive()) {
 //							threads.add(handler);
 //							System.out.println("Run: " + handler.getName());
-						handler.execute(topicId, vaultageMessage);
+							handler.execute(topicId, vaultageMessage);
 //						}
 					} catch (Exception e) {
 						e.printStackTrace();
