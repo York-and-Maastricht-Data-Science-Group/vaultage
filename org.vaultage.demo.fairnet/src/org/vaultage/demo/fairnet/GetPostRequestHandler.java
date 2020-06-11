@@ -1,4 +1,3 @@
-/**** protected region GetPostRequestHandler on begin ****/
 package org.vaultage.demo.fairnet;
 
 import org.vaultage.core.VaultageMessage;
@@ -11,4 +10,3 @@ public class GetPostRequestHandler extends GetPostRequestBaseHandler {
 		return localVault.getPost(senderMessage.getFrom(), postId);
 	}
 }
-/**** protected region GetPostRequestHandler end ****/
