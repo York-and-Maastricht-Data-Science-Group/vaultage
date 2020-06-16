@@ -5,23 +5,20 @@ import static org.junit.Assert.assertEquals;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
 import java.util.List;
 
-import org.apache.activemq.ActiveMQConnection;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.vaultage.core.VaultageServer;
-import org.vaultage.demo.fairnet.AddFriendRequestBaseHandler;
 import org.vaultage.demo.fairnet.AddFriendRequestHandler;
-import org.vaultage.demo.fairnet.AddFriendResponseBaseHandler;
 import org.vaultage.demo.fairnet.AddFriendResponseHandler;
 import org.vaultage.demo.fairnet.FairnetBroker;
 import org.vaultage.demo.fairnet.FairnetVault;
+import org.vaultage.demo.fairnet.Friend;
 import org.vaultage.demo.fairnet.GetPostRequestHandler;
 import org.vaultage.demo.fairnet.GetPostResponseHandler;
 import org.vaultage.demo.fairnet.GetPostsRequestHandler;
 import org.vaultage.demo.fairnet.GetPostsResponseHandler;
-import org.vaultage.demo.fairnet.Friend;
 import org.vaultage.demo.fairnet.Post;
 import org.vaultage.demo.fairnet.RemoteRequester;
 import org.vaultage.util.VaultageEncryption;
@@ -31,13 +28,19 @@ public class FairnetTest {
 	// change this to a bigger value if your machine if slower than the machine I
 	// used for testing
 	private static final int SLEEP_TIME = 50;
+	private static final String BROKER_ADDRESS = "tcp://localhost:61616";
+	private static FairnetBroker BROKER = null;
+
+	@BeforeClass
+	public static void startBroker() throws Exception {
+		BROKER = new FairnetBroker();
+		BROKER.start(BROKER_ADDRESS);
+	}
 
 	@Test
 	public void testRegistration() throws Exception {
 		
-		String address = "vm://localhost";
-		
-		VaultageServer fairnet = new VaultageServer(address);
+		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
 		/*** User ***/
 		FairnetVault user1 = new FairnetVault();
@@ -294,12 +297,7 @@ public class FairnetTest {
 	@Test
 	public void testAsycAddFriend() throws Exception {
 
-		String address = "tcp://localhost:61616";
-		
-		FairnetBroker broker = new FairnetBroker();
-		broker.start(address);
-		
-		VaultageServer fairnet = new VaultageServer(address);
+		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
 		// user 1
 		FairnetVault bob = createVault("bob[at]publickey.net", "Bob", fairnet);
@@ -320,19 +318,16 @@ public class FairnetTest {
 		bob.getAddFriendRequestBaseHandler().isImmediatelyResponded(false);
 		charlie.getAddFriendRequestBaseHandler().isImmediatelyResponded(false);
 		
-		alice.connect(fairnet);
-		alice.subscribe();
+		alice.register(fairnet);
 
-		bob.connect(fairnet);
-		bob.subscribe();
+		bob.register(fairnet);
 		
-		charlie.connect(fairnet);
-		charlie.subscribe();
+		charlie.register(fairnet);
 		
 		Thread.sleep(SLEEP_TIME);
 		
-		bob.disconnect();
-		charlie.disconnect();
+		bob.unregister();
+		charlie.unregister();
 		Thread.sleep(SLEEP_TIME);
 		
 		alice.getRemoteRequester().requestAddFriend(bob.getPublicKey());
@@ -340,15 +335,14 @@ public class FairnetTest {
 				
 		Thread.sleep(SLEEP_TIME);
 		
-		broker.stop();
-		broker.start(address);
+		BROKER.stop();
+		BROKER.start(BROKER_ADDRESS);
 		
-		Thread.sleep(SLEEP_TIME);
+		Thread.sleep(SLEEP_TIME * 10);
 		
-		bob.connect(fairnet);
-		charlie.connect(fairnet);
-		bob.subscribe();
-		charlie.subscribe();
+		alice.register(fairnet);
+		bob.register(fairnet);
+		charlie.register(fairnet);
 		
 		
 		Thread.sleep(SLEEP_TIME);

@@ -1,7 +1,5 @@
-/**** protected region SendNumberPollRequestHandler on begin ****/
 package org.vaultage.demo.pollen;
 
-import java.util.List;
 import java.util.Scanner;
 
 import org.vaultage.core.VaultageMessage;
@@ -29,4 +27,3 @@ public class SendNumberPollRequestHandler extends SendNumberPollRequestBaseHandl
 		this.scanner = scanner;
 	}
 }
-/**** protected region SendNumberPollRequestHandler end ****/
