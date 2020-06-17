@@ -1,16 +1,21 @@
-var e = new EPackage;
-e.getBasePackage().println();
-
 operation EClass filename() : String {
-    return self.name + ".java";
+	return self.name + ".java";
+}
+
+operation EClass remoteName() : String {
+	return "Remote" + self.name;
+}
+
+operation EClass remoteFilename() : String {
+	return self.remoteName() + ".java";
 }
 
 operation EClass getBaseName() : String {
-    return self.name + "Base";
+	return self.name + "Base";
 }
 
 operation EClass baseFilename() : String {
-    return self.getBaseName() + ".java";
+	return self.getBaseName() + ".java";
 }
 
 operation EPackage getBrokerName() {
@@ -146,12 +151,9 @@ operation EOperation isPublic() : Boolean{
 }
 
 operation EOperation getParams(): String {
-	var params = "";
-  	for (eParameter in self.eParameters) {
-  	  params = params + ", ";
-      params = params + eParameter.getType() + " " + eParameter.name;
-  	}
-   return params;
+	return self.eParameters
+		.collect(p | p.getType() + " " + p.name)
+		.concat(", ");
 }
 
 operation EOperation getParamsWithoutTypes(): String {

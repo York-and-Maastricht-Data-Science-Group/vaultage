@@ -30,7 +30,6 @@ public abstract class [%=class.getBaseName()%] {
 	protected Vaultage vaultage;
 	protected Map<String, VaultageHandler> handlers;	
 	protected VaultageServer vaultageServer;
-	protected RemoteRequester remoteRequester;
 
 [% for (eOperation in class.eOperations){ %]
 	protected [%= eOperation.name.firstToUpperCase()%]RequestBaseHandler [%=eOperation.name%]RequestBaseHandler;
@@ -45,15 +44,10 @@ public abstract class [%=class.getBaseName()%] {
 		KeyPair keyPair = VaultageEncryption.generateKeys();
 		this.publicKey = VaultageEncryption.getPublicKey(keyPair);
 		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
-		remoteRequester = new RemoteRequester(vaultageServer, this);
 	}
 	
 	public VaultageServer getVaultageServer(){
 		return this.vaultageServer;
-	}
-	
-	public RemoteRequester getRemoteRequester() {
-		return remoteRequester;
 	}
 	
 	public String getId(){

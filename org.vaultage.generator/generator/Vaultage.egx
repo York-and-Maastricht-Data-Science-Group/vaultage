@@ -11,7 +11,6 @@ pre {
 	var packagePath =  packageName.replace("\\.", "/") + "/";
 	var outputSource = javaSourcePath + packagePath;
 	var outputGen = javaGenPath + packagePath;
-	var requesterFilename = "RemoteRequester.java";
 	var vaultClassName = EClass.allInstances.selectOne( c | c.hasVaultAnnotation()).name;
 	var requesterPublicKey = "String requesterPublicKey";
 	var requesteePublicKey = "String requesteePublicKey";
@@ -69,14 +68,10 @@ rule VaultBaseClass transform class : EClass {
 rule RemoteRequesterClass transform class : EClass {
 	guard : class.hasVaultAnnotation() 
 	parameters : Map {
-  		"packageName" = packageName,  
-    	"class" = class,
-    	"vaultClassName" = vaultClassName,
-    	"requesterPublicKey"= requesterPublicKey,
-    	"requesteePublicKey"= requesteePublicKey
-    }
-  	template: "RemoteRequester.egl"
-  	target: outputGen + requesterFilename
+		"packageName" = packageName
+	}
+	template: "RemoteRequester.egl"
+	target: outputGen + class.remoteFilename()
 }
 
 /***

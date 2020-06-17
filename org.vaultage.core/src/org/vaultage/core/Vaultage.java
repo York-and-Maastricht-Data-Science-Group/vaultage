@@ -122,6 +122,10 @@ public class Vaultage {
 		System.out.println("Finished!");
 	}
 
+	public static String serialise(Object obj) {
+		return Gson.toJson(obj);
+	}
+
 	/***
 	 * A method to send a message to ActiveMQ broker
 	 * 
