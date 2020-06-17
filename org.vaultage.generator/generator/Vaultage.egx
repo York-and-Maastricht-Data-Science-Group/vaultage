@@ -63,14 +63,14 @@ rule VaultBaseClass transform class : EClass {
 }
 
 /***
- * To generate a remote requester class
+ * To generate a remote vault class
 ***/
-rule RemoteRequesterClass transform class : EClass {
+rule RemoteVaultClass transform class : EClass {
 	guard : class.hasVaultAnnotation() 
 	parameters : Map {
 		"packageName" = packageName
 	}
-	template: "RemoteRequester.egl"
+	template: "RemoteVault.egl"
 	target: outputGen + class.remoteFilename()
 }
 
