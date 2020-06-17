@@ -57,7 +57,7 @@ rule VaultBaseClass transform class : EClass {
 	guard : class.hasVaultAnnotation()
 	parameters : Map {
   		"packageName" = packageName,
-    	"requesterPublicKey"= requesterPublicKey
+    	"appName" = ePackage.name.firstToUpperCase()
     }
   	template: "VaultBase.egl"
   	target: outputGen + class.baseFilename()

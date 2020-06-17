@@ -11,10 +11,8 @@ import java.util.Set;
 
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
@@ -26,6 +24,7 @@ import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerFactory;
 import org.apache.activemq.broker.BrokerService;
+import org.vaultage.core.VaultageMessage.MessageType;
 import org.vaultage.util.VaultageEncryption;
 
 import com.google.gson.Gson;
@@ -42,12 +41,15 @@ public class Vaultage {
 
 	public static Gson Gson = new GsonBuilder().setPrettyPrinting().create();
 
+	private Object vault;
 	private String address;
 	private ActiveMQConnectionFactory connectionFactory;
 	private Connection connection;
 	private Session session;
-	private Set<VaultageHandler> threads = new HashSet<VaultageHandler>();
 	private Set<String> expectedReplyTokens = new HashSet<>();
+
+	private RequestMessageHandler requestMessageHandler;
+	private ResponseMessageHandler responseMessageHandler;
 
 	public Set<String> getExpectedReplyTokens() {
 		return expectedReplyTokens;
@@ -55,6 +57,13 @@ public class Vaultage {
 
 	public void setExpectedReplyTokens(Set<String> expectedReplyTokens) {
 		this.expectedReplyTokens = expectedReplyTokens;
+	}
+
+	public Vaultage() {
+	}
+
+	public Vaultage(Object vault) {
+		this.vault = vault;
 	}
 
 	/***
@@ -102,7 +111,7 @@ public class Vaultage {
 			}
 		});
 
-		v2.subscribe(receiverPublicKey, receiverPrivateKey, handlers);
+		v2.subscribe(receiverPublicKey, receiverPrivateKey);
 
 		Thread.sleep(SLEEP_TIME);
 
@@ -126,6 +135,10 @@ public class Vaultage {
 		return Gson.toJson(obj);
 	}
 
+	public static <T> T deserialise(String content, Class<T> c) {
+		return Gson.fromJson(content, c);
+	}
+
 	/***
 	 * A method to send a message to ActiveMQ broker
 	 * 
@@ -146,7 +159,7 @@ public class Vaultage {
 			producer.setDeliveryMode(DeliveryMode.PERSISTENT);
 
 			// Create a message
-			String text = Gson.toJson(message).trim();
+			String text = serialise(message).trim();
 
 			// encrypt message
 			String encryptedMessage = VaultageEncryption.doubleEncrypt(text, topicId, senderPrivateKey).trim();
@@ -173,7 +186,7 @@ public class Vaultage {
 	 * @param handlers
 	 * @throws InterruptedException
 	 */
-	public void subscribe(String topicId, String receiverPrivateKey, Map<String, VaultageHandler> handlers)
+	public void subscribe(String topicId, String receiverPrivateKey)
 			throws InterruptedException {
 		try {
 			// Create the destination (Topic or Queue)
@@ -196,20 +209,24 @@ public class Vaultage {
 						String encryptedMessage = mergedMessage.substring(VaultageEncryption.PUBLIC_KEY_LENGTH,
 								mergedMessage.length());
 
-						String json = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
+						String content = VaultageEncryption.doubleDecrypt(encryptedMessage,
+								senderPublicKey,
 								receiverPrivateKey);
 
-//						System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + json);
+						// System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
 
-						VaultageMessage vaultageMessage = Gson.fromJson(json, VaultageMessage.class);
-						String operation = vaultageMessage.getOperation();
+						VaultageMessage vaultageMessage = Vaultage.deserialise(content, VaultageMessage.class);
+						MessageType msgType = vaultageMessage.getMessageType();
 
-						VaultageHandler handler = handlers.get(operation);
-//						if (handler != null && !handler.isAlive()) {
-//							threads.add(handler);
-//							System.out.println("Run: " + handler.getName());
-							handler.execute(topicId, vaultageMessage);
-//						}
+						switch (msgType) {
+						case REQUEST:
+							// calls the user vault method associated with the operation
+							requestMessageHandler.process(vaultageMessage, senderPublicKey, vault);
+							break;
+						case RESPONSE:
+							// calls the registered handler of the operation
+							responseMessageHandler.process(vaultageMessage, senderPublicKey, vault);
+						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -254,11 +271,6 @@ public class Vaultage {
 	 * @throws Exception
 	 */
 	public void disconnect() throws Exception {
-		for (VaultageHandler h : threads) {
-			if (h.isAlive()) {
-				h.interrupt();
-			}
-		}
 		session.close();
 		connection.stop();
 		connection.close();
@@ -280,6 +292,14 @@ public class Vaultage {
 	 */
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public void setRequestMessageHandler(RequestMessageHandler requestMessageHandler) {
+		this.requestMessageHandler = requestMessageHandler;
+	}
+
+	public void setResponseMessageHandler(ResponseMessageHandler responseMessageHandler) {
+		this.responseMessageHandler = responseMessageHandler;
 	}
 
 }

@@ -169,7 +169,7 @@ operation EOperation getParamsWithoutTypes(): String {
 operation EOperation getRespondToParams(): String {
 	var params = "";
 	if (not self.isPublic()){
-		params = params + requesterPublicKey;
+		params = params + "String requesterPublicKey";
 	}
   	if (self.eType <> null or self.eType <> ""){
   	  params = params + ", " + self.getType() + " result";	
@@ -208,7 +208,7 @@ operation EOperation getRequesteeParams(): String {
 operation EOperation getRequesterParams(): String {
 	var params = "";
 	if (not self.isPublic()){
-		params = params + requesterPublicKey;
+		params = params + "String requesterPublicKey";
 	}
   	for (eParameter in self.eParameters) {
   	  params = params + ", ";
