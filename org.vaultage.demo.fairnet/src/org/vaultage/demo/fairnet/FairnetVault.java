@@ -1,4 +1,3 @@
-/**** protected region FairnetVault on begin ****/
 package org.vaultage.demo.fairnet;
 
 import java.util.ArrayList;
@@ -83,4 +82,3 @@ public class FairnetVault extends FairnetVaultBase {
 	}
 
 }
-/**** protected region FairnetVault end ****/

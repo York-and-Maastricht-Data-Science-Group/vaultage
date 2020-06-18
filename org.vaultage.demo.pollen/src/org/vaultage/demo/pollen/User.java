@@ -1,16 +1,22 @@
-/**** protected region User on begin ****/
 package org.vaultage.demo.pollen;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.Scanner;
+
+import org.vaultage.demo.pollen.cli.PollenCLI;
 
 public class User extends UserBase {
 	private String name = new String();
+	// token to poll map
 	private Map<String, NumberPoll> polls = new HashMap<>();
+	
+	// poll id to value maps
 	private Map<String, Double> pollFakeValues = new HashMap<>();
 	private Map<String, Double> pollRealValues = new HashMap<>();
+	private Map<String, Double> numberPollResults = new HashMap<>();
+	
 	public long waitTime = 0;
 
 	public User() throws Exception {
@@ -45,21 +51,7 @@ public class User extends UserBase {
 
 	// operations
 	public double sendNumberPoll(String requesterPublicKey, NumberPoll poll) throws Exception {
-		double result = 0;
-		this.polls.put(poll.getId(), poll);
-		if (this.getPublicKey().equals(poll.getOriginator())) {
-			double fakeSalary = (new Random()).nextInt(200 - 100) + 100;
-			pollFakeValues.put(poll.getId(), fakeSalary);
-			result = fakeSalary;
-		} else {
-			for (String publicKey : poll.getParticipants()) {
-				if (!publicKey.equals(this.getPublicKey()) && !publicKey.equals(requesterPublicKey)) {
-					result = result + this.getRemoteRequester().sendNumberPoll(publicKey, poll);
-//					this.getRemoteRequester().requestSendNumberPoll(publicKey, poll);
-				}
-			}
-		}
-		return result;
+		return 1.0;
 	}
 
 	public List<Integer> sendMultivaluedPoll(String requesterPublicKey, MultivaluedPoll poll) throws Exception {
@@ -79,5 +71,21 @@ public class User extends UserBase {
 		return 0;
 	}
 
+	public void setNumberPollResult(String pollId, double result) {
+		numberPollResults.put(pollId, result);
+	}
+
+	public double getNumberPollResult(String pollId) {
+		if (numberPollResults.containsKey(pollId)) {
+			return numberPollResults.get(pollId);
+		}
+		return -288.0;
+	}
+
+	public double sendNumberPoll(User requester, NumberPoll poll) {
+		Scanner s = new Scanner(System.in);
+		PollenCLI.displayPoll(poll);
+		return PollenCLI.readValue(s);
+	}
+
 }
-/**** protected region User end ****/

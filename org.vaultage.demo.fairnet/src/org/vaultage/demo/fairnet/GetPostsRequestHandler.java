@@ -1,10 +1,7 @@
-/**** protected region GetPostsRequestHandler on begin ****/
 package org.vaultage.demo.fairnet;
 
 import java.util.List;
-
 import org.vaultage.core.VaultageMessage;
-import org.vaultage.demo.fairnet.FairnetVault;
 
 public class GetPostsRequestHandler extends GetPostsRequestBaseHandler {
 
@@ -14,4 +11,3 @@ public class GetPostsRequestHandler extends GetPostsRequestBaseHandler {
 		return localVault.getPosts(senderMessage.getFrom());
 	}
 }
-/**** protected region GetPostsRequestHandler end ****/
