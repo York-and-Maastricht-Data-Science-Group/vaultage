@@ -46,36 +46,41 @@ public class User extends UserBase {
 
 	// operations
 	public double sendNumberPoll(String requesterPublicKey, NumberPoll poll) throws Exception {
-		double result = 0;
-		this.polls.put(poll.getId(), poll);
-		if (this.getPublicKey().equals(poll.getOriginator())) {
-			double fakeSalary = (new Random()).nextInt(200 - 100) + 100;
-			pollFakeValues.put(poll.getId(), fakeSalary);
-			result = fakeSalary;
-		} else {
-			Iterator<String> iterator = poll.getParticipants().iterator();
-			while(iterator.hasNext()) {
-				String item = iterator.next();
-				if (item.equals(this.getPublicKey()) || item.equals(requesterPublicKey)) {
-					iterator.remove();
-				}
-			}
-			if (poll.getParticipants().size() == 0) {
-				result = result + this.getRemoteRequester().sendNumberPoll(poll.getOriginator(), poll);
-			} else {
-				result = result + this.getRemoteRequester().sendNumberPoll(poll.getParticipants().get(0), poll);
-			}
-			
-//			for (String publicKey : poll.getParticipants()) {
-//				if (!publicKey.equals(this.getPublicKey()) && !publicKey.equals(requesterPublicKey)) {
-//					result = result + this.getRemoteRequester().sendNumberPoll(publicKey, poll);
-//			//		this.getRemoteRequester().requestSendNumberPoll(publicKey, poll);
-//				}
-//			}
-		}
-		return result;
+		return 1.0;
 	}
 
+//	// operations
+//		public double sendNumberPoll(String requesterPublicKey, NumberPoll poll) throws Exception {
+//			double result = 0;
+//			this.polls.put(poll.getId(), poll);
+//			if (this.getPublicKey().equals(poll.getOriginator())) {
+//				double fakeSalary = (new Random()).nextInt(200 - 100) + 100;
+//				pollFakeValues.put(poll.getId(), fakeSalary);
+//				result = fakeSalary;
+//			} else {
+//				Iterator<String> iterator = poll.getParticipants().iterator();
+//				while(iterator.hasNext()) {
+//					String item = iterator.next();
+//					if (item.equals(this.getPublicKey()) || item.equals(requesterPublicKey)) {
+//						iterator.remove();
+//					}
+//				}
+//				if (poll.getParticipants().size() == 0) {
+//					result = result + this.getRemoteRequester().sendNumberPoll(poll.getOriginator(), poll);
+//				} else {
+//					result = result + this.getRemoteRequester().sendNumberPoll(poll.getParticipants().get(0), poll);
+//				}
+//				
+////				for (String publicKey : poll.getParticipants()) {
+////					if (!publicKey.equals(this.getPublicKey()) && !publicKey.equals(requesterPublicKey)) {
+////						result = result + this.getRemoteRequester().sendNumberPoll(publicKey, poll);
+////				//		this.getRemoteRequester().requestSendNumberPoll(publicKey, poll);
+////					}
+////				}
+//			}
+//			return result;
+//			return 1.0;
+//		}
 	public List<Integer> sendMultivaluedPoll(String requesterPublicKey, MultivaluedPoll poll) throws Exception {
 		throw new Exception();
 	}

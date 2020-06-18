@@ -1,0 +1,47 @@
+[% import 'Util.eol'; %]
+package [%=packageName%];
+
+import java.util.List;
+
+import org.vaultage.core.Vaultage;
+import org.vaultage.core.VaultageMessage;
+import org.vaultage.core.VaultageMessage.MessageType;
+
+public class [%=class.remoteName()%] {
+
+	protected [%=class.name%] localVault;
+	protected String remotePublicKey;
+
+	public String getRemotePublicKey() {
+		return remotePublicKey;
+	}
+
+	public [%=class.remoteName()%]([%=class.name%] localVault, String remotePublicKey) {
+		this.localVault = localVault;
+		this.remotePublicKey = remotePublicKey;
+	}
+
+[% for (eOperation in class.eOperations) { %]
+
+	public String [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
+		
+		VaultageMessage message = new VaultageMessage();
+		message.initToken();
+		message.setSenderId(localVault.getId());
+		message.setFrom(localVault.getPublicKey());
+		message.setTo(remotePublicKey);
+		message.setMessageType(MessageType.REQUEST);
+		message.setOperation("[%= eOperation.name %]");
+		
+	[% for (eParamater in eOperation.eParameters) { %]
+		message.putValue("[%=eParamater.name%]", Vaultage.serialise([%=eParamater.name%]));
+	[% } %]
+
+		this.localVault.getVaultage().sendMessage(message.getTo(), localVault.getPublicKey(),
+				localVault.getPrivateKey(), message);
+
+		return message.getToken();
+	}
+
+[% } %]	
+}

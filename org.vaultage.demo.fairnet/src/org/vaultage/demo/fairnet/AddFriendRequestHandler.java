@@ -1,16 +1,13 @@
-/**** protected region AddFriendRequestHandler on begin ****/
 package org.vaultage.demo.fairnet;
 
 import java.util.List;
 import org.vaultage.core.VaultageMessage;
-import org.vaultage.demo.fairnet.FairnetVault;
 
 public class AddFriendRequestHandler extends AddFriendRequestBaseHandler {
 
 	@Override
-	public Boolean run(VaultageMessage senderMessage) throws Exception {
+	public java.lang.Boolean run(VaultageMessage message) throws Exception {	
 		FairnetVault localVault = (FairnetVault) this.vault;
-		return localVault.addFriend(senderMessage.getFrom());
+		return localVault.addFriend(message.getFrom());
 	}
 }
-/**** protected region AddFriendRequestHandler end ****/
