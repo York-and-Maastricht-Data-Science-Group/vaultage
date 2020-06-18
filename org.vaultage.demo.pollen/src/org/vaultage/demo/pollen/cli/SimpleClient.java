@@ -145,7 +145,7 @@ public class SimpleClient {
 
 		NumberPoll poll = PollenCLI.createNumberPoll(scan);
 		poll.setOriginator(user.getPublicKey());
-		// participants stores the list of public keys
+		// participants store the list of public keys
 		List<String> participants = PollenUtil.getParticipants(user.getName());
 		poll.setParticipants(participants);
 

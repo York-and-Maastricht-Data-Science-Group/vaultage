@@ -2,6 +2,7 @@
 package org.vaultage.demo.pollen;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -52,12 +53,25 @@ public class User extends UserBase {
 			pollFakeValues.put(poll.getId(), fakeSalary);
 			result = fakeSalary;
 		} else {
-			for (String publicKey : poll.getParticipants()) {
-				if (!publicKey.equals(this.getPublicKey()) && !publicKey.equals(requesterPublicKey)) {
-					result = result + this.getRemoteRequester().sendNumberPoll(publicKey, poll);
-//					this.getRemoteRequester().requestSendNumberPoll(publicKey, poll);
+			Iterator<String> iterator = poll.getParticipants().iterator();
+			while(iterator.hasNext()) {
+				String item = iterator.next();
+				if (item.equals(this.getPublicKey()) || item.equals(requesterPublicKey)) {
+					iterator.remove();
 				}
 			}
+			if (poll.getParticipants().size() == 0) {
+				result = result + this.getRemoteRequester().sendNumberPoll(poll.getOriginator(), poll);
+			} else {
+				result = result + this.getRemoteRequester().sendNumberPoll(poll.getParticipants().get(0), poll);
+			}
+			
+//			for (String publicKey : poll.getParticipants()) {
+//				if (!publicKey.equals(this.getPublicKey()) && !publicKey.equals(requesterPublicKey)) {
+//					result = result + this.getRemoteRequester().sendNumberPoll(publicKey, poll);
+//			//		this.getRemoteRequester().requestSendNumberPoll(publicKey, poll);
+//				}
+//			}
 		}
 		return result;
 	}
