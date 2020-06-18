@@ -1,4 +1,4 @@
-/**** protected region User on begin ****/
+
 package org.vaultage.demo.pollen;
 
 import java.util.HashMap;
@@ -99,4 +99,3 @@ public class User extends UserBase {
 	}
 
 }
-/**** protected region User end ****/

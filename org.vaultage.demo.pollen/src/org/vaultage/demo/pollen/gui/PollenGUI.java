@@ -23,8 +23,6 @@ import javax.swing.border.LineBorder;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.pollen.NumberPoll;
-import org.vaultage.demo.pollen.SendNumberPollRequestBaseHandler;
-import org.vaultage.demo.pollen.SendNumberPollRequestHandler;
 import org.vaultage.demo.pollen.SendNumberPollResponseHandler;
 import org.vaultage.demo.pollen.User;
 import org.vaultage.demo.pollen.util.PollenUtil;
@@ -58,7 +56,7 @@ public class PollenGUI extends JFrame {
 					user.setName(name);
 					PollenUtil.savePublicKey(user);
 					
-				} catch (Exception e) {
+				} catch (Exception e) { 
 					e.printStackTrace();
 				}
 			}
@@ -165,7 +163,7 @@ public class PollenGUI extends JFrame {
 					DefaultListModel<String> model = (DefaultListModel<String>) listMyPolls.getModel();
 					model.addElement(poll.getId());
 					
-					user.getRemoteRequester().requestSendNumberPoll(participants.get(0), poll);
+//					user.getRemoteRequester().requestSendNumberPoll(participants.get(0), poll);
 					
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -192,25 +190,7 @@ public class PollenGUI extends JFrame {
 
 		user = new User();
 
-		user.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(null) {
-			@Override
-			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
-				
-				DefaultListModel<String> model = (DefaultListModel<String>) listMyPolls.getModel();
-				model.addElement(poll.getId());
-				
-//				User localVault = (User) this.vault;
-//				double total = localVault.sendNumberPoll(senderMessage.getFrom(), poll);
-//				double mySalary = 0;
-//				localVault.addPollRealValue(poll.getId(), mySalary);
-//				result = total + mySalary;
-//				return (double) result;
-				return 0;
-			}
-		});
-		user.getSendNumberPollRequestBaseHandler().isImmediatelyResponded(false);
-		user.setSendNumberPollResponseBaseHandler(new SendNumberPollResponseHandler());
-
+		
 		System.out.println("IsConnected = " + user.register(pollenBroker));
 	}
 }

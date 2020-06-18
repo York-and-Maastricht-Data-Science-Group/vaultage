@@ -1,0 +1,12 @@
+[% import 'Util.eol'; %]
+package [%=packageName%];
+[%
+	var class = eOperation.eContainer();
+%]
+
+import java.util.List;
+
+public interface [%=eOperation.getClassResponseHandlerName()%] {
+
+	public void run([%=class.name%] me, [%=class.remoteName()%] other, String responseToken, [%=eOperation.getReturnType()%] result) throws Exception;
+}

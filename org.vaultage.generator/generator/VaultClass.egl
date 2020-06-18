@@ -1,4 +1,5 @@
 [% import 'Util.eol'; %]
+
 package [%=packageName%];
 
 import java.io.FileNotFoundException;

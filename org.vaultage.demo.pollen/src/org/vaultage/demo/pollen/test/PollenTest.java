@@ -1,5 +1,7 @@
 package org.vaultage.demo.pollen.test;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,17 +40,7 @@ public class PollenTest {
 		User alice = new User();
 		alice.setId("Alice");
 		alice.setName("Alice");
-		alice.setSendNumberPollResponseHandler(new SendNumberPollResponseHandler() {
-
-			@Override
-			public void run(User me, RemoteUser other, String responseToken, double result) throws Exception {
-				NumberPoll poll = me.getPolls().get(responseToken);
-				me.setNumberPollResult(poll.getId(), result);
-				synchronized (this) {
-					this.notify();
-				}
-			}
-		});
+		
 
 		// Bob
 		User bob = new User();
@@ -69,17 +61,34 @@ public class PollenTest {
 		salaryPoll.setOriginator(alice.getPublicKey());
 		salaryPoll.setParticipants(participants);
 
+		double[] actualResult = new double[1]; 
+		
+		SendNumberPollResponseHandler response = new SendNumberPollResponseHandler() {
+			
+			@Override
+			public void run(User me, RemoteUser other, String responseToken, double result) throws Exception {
+				actualResult[0] = result;
+				synchronized (this) {
+					this.notify();
+				}
+			}
+		};
+		
+		alice.setSendNumberPollResponseHandler(response);
+		bob.setSendNumberPollResponseHandler(response);
+		
 		// send poll, initiated by Alice
 		RemoteUser firstParticipant = new RemoteUser(alice, participants.get(0));
 		synchronized (alice.getSendNumberPollResponseHandler()) {
 			System.out.println("Sending poll question to Bob");
 			String token = firstParticipant.sendNumberPoll(salaryPoll);
 			alice.getPolls().put(token, salaryPoll);
-			alice.getSendNumberPollResponseHandler().wait(); // wait for the response
+			SendNumberPollResponseHandler handler = alice.getSendNumberPollResponseHandler();
+			handler.wait(); // wait for the response
 		}
-		double pollResult = alice.getNumberPollResult(salaryPoll.getId());
-		System.out.println("(Alice) Poll result  = " + pollResult);
+		System.out.println("(Alice) Poll result  = " + actualResult[0]);
 
+		assertEquals(1.0, actualResult[0], 0);
 		alice.unregister();
 		bob.unregister();
 	}

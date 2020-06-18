@@ -12,10 +12,10 @@ import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.pollen.NumberPoll;
 import org.vaultage.demo.pollen.PollenBroker;
-import org.vaultage.demo.pollen.SendNumberPollRequestHandler;
+//import org.vaultage.demo.pollen.SendNumberPollRequestHandler;
 import org.vaultage.demo.pollen.SendNumberPollResponseHandler;
 import org.vaultage.demo.pollen.User;
-import org.vaultage.demo.pollen.custom.CustomRemoteUser;
+//import org.vaultage.demo.pollen.custom.CustomRemoteUser;
 import org.vaultage.demo.pollen.util.PollenUtil;
 
 /***
@@ -60,64 +60,64 @@ public class SimpleClient {
 		VaultageServer pollenServer = new VaultageServer(PollenBroker.BROKER_ADDRESS);
 		user.register(pollenServer);
 
-		// set handlers
-		user.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
-
-			@Override
-			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
-				User localVault = (User) this.vault;
-
-				if (localVault.getPublicKey().equals(poll.getOriginator())) {
-
-					System.out.println("The poll request is back to me as the originator");
-					
-					double fakeValue = ThreadLocalRandom.current().nextDouble(MIN_RANDOM, MAX_RANDOM);
-					result = fakeValue;
-					poll2fakeValue.put(poll.getId(), fakeValue);
-
-
-					System.out.printf("Sending fake value: %f\n", fakeValue);
-
-					return (double) result;
-
-				} else {
-					localVault.getPolls().put(poll.getId(), poll);
-
-					System.out.println("\nNew poll received!");
-					
-					List<String> participants = poll.getParticipants();
-					int index = participants.indexOf(localVault.getPublicKey());
-					
-					System.out.printf("I am participant %d\n\n", index + 1);
-
-					PollenCLI.displayPoll(poll);
-					double answer = PollenCLI.readValue(scan);
-
-					String nextParticipant;
-					if (index + 1 < participants.size()) {
-						nextParticipant = participants.get(index + 1);
-						System.out.println("\nSending to next participant");
-					}
-					else {
-						// we were the last participant. back to originator
-						nextParticipant = poll.getOriginator();
-						System.out.println("\nSending back to originator");
-					}
-					double currentTotal =
-							(new CustomRemoteUser(
-									localVault.getVaultageServer(),
-									localVault,
-									nextParticipant))
-							.sendNumberPoll(poll);
-					
-					System.out.printf("\nCurrent accumulated value: %f\n", currentTotal);
-					
-					result = currentTotal + answer;
-					return (double) result;
-				}
-			}
-		});
-		user.setSendNumberPollResponseBaseHandler(new SendNumberPollResponseHandler());
+//		 set handlers
+//		user.setSendNumberPollRequestBaseHandler(new SendNumberPollRequestHandler(scan) {
+//
+//			@Override
+//			public double run(VaultageMessage senderMessage, NumberPoll poll) throws Exception {
+//				User localVault = (User) this.vault;
+//
+//				if (localVault.getPublicKey().equals(poll.getOriginator())) {
+//
+//					System.out.println("The poll request is back to me as the originator");
+//					
+//					double fakeValue = ThreadLocalRandom.current().nextDouble(MIN_RANDOM, MAX_RANDOM);
+//					result = fakeValue;
+//					poll2fakeValue.put(poll.getId(), fakeValue);
+//
+//
+//					System.out.printf("Sending fake value: %f\n", fakeValue);
+//
+//					return (double) result;
+//
+//				} else {
+//					localVault.getPolls().put(poll.getId(), poll);
+//
+//					System.out.println("\nNew poll received!");
+//					
+//					List<String> participants = poll.getParticipants();
+//					int index = participants.indexOf(localVault.getPublicKey());
+//					
+//					System.out.printf("I am participant %d\n\n", index + 1);
+//
+//					PollenCLI.displayPoll(poll);
+//					double answer = PollenCLI.readValue(scan);
+//
+//					String nextParticipant;
+//					if (index + 1 < participants.size()) {
+//						nextParticipant = participants.get(index + 1);
+//						System.out.println("\nSending to next participant");
+//					}
+//					else {
+//						// we were the last participant. back to originator
+//						nextParticipant = poll.getOriginator();
+//						System.out.println("\nSending back to originator");
+//					}
+//					double currentTotal =
+//							(new CustomRemoteUser(
+//									localVault.getVaultageServer(),
+//									localVault,
+//									nextParticipant))
+//							.sendNumberPoll(poll);
+//					
+//					System.out.printf("\nCurrent accumulated value: %f\n", currentTotal);
+//					
+//					result = currentTotal + answer;
+//					return (double) result;
+//				}
+//			}
+//		});
+//		user.setSendNumberPollResponseBaseHandler(new SendNumberPollResponseHandler());
 
 		// select what the client will do
 
@@ -145,19 +145,19 @@ public class SimpleClient {
 
 		NumberPoll poll = PollenCLI.createNumberPoll(scan);
 		poll.setOriginator(user.getPublicKey());
-		// participants store the list of public keys
+		// participants stores the list of public keys
 		List<String> participants = PollenUtil.getParticipants(user.getName());
 		poll.setParticipants(participants);
 
 		if (participants.size() > 0) {
 			String firstParticipant = participants.get(0);
 			System.out.println("Sending the poll to " + firstParticipant);
-			CustomRemoteUser remoteUser =
-					new CustomRemoteUser(vaultageServer, user, firstParticipant);
-			double total = remoteUser.sendNumberPoll(poll);
-			System.out.println("Fake total: " + total);
+//			CustomRemoteUser remoteUser =
+//					new CustomRemoteUser(vaultageServer, user, firstParticipant);
+//			double total = remoteUser.sendNumberPoll(poll);
+//			System.out.println("Fake total: " + total);
 			double randomValue = poll2fakeValue.get(poll.getId());
-			System.out.println("Real total: " + (total - randomValue));
+//			System.out.println("Real total: " + (total - randomValue));
 		} else {
 			System.out.println("No participants available. Please run another User to share its public key.");
 		}

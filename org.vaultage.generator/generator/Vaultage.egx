@@ -76,15 +76,15 @@ rule RemoteVaultClass transform class : EClass {
 }
 
 /***
- * To generate response handler classes
+ * To generate response method handler interface
 ***/
-rule ResponseHandlerClasses transform eOperation : EOperation {
+rule ResponseOperationHandlerInterface transform eOperation : EOperation {
 	guard : eOperation.eContainer.hasVaultAnnotation()
 	parameters : Map {
 		"packageName" = packageName,
 		"requesterPublicKey"= requesterPublicKey
 	}
-	template: "ResponseHandler.egl"
+	template: "ResponseOperationHandler.egl"
 	target: outputGen + eOperation.getResponseHandlerFilename()
 }
 
@@ -100,3 +100,33 @@ rule BrokerService {
 	target: outputSource + ePackage.getBrokerName() + ".java"
 	overwrite: false
 }
+
+/***
+ * To generate a vault request message handler
+***/
+rule RequestMessageHandler transform class : EClass {
+	guard : class.hasVaultAnnotation() 
+	parameters : Map {
+  		"packageName" = packageName,    
+    	"class" = class,
+    	"appName" = ePackage.name.firstToUpperCase()
+    }
+  	template: "RequestMessageHandler.egl"
+  	target: outputGen + ePackage.name.firstToUpperCase() + "RequestMessageHandler.java"
+}
+
+
+/***
+ * To generate a vault response message handler
+***/
+rule ResponseMessageHandler transform class : EClass {
+	guard : class.hasVaultAnnotation() 
+	parameters : Map {
+  		"packageName" = packageName,    
+    	"class" = class,
+    	"appName" = ePackage.name.firstToUpperCase()
+    }
+  	template: "ResponseMessageHandler.egl"
+  	target: outputGen + ePackage.name.firstToUpperCase() + "ResponseMessageHandler.java"
+}
+

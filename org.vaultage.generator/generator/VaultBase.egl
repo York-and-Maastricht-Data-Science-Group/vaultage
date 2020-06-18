@@ -13,9 +13,6 @@ import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageHandler;
 import org.vaultage.core.VaultageServer;
 
-import [%=packageName%].custom.Custom[%=appName%]RequestMessageHandler;
-import [%=packageName%].custom.Custom[%=appName%]ResponseMessageHandler;
-
 public abstract class [%=class.getBaseName()%] {
 
 	protected String id = UUID.randomUUID().toString();
@@ -32,8 +29,8 @@ public abstract class [%=class.getBaseName()%] {
 	public [%=class.getBaseName()%]() throws Exception {
 		this.isListening = false;
 		this.vaultage = new Vaultage(this);
-		vaultage.setRequestMessageHandler(new Custom[%=appName%]RequestMessageHandler());
-		vaultage.setResponseMessageHandler(new Custom[%=appName%]ResponseMessageHandler());
+		vaultage.setRequestMessageHandler(new [%=appName%]RequestMessageHandler());
+		vaultage.setResponseMessageHandler(new [%=appName%]ResponseMessageHandler());
 		
 		KeyPair keyPair = VaultageEncryption.generateKeys();
 		this.publicKey = VaultageEncryption.getPublicKey(keyPair);
