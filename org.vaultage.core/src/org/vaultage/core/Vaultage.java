@@ -171,7 +171,7 @@ public class Vaultage {
 //			System.out.println("Send to: " + topicId);
 
 			expectedReplyTokens.add(message.getToken());
-			System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
+//			System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -213,7 +213,7 @@ public class Vaultage {
 								senderPublicKey,
 								receiverPrivateKey);
 
-						 System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
+//						 System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
 
 						VaultageMessage vaultageMessage = Vaultage.deserialise(content, VaultageMessage.class);
 						MessageType msgType = vaultageMessage.getMessageType();

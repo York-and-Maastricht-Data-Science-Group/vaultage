@@ -84,10 +84,10 @@ public class User extends UserBase {
 				(new RemoteUser(this, poll.getParticipants().get(0))).sendNumberPoll(poll);
 			}
 			synchronized (this.getSendNumberPollResponseHandler()) {
-				System.out.println(this.getName() + " starts waiting ...");
+//				System.out.println(this.getName() + " starts waiting ...");
 				this.getSendNumberPollResponseHandler().wait();
 				result = answer + getSendNumberPollResponseHandler().getResult();
-				System.out.println(this.getName() + " ends waiting");
+//				System.out.println(this.getName() + " ends waiting");
 			}
 		}
 		return result;
