@@ -51,14 +51,21 @@ public class PollenTest {
 		bob.setId("Bob");
 		bob.setName("Bob");
 
+		// Charlie
+		User charlie = new User();
+		charlie.setId("Charlie");
+		charlie.setName("Charlie");
+
 		VaultageServer server = new VaultageServer(PollenBroker.BROKER_ADDRESS);
 
 		// register participants
 		alice.register(server);
 		bob.register(server);
+		charlie.register(server);
 
 		List<String> participants = new ArrayList<>();
 		participants.add(bob.getPublicKey());
+		participants.add(charlie.getPublicKey());
 		participants.add(alice.getPublicKey());
 
 		NumberPoll salaryPoll = PollRepository.createSalaryPoll();
@@ -67,14 +74,27 @@ public class PollenTest {
 
 		alice.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
 		bob.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
+		charlie.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
 
+		double bobAnswer = 100;
 		bob.setOnPollReceivedListener(new OnPollReceivedListener() {
 			@Override
 			public void onPollReceived(User user, NumberPoll poll) {
 				System.out.println(poll.getQuestion());
 				System.out.print("Type your answer: ");
 				PollAnswer pa = bob.getPollAnswer(poll.getId());
-				pa.submitAnswer(100);
+				pa.submitAnswer(bobAnswer);
+			}
+		});
+		
+		double charlieAnswer = 150;
+		charlie.setOnPollReceivedListener(new OnPollReceivedListener() {
+			@Override
+			public void onPollReceived(User user, NumberPoll poll) {
+				System.out.println(poll.getQuestion());
+				System.out.print("Type your answer: ");
+				PollAnswer pa = charlie.getPollAnswer(poll.getId());
+				pa.submitAnswer(charlieAnswer);
 			}
 		});
 
@@ -93,11 +113,11 @@ public class PollenTest {
 				.getResult();
 
 		System.out.println("(Alice) Poll result  = " + actualResult);
-		assertEquals(fakeValue + 100, actualResult, 0);
-		
+		assertEquals(fakeValue + bobAnswer + charlieAnswer, actualResult, 0);
+
 		alice.unregister();
 		bob.unregister();
-		
+
 		scanner.close();
 	}
 
