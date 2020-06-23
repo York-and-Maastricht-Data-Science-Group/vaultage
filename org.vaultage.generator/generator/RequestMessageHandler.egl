@@ -30,20 +30,32 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 [% for (eParameter in eOperation.eParameters){ %]
 				[%=eParameter.getTypeName()%] [%=eParameter.name%] = Vaultage.deserialise(message.getValue("[%=eParameter.name%]"), [%=eParameter.getTypeImplementation()%].class);
 [% } %]
-				[%=eOperation.getReturnType() %] result = [%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester.getPublicKey()[%= eOperation.getParamsWithoutTypes() %]);
-		
-				VaultageMessage response = new VaultageMessage();
-				response.setToken(message.getToken()); // use the request token to know what is being responded
-				response.setSenderId([%=class.name.firstToLowerCase()%].getId());
-				response.setFrom([%=class.name.firstToLowerCase()%].getPublicKey());
-				response.setTo(senderPublicKey);
-				response.setOperation("[%=eOperation.name%]");
-				response.setMessageType(MessageType.RESPONSE);
-	
-				response.putValue("result", Vaultage.serialise(result));
-	
-				[%=class.name.firstToLowerCase()%].getVaultage().sendMessage(response.getTo(), [%=class.name.firstToLowerCase()%].getPublicKey(),
-						[%=class.name.firstToLowerCase()%].getPrivateKey(), response);
+				Thread t = new Thread() {
+				@Override
+				public void run() {
+					try {
+						[%=eOperation.getReturnType() %] result = [%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester.getPublicKey()[%= eOperation.getParamsWithoutTypes() %]);
+				
+						VaultageMessage response = new VaultageMessage();
+						response.setToken(message.getToken()); // use the request token to know what is being responded
+						response.setSenderId([%=class.name.firstToLowerCase()%].getId());
+						response.setFrom([%=class.name.firstToLowerCase()%].getPublicKey());
+						response.setTo(senderPublicKey);
+						response.setOperation("[%=eOperation.name%]");
+						response.setMessageType(MessageType.RESPONSE);
+			
+						response.putValue("result", Vaultage.serialise(result));
+			
+						[%=class.name.firstToLowerCase()%].getVaultage().sendMessage(response.getTo(), [%=class.name.firstToLowerCase()%].getPublicKey(),
+								[%=class.name.firstToLowerCase()%].getPrivateKey(), response);
+					} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				};
+				t.setName("Request-" + message.getToken());
+				t.start();
 			}
 			break;
 [% } %]		default:

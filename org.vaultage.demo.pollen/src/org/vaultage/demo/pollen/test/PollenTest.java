@@ -4,12 +4,15 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.pollen.NumberPoll;
+import org.vaultage.demo.pollen.OnPollReceivedListener;
+import org.vaultage.demo.pollen.PollAnswer;
 import org.vaultage.demo.pollen.PollenBroker;
 import org.vaultage.demo.pollen.RemoteUser;
 import org.vaultage.demo.pollen.SendNumberPollResponseHandler;
@@ -20,7 +23,7 @@ public class PollenTest {
 
 	static PollenBroker BROKER;
 
-	//	Scanner scanner = new Scanner(System.in);
+	// Scanner scanner = new Scanner(System.in);
 
 	@BeforeClass
 	public static void startBroker() throws Exception {
@@ -36,11 +39,12 @@ public class PollenTest {
 	@Test
 	public void testInteractiveSalaryPoll() throws Exception {
 
+		Scanner scanner = new Scanner(System.in);
+
 		// Alice
 		User alice = new User();
 		alice.setId("Alice");
 		alice.setName("Alice");
-		
 
 		// Bob
 		User bob = new User();
@@ -61,22 +65,19 @@ public class PollenTest {
 		salaryPoll.setOriginator(alice.getPublicKey());
 		salaryPoll.setParticipants(participants);
 
-		double[] actualResult = new double[1]; 
-		
-		SendNumberPollResponseHandler response = new SendNumberPollResponseHandler() {
-			
+		alice.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
+		bob.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
+
+		bob.setOnPollReceivedListener(new OnPollReceivedListener() {
 			@Override
-			public void run(User me, RemoteUser other, String responseToken, double result) throws Exception {
-				actualResult[0] = result;
-				synchronized (this) {
-					this.notify();
-				}
+			public void onPollReceived(User user, NumberPoll poll) {
+				System.out.println(poll.getQuestion());
+				System.out.print("Type your answer: ");
+				PollAnswer pa = bob.getPollAnswer(poll.getId());
+				pa.submitAnswer(100);
 			}
-		};
-		
-		alice.setSendNumberPollResponseHandler(response);
-		bob.setSendNumberPollResponseHandler(response);
-		
+		});
+
 		// send poll, initiated by Alice
 		RemoteUser firstParticipant = new RemoteUser(alice, participants.get(0));
 		synchronized (alice.getSendNumberPollResponseHandler()) {
@@ -86,11 +87,18 @@ public class PollenTest {
 			SendNumberPollResponseHandler handler = alice.getSendNumberPollResponseHandler();
 			handler.wait(); // wait for the response
 		}
-		System.out.println("(Alice) Poll result  = " + actualResult[0]);
 
-		assertEquals(1.0, actualResult[0], 0);
+		double fakeValue = alice.getPollFakeValue(salaryPoll.getId());
+		double actualResult = ((UnitTestNumberPollResponseHandler) alice.getSendNumberPollResponseHandler())
+				.getResult();
+
+		System.out.println("(Alice) Poll result  = " + actualResult);
+		assertEquals(fakeValue + 100, actualResult, 0);
+		
 		alice.unregister();
 		bob.unregister();
+		
+		scanner.close();
 	}
 
 }
