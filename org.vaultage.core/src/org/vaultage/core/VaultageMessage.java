@@ -5,16 +5,24 @@ import java.util.Map;
 import java.util.UUID;
 
 public class VaultageMessage {
-	
+
+	public enum MessageType {
+		REQUEST, RESPONSE
+	};
+
 	private String senderId;
 	private String from;
 	private String to;
+	private MessageType messageType;
 	private String operation;
 	private Map<String, String> values = new HashMap<>();
 	private String token;
 
 	public VaultageMessage() {
-		this.token = UUID.randomUUID().toString();
+	}
+
+	public void initToken() {
+		token = UUID.randomUUID().toString();
 	}
 	
 	public String getToken() {
@@ -63,6 +71,14 @@ public class VaultageMessage {
 
 	public void setSenderId(String senderId) {
 		this.senderId = senderId;
+	}
+
+	public MessageType getMessageType() {
+		return messageType;
+	}
+
+	public void setMessageType(MessageType messageType) {
+		this.messageType = messageType;
 	}
 
 }

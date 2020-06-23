@@ -1,0 +1,66 @@
+[% import 'Util.eol'; %]
+package [%=packageName%];
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.vaultage.core.RequestMessageHandler;
+import org.vaultage.core.Vaultage;
+import org.vaultage.core.VaultageMessage;
+import org.vaultage.core.VaultageMessage.MessageType;
+
+public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
+
+	@Override
+	public void process(VaultageMessage message, String senderPublicKey, Object vault) throws Exception {
+		[%=class.name%] [%=class.name.firstToLowerCase()%] = ([%=class.name%]) vault;
+		[%=class.name%] requester = new [%=class.name%]();
+		requester.setPublicKey(senderPublicKey);
+		
+		String operation = message.getOperation();
+				
+		// sending the response back
+		// will be handled by 
+		//   1st - a PollenResponseMessageHandler to determine the operation handler to use
+		//   2nd - the specific handler (SendNumberPollResponseHandler in this case)
+				
+		switch (operation) {
+[% for (eOperation in class.eOperations){ %]
+			case "[%=eOperation.name%]": {
+[% for (eParameter in eOperation.eParameters){ %]
+				[%=eParameter.getTypeName()%] [%=eParameter.name%] = Vaultage.deserialise(message.getValue("[%=eParameter.name%]"), [%=eParameter.getTypeImplementation()%].class);
+[% } %]
+				Thread t = new Thread() {
+				@Override
+				public void run() {
+					try {
+						[%=eOperation.getReturnType() %] result = [%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester[%= eOperation.getParamsWithoutTypes() %]);
+				
+						VaultageMessage response = new VaultageMessage();
+						response.setToken(message.getToken()); // use the request token to know what is being responded
+						response.setSenderId([%=class.name.firstToLowerCase()%].getId());
+						response.setFrom([%=class.name.firstToLowerCase()%].getPublicKey());
+						response.setTo(senderPublicKey);
+						response.setOperation("[%=eOperation.name%]");
+						response.setMessageType(MessageType.RESPONSE);
+			
+						response.putValue("result", Vaultage.serialise(result));
+			
+						[%=class.name.firstToLowerCase()%].getVaultage().sendMessage(response.getTo(), [%=class.name.firstToLowerCase()%].getPublicKey(),
+								[%=class.name.firstToLowerCase()%].getPrivateKey(), response);
+					} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				};
+				t.setName("Request-" + message.getToken());
+				t.start();
+			}
+			break;
+[% } %]		default:
+				throw new Exception("Operation " + operation + " is not supported!");
+		}
+	}
+
+}

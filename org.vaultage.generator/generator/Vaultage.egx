@@ -11,11 +11,25 @@ pre {
 	var packagePath =  packageName.replace("\\.", "/") + "/";
 	var outputSource = javaSourcePath + packagePath;
 	var outputGen = javaGenPath + packagePath;
-	var requesterFilename = "RemoteRequester.java";
 	var vaultClassName = EClass.allInstances.selectOne( c | c.hasVaultAnnotation()).name;
 	var requesterPublicKey = "String requesterPublicKey";
 	var requesteePublicKey = "String requesteePublicKey";
 	var ePackage = EPackage.all().first();
+}
+
+/***
+ * To generate static classes
+***/
+rule StaticClasses transform class : EClass {
+	guard : not class.hasVaultAnnotation() 
+	parameters : Map {
+  		"packageName" = packageName,     
+    	"class" = class,
+    	"parentClass" = "",
+    	"requesterPublicKey"= requesterPublicKey
+    }
+  	template: "StaticClass.egl"
+  	target: outputGen + class.filename()
 }
 
 /***
@@ -35,113 +49,49 @@ rule VaultClass transform class : EClass {
 }
 
 /***
- * To generate static classes
-***/
-rule StaticClasses transform class : EClass {
-	guard : not class.hasVaultAnnotation() 
-	parameters : Map {
-  		"packageName" = packageName,     
-    	"class" = class,
-    	"parentClass" = "",
-    	"requesterPublicKey"= requesterPublicKey
-    }
-  	template: "StaticClass.egl"
-  	target: outputGen + class.filename()
-}
 
 /***
  * To generate the base class of a vault class
 ***/
 rule VaultBaseClass transform class : EClass {
-	guard : class.hasVaultAnnotation() 
+	guard : class.hasVaultAnnotation()
 	parameters : Map {
-  		"packageName" = packageName,  
-    	"class" = class,
-    	"requesterPublicKey"= requesterPublicKey
+  		"packageName" = packageName,
+    	"appName" = ePackage.name.firstToUpperCase()
     }
   	template: "VaultBase.egl"
   	target: outputGen + class.baseFilename()
 }
 
 /***
- * To generate a remote requester class
+ * To generate a remote vault class
 ***/
-rule RemoteRequesterClass transform class : EClass {
-	guard : class.hasVaultAnnotation() 
+rule RemoteVaultClass transform class : EClass {
+	guard : class.hasVaultAnnotation()
 	parameters : Map {
-  		"packageName" = packageName,  
-    	"class" = class,
-    	"vaultClassName" = vaultClassName,
-    	"requesterPublicKey"= requesterPublicKey,
-    	"requesteePublicKey"= requesteePublicKey
-    }
-  	template: "RemoteRequester.egl"
-  	target: outputGen + requesterFilename
+		"packageName" = packageName
+	}
+	template: "RemoteVault.egl"
+	target: outputGen + class.remoteFilename()
 }
 
 /***
- * To generate request handler classes
+ * To generate response method handler interface
 ***/
-rule RequestHandlerClasses transform eOperation : EOperation {
-	guard : eOperation.eContainer.hasVaultAnnotation() 
+rule ResponseOperationHandlerInterface transform eOperation : EOperation {
+	guard : eOperation.eContainer.hasVaultAnnotation()
 	parameters : Map {
-  		"packageName" = packageName,  
-    	"eOperation" = eOperation,
-    	"requesterPublicKey"= requesterPublicKey
-    }
-  	template: "RequestHandler.egl"
-  	target: outputSource + eOperation.getRequestHandlerFileName()
-  	overwrite: false
-}
-
-/***
- * To generate response handler classes
-***/
-rule ResponseHandlerClasses transform eOperation : EOperation {
-	guard : eOperation.eContainer.hasVaultAnnotation() 
-	parameters : Map {
-  		"packageName" = packageName, 
-    	"eOperation" = eOperation,
-    	"requesterPublicKey"= requesterPublicKey
-    }
-  	template: "ResponseHandler.egl"
-  	target: outputSource + eOperation.getResponseHandlerFilename()
-  	overwrite: false
-}
-
-/***
- * To generate request handler classes
-***/
-rule RequestBaseHandlerClasses transform eOperation : EOperation {
-	guard : eOperation.eContainer.hasVaultAnnotation() 
-	parameters : Map {
-  		"packageName" = packageName,
-    	"eOperation" = eOperation,
-    	"requesterPublicKey"= requesterPublicKey,
-    	"requesteePublicKey"= requesteePublicKey
-    }
-  	template: "RequestBaseHandler.egl"
-  	target: outputGen + eOperation.getRequestBaseHandlerFileName()
-}
-
-/***
- * To generate response handler classes
-***/
-rule ResponseBaseHandlerClasses transform eOperation : EOperation {
-	guard : eOperation.eContainer.hasVaultAnnotation() 
-	parameters : Map {
-  		"packageName" = packageName, 
-    	"eOperation" = eOperation,
-    	"requesterPublicKey"= requesterPublicKey
-    }
-  	template: "ResponseBaseHandler.egl"
-  	target: outputGen + eOperation.getResponseBaseHandlerFilename()
+		"packageName" = packageName,
+		"requesterPublicKey"= requesterPublicKey
+	}
+	template: "ResponseOperationHandler.egl"
+	target: outputGen + eOperation.getResponseHandlerFilename()
 }
 
 /***
  *  Generate a class to start the broker service
 ***/
-rule BrokerService { 
+rule BrokerService {
 	parameters : Map {
 		"packageName" = packageName,
 		"brokerName" = ePackage.getBrokerName()
@@ -150,3 +100,33 @@ rule BrokerService {
 	target: outputSource + ePackage.getBrokerName() + ".java"
 	overwrite: false
 }
+
+/***
+ * To generate a vault request message handler
+***/
+rule RequestMessageHandler transform class : EClass {
+	guard : class.hasVaultAnnotation() 
+	parameters : Map {
+  		"packageName" = packageName,    
+    	"class" = class,
+    	"appName" = ePackage.name.firstToUpperCase()
+    }
+  	template: "RequestMessageHandler.egl"
+  	target: outputGen + ePackage.name.firstToUpperCase() + "RequestMessageHandler.java"
+}
+
+
+/***
+ * To generate a vault response message handler
+***/
+rule ResponseMessageHandler transform class : EClass {
+	guard : class.hasVaultAnnotation() 
+	parameters : Map {
+  		"packageName" = packageName,    
+    	"class" = class,
+    	"appName" = ePackage.name.firstToUpperCase()
+    }
+  	template: "ResponseMessageHandler.egl"
+  	target: outputGen + ePackage.name.firstToUpperCase() + "ResponseMessageHandler.java"
+}
+

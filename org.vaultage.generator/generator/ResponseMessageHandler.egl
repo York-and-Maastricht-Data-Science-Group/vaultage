@@ -1,0 +1,32 @@
+[% import 'Util.eol'; %]
+package [%=packageName%];
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.vaultage.core.ResponseMessageHandler;
+import org.vaultage.core.Vaultage;
+import org.vaultage.core.VaultageMessage;
+
+public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
+
+	@Override
+	public void process(VaultageMessage message, String senderPublicKey, Object vault) throws Exception {
+		[%=class.name%] [%=class.name.firstToLowerCase()%] = ([%=class.name%]) vault;
+		Remote[%=class.name%] sender = new Remote[%=class.name%]([%=class.name.firstToLowerCase()%], senderPublicKey);
+
+		String operation = message.getOperation();
+
+		switch (operation) {
+[% for (eOperation in class.eOperations){ %]
+			case "[%=eOperation.name%]": {
+				[%= eOperation.getReturnType() %] result = Vaultage.deserialise(message.getValue("result"), [%=eOperation.getTypeImplementation()%].class);
+				[%=class.name.firstToLowerCase()%].get[%=eOperation.name.firstToUpperCase()%]ResponseHandler().run([%=class.name.firstToLowerCase()%], sender, message.getToken(), result);
+			}
+			break;
+[% } %]		default:
+				throw new Exception("Operation " + operation + " is not supported!");
+		}
+	}
+
+}

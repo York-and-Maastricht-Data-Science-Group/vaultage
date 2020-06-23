@@ -6,20 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 
 import org.vaultage.util.VaultageEncryption;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageHandler;
 import org.vaultage.core.VaultageServer;
-
-[% /* for (eOperation in class.eOperations){ %]
-// import [%=packageName%].[%= eOperation.name.firstToUpperCase()%]RequestBaseHandler;
-// import [%=packageName%].[%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler;	
-[% } */%]
 
 public abstract class [%=class.getBaseName()%] {
 
@@ -28,32 +20,25 @@ public abstract class [%=class.getBaseName()%] {
 	protected String publicKey;
 	protected boolean isListening;
 	protected Vaultage vaultage;
-	protected Map<String, VaultageHandler> handlers;	
 	protected VaultageServer vaultageServer;
-	protected RemoteRequester remoteRequester;
 
 [% for (eOperation in class.eOperations){ %]
-	protected [%= eOperation.name.firstToUpperCase()%]RequestBaseHandler [%=eOperation.name%]RequestBaseHandler;
-	protected [%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler [%=eOperation.name%]ResponseBaseHandler;	
+	protected [%=eOperation.getClassResponseHandlerName()%] [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];
 [% } %]	
 
 	public [%=class.getBaseName()%]() throws Exception {
 		this.isListening = false;
-		this.vaultage = new Vaultage();
-		this.handlers = new HashMap<String, VaultageHandler>();
+		this.vaultage = new Vaultage(this);
+		vaultage.setRequestMessageHandler(new [%=appName%]RequestMessageHandler());
+		vaultage.setResponseMessageHandler(new [%=appName%]ResponseMessageHandler());
 		
 		KeyPair keyPair = VaultageEncryption.generateKeys();
 		this.publicKey = VaultageEncryption.getPublicKey(keyPair);
 		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
-		remoteRequester = new RemoteRequester(vaultageServer, this);
 	}
 	
 	public VaultageServer getVaultageServer(){
 		return this.vaultageServer;
-	}
-	
-	public RemoteRequester getRemoteRequester() {
-		return remoteRequester;
 	}
 	
 	public String getId(){
@@ -89,40 +74,21 @@ public abstract class [%=class.getBaseName()%] {
 	}
 
 [% for (eOperation in class.eOperations){ %]
-	public void set[%= eOperation.name.firstToUpperCase()%]RequestBaseHandler([%= eOperation.name.firstToUpperCase()%]RequestBaseHandler [%= eOperation.name%]RequestBaseHandler) {
-		this.[%= eOperation.name%]RequestBaseHandler = [%= eOperation.name%]RequestBaseHandler;
-		this.[%= eOperation.name%]RequestBaseHandler.setOwner(this);
-		if ([%= eOperation.name%]RequestBaseHandler.getClass().isAnonymousClass()) {
-			handlers.put([%= eOperation.name%]RequestBaseHandler.getClass().getSuperclass().getName(), [%= eOperation.name%]RequestBaseHandler);
-		} else {
-			handlers.put([%= eOperation.name%]RequestBaseHandler.getClass().getName(), [%= eOperation.name%]RequestBaseHandler);
-		}
+	public void set[%=eOperation.getClassResponseHandlerName()%]([%=eOperation.getClassResponseHandlerName()%] handler) {
+		this.[%=eOperation.getClassResponseHandlerName().firstToLowerCase()%] = handler;
 	}
 	
-	public [%= eOperation.name.firstToUpperCase()%]RequestBaseHandler get[%= eOperation.name.firstToUpperCase()%]RequestBaseHandler() {
-		return [%= eOperation.name%]RequestBaseHandler;
+	public [%=eOperation.getClassResponseHandlerName()%] get[%=eOperation.getClassResponseHandlerName()%]() {
+		return [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];
 	}
 	
-	public void set[%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler([%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler [%= eOperation.name%]ResponseBaseHandler) {
-		this.[%= eOperation.name%]ResponseBaseHandler = [%= eOperation.name%]ResponseBaseHandler;
-		this.[%= eOperation.name%]ResponseBaseHandler.setOwner(this);
-		if ([%= eOperation.name%]ResponseBaseHandler.getClass().isAnonymousClass()) {
-			handlers.put([%= eOperation.name%]ResponseBaseHandler.getClass().getSuperclass().getName(), [%= eOperation.name%]ResponseBaseHandler);
-		} else {
-			handlers.put([%= eOperation.name%]ResponseBaseHandler.getClass().getName(), [%= eOperation.name%]ResponseBaseHandler);
-		}
-	}
-	
-	public [%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler get[%= eOperation.name.firstToUpperCase()%]ResponseBaseHandler() {
-		return [%= eOperation.name%]ResponseBaseHandler;
-	}
-	
-[% } %]	
+[% } %]
+
 	public boolean register(VaultageServer vaultageServer) throws Exception {
 		boolean isSuccess = vaultage.connect(vaultageServer.getAddress(), publicKey);
 		this.vaultageServer = vaultageServer;
 		if (isSuccess) {
-			vaultage.subscribe(publicKey, privateKey, handlers);
+			vaultage.subscribe(publicKey, privateKey);
 			return true;
 		}
 		return false;
@@ -134,9 +100,6 @@ public abstract class [%=class.getBaseName()%] {
 	
 	// operations
 [% for (eOperation in class.eOperations){ %]
-	[%= eOperation.getAccessModifier()%] abstract [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception;
-	
-[% } %]	
-	
-			
+	public abstract [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception;
+[% } %]
 }

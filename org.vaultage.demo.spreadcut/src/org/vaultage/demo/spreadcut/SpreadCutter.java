@@ -1,3 +1,4 @@
+
 package org.vaultage.demo.spreadcut;
 
 import java.io.FileNotFoundException;
@@ -29,12 +30,12 @@ public class SpreadCutter extends SpreadCutterBase {
 	
 	// operations
 	
-	public List<ProximityContact> getContacts(String requesterPublicKey, String timestamp) throws Exception {
+	public List<ProximityContact> getContacts(SpreadCutter requesterSpreadCutter, String timestamp) throws Exception {
 		throw new Exception();
 	}
 	
 	
-	public boolean confirmContact(String requesterPublicKey, String timestamp) throws Exception {
+	public boolean confirmContact(SpreadCutter requesterSpreadCutter, String timestamp) throws Exception {
 		throw new Exception();
 	}
 	
