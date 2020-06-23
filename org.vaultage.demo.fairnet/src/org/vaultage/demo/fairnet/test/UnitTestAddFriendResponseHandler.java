@@ -9,9 +9,7 @@ public class UnitTestAddFriendResponseHandler implements AddFriendResponseHandle
 
 	private boolean isSuccess = false;
 	
-	public boolean isSuccess() {
-		return isSuccess;
-	}
+	
 	
 	@Override
 	public void run(FairnetVault me, RemoteFairnetVault other, String responseToken, Boolean result) throws Exception {
@@ -23,5 +21,10 @@ public class UnitTestAddFriendResponseHandler implements AddFriendResponseHandle
 		synchronized (this) {
 			this.notify();
 		}
+	}
+
+	@Override
+	public Boolean getResult() {
+		return isSuccess;
 	}
 }

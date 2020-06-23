@@ -9,9 +9,7 @@ public class UnitTestGetPostResponseHandler implements GetPostResponseHandler {
 
 	private Post post;
 
-	public Post getPost() {
-		return post;
-	}
+	
 
 	@Override
 	public void run(FairnetVault me, RemoteFairnetVault other, String responseToken, Post result) throws Exception {
@@ -23,4 +21,10 @@ public class UnitTestGetPostResponseHandler implements GetPostResponseHandler {
 		}
 	}
 
+	@Override
+	public Post getResult() {
+		return post;
+	}
+
+	
 }

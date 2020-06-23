@@ -247,7 +247,7 @@ public class FairnetTest {
 			user2.getGetPostsResponseHandler().wait();
 		}
 		
-		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getGetPostsResponseHandler()).getPosts(); 
+		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getGetPostsResponseHandler()).getResult(); 
 
 		assertEquals(true, retrievedUser1posts.contains(post1.getId()));
 		assertEquals(false, retrievedUser1posts.contains(post2.getId()));
@@ -290,7 +290,7 @@ public class FairnetTest {
 			user2.getGetPostsResponseHandler().wait();
 		}  
 		
-		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getGetPostsResponseHandler()).getPosts();
+		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getGetPostsResponseHandler()).getResult();
 		
 		// simulate request user1's post contents per post
 		for (String postId : retrievedUser1posts) {
@@ -300,7 +300,7 @@ public class FairnetTest {
 				remoteRequester.getPost(postId);
 				user2.getGetPostResponseHandler().wait();
 			}
-			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getGetPostResponseHandler()).getPost();
+			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getGetPostResponseHandler()).getResult();
 			assertEquals(post.getContent(), retrievedUser1post.getContent());
 		}
 

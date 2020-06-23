@@ -11,9 +11,7 @@ public class UnitTestGetPostsResponseHandler implements GetPostsResponseHandler 
 
 	private List<String> posts;
 
-	public List<String> getPosts() {
-		return posts;
-	}
+	
 	
 	@Override
 	public void run(FairnetVault me, RemoteFairnetVault other, String responseToken, List<String> result)
@@ -24,6 +22,11 @@ public class UnitTestGetPostsResponseHandler implements GetPostsResponseHandler 
 		synchronized (this) {
 			this.notify();
 		}
+	}
+
+	@Override
+	public List<String> getResult() {
+		return posts;
 	}
 
 
