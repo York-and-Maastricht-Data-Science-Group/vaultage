@@ -34,7 +34,7 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 				@Override
 				public void run() {
 					try {
-						[%=eOperation.getReturnType() %] result = [%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester.getPublicKey()[%= eOperation.getParamsWithoutTypes() %]);
+						[%=eOperation.getReturnType() %] result = [%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester[%= eOperation.getParamsWithoutTypes() %]);
 				
 						VaultageMessage response = new VaultageMessage();
 						response.setToken(message.getToken()); // use the request token to know what is being responded

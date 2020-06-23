@@ -47,7 +47,7 @@ public class User extends UserBase {
 //	}
 
 	// operations
-	public double sendNumberPoll(String requesterPublicKey, NumberPoll poll) throws Exception {
+	public double sendNumberPoll(User requesterUser, NumberPoll poll) throws Exception {
 		double result = 0;
 		double answer = 0;
 
@@ -59,7 +59,7 @@ public class User extends UserBase {
 			Iterator<String> iterator = poll.getParticipants().iterator();
 			while (iterator.hasNext()) {
 				String item = iterator.next();
-				if (item.equals(this.getPublicKey()) || item.equals(requesterPublicKey)) {
+				if (item.equals(this.getPublicKey()) || item.equals(requesterUser.getPublicKey())) {
 					iterator.remove();
 				}
 			}
@@ -93,7 +93,7 @@ public class User extends UserBase {
 		return result;
 	}
 
-	public List<Integer> sendMultivaluedPoll(String requesterPublicKey, MultivaluedPoll poll) throws Exception {
+	public List<Integer> sendMultivaluedPoll(User requesterUser, MultivaluedPoll poll) throws Exception {
 		throw new Exception();
 	}
 

@@ -81,7 +81,7 @@ public class PollenTest {
 			@Override
 			public void onPollReceived(User user, NumberPoll poll) {
 				System.out.println(poll.getQuestion());
-				System.out.print("Type your answer: ");
+				System.out.println(user.getName() + ", type your answer: ");
 				PollAnswer pa = bob.getPollAnswer(poll.getId());
 				pa.submitAnswer(bobAnswer);
 			}
@@ -92,8 +92,8 @@ public class PollenTest {
 			@Override
 			public void onPollReceived(User user, NumberPoll poll) {
 				System.out.println(poll.getQuestion());
-				System.out.print("Type your answer: ");
-				PollAnswer pa = charlie.getPollAnswer(poll.getId());
+				System.out.println(user.getName() + ", type your answer: ");
+				PollAnswer pa = user.getPollAnswer(poll.getId());
 				pa.submitAnswer(charlieAnswer);
 			}
 		});
