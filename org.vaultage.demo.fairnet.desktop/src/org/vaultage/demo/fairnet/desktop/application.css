@@ -1,0 +1,9 @@
+/* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
+
+.left-pane-button:hover{
+    -fx-background-color: #f0f0f0;
+}
+
+.left-pane-button {
+    -fx-background-color: #ffffff;
+}
