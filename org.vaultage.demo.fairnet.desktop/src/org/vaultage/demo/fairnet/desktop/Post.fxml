@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane prefHeight="40.0" prefWidth="899.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <AnchorPane BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="labelPostUsername" layoutX="14.0" layoutY="13.0" text="Felis Domestica">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <Label fx:id="labelPostDateTime" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="651.0" layoutY="13.0" text="Saturday, 31 September 2020" textAlignment="RIGHT" AnchorPane.rightAnchor="14.0">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+   </top>
+   <center>
+      <Text fx:id="labelPostContent" strokeType="OUTSIDE" strokeWidth="0.0" text="Lorem ipsum dolor sit amet, &#10;consectetur adipiscing elit, &#10;sed do eiusmod tempor incididunt ut labore et dolore magna aliqua" wrappingWidth="871.0" BorderPane.alignment="TOP_LEFT">
+         <font>
+            <Font size="18.0" />
+         </font>
+         <BorderPane.margin>
+            <Insets bottom="2.0" left="14.0" right="14.0" top="2.0" />
+         </BorderPane.margin>
+      </Text>
+   </center>
+</BorderPane>

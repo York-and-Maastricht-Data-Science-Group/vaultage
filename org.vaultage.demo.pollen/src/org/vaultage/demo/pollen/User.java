@@ -63,6 +63,8 @@ public class User extends UserBase {
 					iterator.remove();
 				}
 			}
+			
+			// run PollAnswer, this thread will wait until a user submit an answer
 			PollAnswer pollAnswer = new PollAnswer(poll);
 			pollAnswers.put(poll.getId(), pollAnswer);
 			Thread t = new Thread() {
@@ -77,7 +79,9 @@ public class User extends UserBase {
 				pollAnswer.wait();
 			}
 			answer = pollAnswer.getAnswer();
-
+			// ----
+			
+			
 			if (poll.getParticipants().size() == 0) {
 				(new RemoteUser(User.this, poll.getOriginator())).sendNumberPoll(poll);
 			} else {

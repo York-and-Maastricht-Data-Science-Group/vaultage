@@ -78,7 +78,8 @@ public class SimpleClient {
 		// set sendNumberPollResponseHandler
 		user.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
 
-		// pop-up text to type answer
+		// an implementation of the OnPollReceivedListener class
+		// it shows the question to a user and asks to type the answer
 		user.setOnPollReceivedListener(new OnPollReceivedListener() {
 			@Override
 			public void onPollReceived(User user, NumberPoll poll) {
@@ -86,6 +87,7 @@ public class SimpleClient {
 				System.out.print("Type your answer (numeric): ");
 				PollAnswer pollAnswer = user.getPollAnswer(poll.getId());
 				double answer = 0;
+				
 				boolean isCorrect = false;
 				while (!isCorrect) {
 					String temp = scan.nextLine();
@@ -98,10 +100,12 @@ public class SimpleClient {
 						isCorrect = false;
 					}
 				}
+				
 				pollAnswer.submitAnswer(answer);
 			}
 		});
-
+		//----
+		
 		// select what the client will do
 		System.out.println("Select one of these options:");
 		int choice = PollenCLI.readOption(scan, Arrays.asList("Start a poll", "Answer polls", "Exit"));

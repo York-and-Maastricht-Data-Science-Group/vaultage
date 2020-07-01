@@ -2,3 +2,5 @@
 /target/
 /build/
 /.settings/
+/vaults/
+/activemq-data/

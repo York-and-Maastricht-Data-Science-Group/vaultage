@@ -4,3 +4,4 @@ Bundle-Name: Pollen
 Bundle-SymbolicName: org.vaultage.demo.pollen
 Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.vaultage.core;bundle-version="1.0.0"
+Export-Package: org.vaultage.demo.pollen
