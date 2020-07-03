@@ -101,7 +101,7 @@ public class SimpleClient {
 				break;
 			}
 		} while (choice != EXIT);
-
+    
 		scan.close();
 		user.unregister();
 		System.out.println("Terminated");

@@ -56,6 +56,7 @@ public class User extends UserBase {
 			RemoteUser remote = new RemoteUser(this, requesterUser.getPublicKey());
 			remote.respondToSendNumberPoll(fakeValue, requestToken);
 		} else {
+
 			int index = poll.getParticipants().indexOf(publicKey);
 
 			String nextParticipant;
