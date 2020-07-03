@@ -117,16 +117,16 @@ public class User extends UserBase {
 		numberPollFakeValues.put(messageToken, value);
 	}
 
-	public double getNumberPollFakeValue(String messageToken) {
-		return numberPollFakeValues.get(messageToken);
+	public double getNumberPollFakeValue(String pollId) {
+		return numberPollFakeValues.get(pollId);
 	}
 
-	public void addNumberPollAnswer(String messageToken, double value) {
-		numberPollAnswers.put(messageToken, value);
+	public void addNumberPollAnswer(String pollId, double value) {
+		numberPollAnswers.put(pollId, value);
 	}
 
-	public double getNumberPollAnswer(String messageToken) {
-		return numberPollAnswers.get(messageToken);
+	public double getNumberPollAnswer(String pollId) {
+		return numberPollAnswers.get(pollId);
 	}
 
 	public OnPollReceivedListener getOnPollReceivedListener() {
