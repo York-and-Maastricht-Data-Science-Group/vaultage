@@ -67,15 +67,15 @@ public class FainetDesktopController {
 
 	@FXML
 	private VBox vBoxPostsPane;
+	
+	@FXML
+	private VBox vBoxNotificationsPane;
 
 	@FXML
 	private Button buttonPost;
 
 	@FXML
 	private TextArea textAreaPost;
-
-	@FXML
-	private BorderPane vBoxNotificationsPane;
 
 	@FXML
 	private BorderPane vBoxFriendsPane;
