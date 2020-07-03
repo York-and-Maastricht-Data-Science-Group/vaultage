@@ -70,7 +70,7 @@ public class PollenTest {
 	}
 
 	@Test
-	public void testThreeParticipantsPoll() throws Exception {
+	public void testSeveralParticipantsPoll() throws Exception {
 
 		User alice = new User();
 		alice.setId("Alice");
@@ -84,18 +84,25 @@ public class PollenTest {
 		charlie.setId("Charlie");
 		charlie.setName("Charlie");
 
+		User dan = new User();
+		dan.setId("Dan");
+		dan.setName("Dan");
+
 		alice.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
 		bob.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
 		charlie.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
+		dan.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
 
 		VaultageServer server = new VaultageServer(PollenBroker.BROKER_ADDRESS);
 		alice.register(server);
 		bob.register(server);
 		charlie.register(server);
+		dan.register(server);
 
 		List<String> participants = new ArrayList<>();
 		participants.add(bob.getPublicKey());
 		participants.add(charlie.getPublicKey());
+		participants.add(dan.getPublicKey());
 
 		NumberPoll salaryPoll = PollRepository.createSalaryPoll();
 		salaryPoll.setOriginator(alice.getPublicKey());
@@ -112,11 +119,12 @@ public class PollenTest {
 		double result = alice.getNumberPollAnswer(salaryPoll.getId());
 
 		// the total response should be the fixed one times the number of participants
-		assertTrue((result - fakeValue) == FIXED_RESPONSE * 2);
+		assertTrue((result - fakeValue) == FIXED_RESPONSE * 3);
 
 		alice.unregister();
 		bob.unregister();
 		charlie.unregister();
+		dan.unregister();
 	}
 
 	//	@Test
