@@ -8,7 +8,5 @@ import java.util.List;
 
 public interface [%=eOperation.getClassResponseHandlerName()%] {
 
-	public [%=eOperation.getReturnType()%] getResult();
-	
 	public void run([%=class.name%] me, [%=class.remoteName()%] other, String responseToken, [%=eOperation.getReturnType()%] result) throws Exception;
 }

@@ -83,12 +83,6 @@ public class SimpleClient {
 					}
 				}
 			}
-
-			@Override
-			public double getResult() {
-				// TODO Auto-generated method stub
-				return 0;
-			}
 		});
 
 		int choice;

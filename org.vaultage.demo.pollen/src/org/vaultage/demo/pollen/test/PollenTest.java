@@ -37,8 +37,6 @@ public class PollenTest {
 	 */
 	public class UnitTestNumberPollResponseHandler implements SendNumberPollResponseHandler {
 
-		private double result = 0;
-
 		@Override
 		public void run(User me, RemoteUser other, String responseToken, double result) throws Exception {
 			NumberPoll poll = me.getPendingNumberPollByResponseToken(responseToken);
@@ -68,11 +66,6 @@ public class PollenTest {
 					throw new RuntimeException("I should be either originator or participant of the poll!");
 				}
 			}
-		}
-
-		@Override
-		public double getResult() {
-			return result;
 		}
 	}
 
