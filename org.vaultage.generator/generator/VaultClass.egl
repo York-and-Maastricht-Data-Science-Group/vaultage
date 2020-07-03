@@ -1,5 +1,4 @@
 [% import 'Util.eol'; %]
-
 package [%=packageName%];
 
 import java.io.FileNotFoundException;
@@ -40,7 +39,7 @@ public class [%=class.name%] [%=parentClass%] {
 	// operations
 [% for (eOperation in class.eOperations){ %]
 	[%= eOperation.getOverride() %]
-	public [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception {
+	public void [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception {
 		throw new Exception();
 	}
 	
