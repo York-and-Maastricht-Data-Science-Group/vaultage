@@ -208,11 +208,13 @@ operation EOperation getRequesteeParams(): String {
 operation EOperation getRequesterParams(): String {
 	var params = "";
 	if (not self.isPublic()){
-		params = params + self.eContainer.name + " requester" + self.eContainer.name;
+		params = self.eContainer.name + " requester" + self.eContainer.name;
+		params += ", ";
 	}
+	params += "String requestToken";
   	for (eParameter in self.eParameters) {
-  	  params = params + ", ";
-      params = params + eParameter.getType() + " " + eParameter.name; 
+  	  params += ", ";
+      params += eParameter.getType() + " " + eParameter.name; 
   	}
    return params;
 }

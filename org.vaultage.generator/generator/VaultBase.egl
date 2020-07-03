@@ -100,6 +100,6 @@ public abstract class [%=class.getBaseName()%] {
 	
 	// operations
 [% for (eOperation in class.eOperations){ %]
-	public abstract [%= eOperation.getReturnType() %] [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception;
+	public abstract void [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception;
 [% } %]
 }

@@ -25,23 +25,40 @@ public class [%=class.remoteName()%] {
 
 	public String [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
 		
-		VaultageMessage message = new VaultageMessage();
-		message.initToken();
-		message.setSenderId(localVault.getId());
-		message.setFrom(localVault.getPublicKey());
-		message.setTo(remotePublicKey);
-		message.setMessageType(MessageType.REQUEST);
-		message.setOperation("[%= eOperation.name %]");
+		VaultageMessage request = new VaultageMessage();
+		request.initToken();
+		request.setSenderId(localVault.getId());
+		request.setFrom(localVault.getPublicKey());
+		request.setTo(remotePublicKey);
+		request.setMessageType(MessageType.REQUEST);
+		request.setOperation("[%= eOperation.name %]");
 		
 	[% for (eParamater in eOperation.eParameters) { %]
-		message.putValue("[%=eParamater.name%]", Vaultage.serialise([%=eParamater.name%]));
+		request.putValue("[%=eParamater.name%]", Vaultage.serialise([%=eParamater.name%]));
 	[% } %]
 
-		this.localVault.getVaultage().sendMessage(message.getTo(), localVault.getPublicKey(),
-				localVault.getPrivateKey(), message);
+		localVault.getVaultage().sendMessage(request.getTo(), localVault.getPublicKey(),
+				localVault.getPrivateKey(), request);
 
-		return message.getToken();
+		return request.getToken();
 	}
+	
+	[% if (eOperation.getReturnType() <> null) { %]
+	
+	public void respondTo[%=eOperation.name.firstToUpperCase()%]([%=eOperation.getReturnType() %] result, String token) throws Exception {
+		
+		VaultageMessage response = new VaultageMessage();
+		response.setToken(token); // TODO: this token is not known by the vault
+		response.setFrom(localVault.getPublicKey());
+		response.setTo(remotePublicKey);
+		response.setOperation("[%=eOperation.name%]");
+		response.setMessageType(MessageType.RESPONSE);
 
+		response.putValue("result", Vaultage.serialise(result));
+
+		localVault.getVaultage().sendMessage(response.getTo(), localVault.getPublicKey(),
+				localVault.getPrivateKey(), response);
+	}
+	[% } %]
 [% } %]	
 }

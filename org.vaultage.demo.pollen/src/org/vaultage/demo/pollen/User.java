@@ -1,34 +1,39 @@
-
 package org.vaultage.demo.pollen;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 public class User extends UserBase {
+
+	public static final int MIN_RANDOM = 1000000;
+	public static final int MAX_RANDOM = 5000000;
+
 	private String name = new String();
-	private Map<String, NumberPoll> polls = new HashMap<>();
-	private Map<String, Double> pollFakeValues = new HashMap<>();
-	private Map<String, PollAnswer> pollAnswers = new HashMap<>();
-	public long waitTime = 0;
-	public int count = 0;
+
+	// The following maps use message tokens as string to recover the information 
+	//   later during the requests/responses interchange
+
+	/** Initiated polls by the messageToken returned by the RemoteVault */
+	private Map<String, NumberPoll> initiatedPolls = new HashMap<>();
+
+	/** Pending poll requests by the token of the received request */
+	private Map<String, NumberPoll> pendingPollRequests = new HashMap<>();
+
+	/**
+	 * Map from the response token of a relayed request (to the next participant)
+	 * to the request token of the previously received request (from the previous participant)
+	 */
+	private Map<String, String> responseToRequestMapper = new HashMap<>();
+
+	// The following maps use the poll id to store the fake value and the final answer
+	private Map<String, Double> numberPollFakeValues = new HashMap<>();
+	private Map<String, Double> numberPollAnswers = new HashMap<>();
 
 	private OnPollReceivedListener onPollReceivedListener;
 
 	public User() throws Exception {
 		super();
-	}
-
-	public double getPollFakeValue(String pollId) {
-		return pollFakeValues.get(pollId);
-	}
-
-
-
-	public void addPollFakeValue(String pollId, double value) {
-		pollFakeValues.put(pollId, value);
 	}
 
 	// getter
@@ -41,73 +46,87 @@ public class User extends UserBase {
 		this.name = name;
 	}
 
-//	// operations
-//	public double sendNumberPoll(String requesterPublicKey, NumberPoll poll) throws Exception {
-//		return 1.0;
-//	}
-
 	// operations
-	public double sendNumberPoll(User requesterUser, NumberPoll poll) throws Exception {
-		double result = 0;
-		double answer = 0;
+	public void sendNumberPoll(User requesterUser, String requestToken, NumberPoll poll) throws Exception {
 
-		if (this.getPublicKey().equals(poll.getOriginator())) {
-			double fakeSalary = (new Random()).nextInt(200 - 100) + 100;
-			pollFakeValues.put(poll.getId(), fakeSalary);
-			result = fakeSalary;
+		if (publicKey.equals(poll.getOriginator())) {
+			// this vault is the poll's originator, respond with fake value
+			double fakeValue = (new Random()).nextInt(MAX_RANDOM - MIN_RANDOM) + MIN_RANDOM;
+			numberPollFakeValues.put(poll.getId(), fakeValue);
+			RemoteUser remote = new RemoteUser(this, requesterUser.getPublicKey());
+			remote.respondToSendNumberPoll(fakeValue, requestToken);
 		} else {
-			Iterator<String> iterator = poll.getParticipants().iterator();
-			while (iterator.hasNext()) {
-				String item = iterator.next();
-				if (item.equals(this.getPublicKey()) || item.equals(requesterUser.getPublicKey())) {
-					iterator.remove();
-				}
-			}
-			PollAnswer pollAnswer = new PollAnswer(poll);
-			pollAnswers.put(poll.getId(), pollAnswer);
-			Thread t = new Thread() {
-				@Override
-				public void run() {
-					User.this.getOnPollReceivedListener().onPollReceived(User.this, poll);
-				}
-			};
-			t.setName(poll.getId());
-			t.start();
-			synchronized (pollAnswer) {
-				pollAnswer.wait();
-			}
-			answer = pollAnswer.getAnswer();
+			int index = poll.getParticipants().indexOf(publicKey);
 
-			if (poll.getParticipants().size() == 0) {
-				(new RemoteUser(User.this, poll.getOriginator())).sendNumberPoll(poll);
-			} else {
-				(new RemoteUser(this, poll.getParticipants().get(0))).sendNumberPoll(poll);
+			String nextParticipant;
+			if (index + 1 == poll.getParticipants().size()) {
+				// last participant, send request back to originator
+				nextParticipant = poll.getOriginator();
 			}
-			synchronized (this.getSendNumberPollResponseHandler()) {
-//				System.out.println(this.getName() + " starts waiting ...");
-				this.getSendNumberPollResponseHandler().wait();
-				result = answer + getSendNumberPollResponseHandler().getResult();
-//				System.out.println(this.getName() + " ends waiting");
+			else {
+				// send request to the next participant
+				nextParticipant = poll.getParticipants().get(index + 1);
+			}
+			// pending poll requests information is stored in two different places:
+			//   pendingPollRequests: stores the poll based on the requestToken
+			//   responseToRequestMapper: when asking the next participant for
+			//     their poll answer, a different token is used (mainly to avoid
+			//     that the whole poll shares the same token, which might be
+			//     dangerous in terms of security). The mappper stores the link
+			//     between the request received from the previous participant
+			//     and the awaiting response from the next
+			pendingPollRequests.put(requestToken, poll);
+
+			synchronized(responseToRequestMapper) {
+				RemoteUser remote = new RemoteUser(this, nextParticipant);
+				String responseToken = remote.sendNumberPoll(poll);
+				responseToRequestMapper.put(responseToken, requestToken);
 			}
 		}
-		return result;
 	}
 
-	public List<Integer> sendMultivaluedPoll(User requesterUser, MultivaluedPoll poll) throws Exception {
+	public void sendMultivaluedPoll(User requesterUser, String requestToken, MultivaluedPoll poll) throws Exception {
 		throw new Exception();
 	}
 
-	public Map<String, NumberPoll> getPolls() {
-		return polls;
+	public void addInitiatedNumberPoll(NumberPoll poll, String messageToken) {
+		initiatedPolls.put(messageToken, poll);
 	}
 
-	public void setPolls(Map<String, NumberPoll> polls) {
-		this.polls = polls;
+	public NumberPoll getInitiatedNumberPoll(String messageToken) {
+		return initiatedPolls.get(messageToken);
 	}
 
-	public double sendNumberPoll(String from, NumberPoll poll, int i) {
-		// TODO Auto-generated method stub
-		return 0;
+	/**
+	 * Get a received poll request that is awaiting for a response
+	 * 
+	 * @param responseToken The token previously used to request an answer to
+	 *                      the next participant of the poll
+	 */
+	public NumberPoll getPendingNumberPollByResponseToken(String responseToken) {
+		synchronized (responseToRequestMapper) {
+			return pendingPollRequests.get(responseToRequestMapper.get(responseToken));
+		}
+	}
+
+	public String getMappedRequestToken(String responseToken) {
+		return responseToRequestMapper.get(responseToken);
+	}
+
+	public void addNumberPollFakeValue(String messageToken, double value) {
+		numberPollFakeValues.put(messageToken, value);
+	}
+
+	public double getNumberPollFakeValue(String messageToken) {
+		return numberPollFakeValues.get(messageToken);
+	}
+
+	public void addNumberPollAnswer(String messageToken, double value) {
+		numberPollAnswers.put(messageToken, value);
+	}
+
+	public double getNumberPollAnswer(String messageToken) {
+		return numberPollAnswers.get(messageToken);
 	}
 
 	public OnPollReceivedListener getOnPollReceivedListener() {
@@ -117,9 +136,4 @@ public class User extends UserBase {
 	public void setOnPollReceivedListener(OnPollReceivedListener onPollReceivedListener) {
 		this.onPollReceivedListener = onPollReceivedListener;
 	}
-
-	public PollAnswer getPollAnswer(String pollId) {
-		return pollAnswers.get(pollId);
-	}
-
 }
