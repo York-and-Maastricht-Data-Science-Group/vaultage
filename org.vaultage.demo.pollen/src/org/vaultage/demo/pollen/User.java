@@ -6,6 +6,9 @@ import java.util.Random;
 
 public class User extends UserBase {
 
+	public static final int MIN_RANDOM = 1000000;
+	public static final int MAX_RANDOM = 5000000;
+
 	private String name = new String();
 
 	// The following maps use message tokens as string to recover the information 
@@ -48,7 +51,7 @@ public class User extends UserBase {
 
 		if (publicKey.equals(poll.getOriginator())) {
 			// this vault is the poll's originator, respond with fake value
-			double fakeValue = (new Random()).nextInt(200 - 100) + 100;
+			double fakeValue = (new Random()).nextInt(MAX_RANDOM - MIN_RANDOM) + MIN_RANDOM;
 			numberPollFakeValues.put(poll.getId(), fakeValue);
 			RemoteUser remote = new RemoteUser(this, requesterUser.getPublicKey());
 			remote.respondToSendNumberPoll(fakeValue, requestToken);
