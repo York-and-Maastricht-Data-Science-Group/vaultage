@@ -98,13 +98,13 @@
       </Pane>
       <StackPane fx:id="stackPane" prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: #E6ECF0;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <BorderPane fx:id="friendsPane" layoutX="10.0" layoutY="10.0" prefHeight="740.0" prefWidth="963.0" style="-fx-background-color: #E6ECF0;">
+            <BorderPane fx:id="notificationsPane" layoutX="10.0" layoutY="10.0" prefHeight="740.0" prefWidth="963.0" style="-fx-background-color: #E6ECF0;">
                <center>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #E6ECF0;" BorderPane.alignment="CENTER">
                      <children>
-                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" layoutX="-10.0" layoutY="204.0" prefHeight="536.0" prefWidth="901.0" style="-fx-background-color: #E6ECF0;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="200.0">
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" layoutX="-10.0" layoutY="204.0" prefHeight="536.0" prefWidth="901.0" style="-fx-background-color: #E6ECF0;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <content>
-                              <VBox fx:id="VBoxFriendsPane" prefHeight="538.0" prefWidth="900.0" spacing="2.0" style="-fx-background-color: #E6ECF0;">
+                              <VBox fx:id="vBoxNotificationsPane" prefHeight="538.0" prefWidth="900.0" spacing="2.0" style="-fx-background-color: #E6ECF0;">
                                  <children>
                                     <BorderPane style="-fx-background-color: #ffffff;">
                                        <center>
@@ -140,34 +140,16 @@
                               </VBox>
                            </content>
                         </ScrollPane>
-                        <AnchorPane prefHeight="195.0" prefWidth="900.0" style="-fx-background-color: #ffffff;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0">
-                           <children>
-                              <Button layoutX="739.0" layoutY="140.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" text="Add" AnchorPane.rightAnchor="11.0" AnchorPane.topAnchor="146.0">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Button>
-                              <Label layoutX="22.0" layoutY="14.0" text="Name" AnchorPane.leftAnchor="22.0" AnchorPane.topAnchor="14.0">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Label layoutX="22.0" layoutY="50.0" text="Public Key" AnchorPane.leftAnchor="22.0" AnchorPane.topAnchor="50.0">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <TextField layoutX="124.0" layoutY="14.0" prefHeight="30.0" prefWidth="766.0" AnchorPane.leftAnchor="124.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="14.0" />
-                              <TextArea layoutX="124.0" layoutY="50.0" prefHeight="90.0" prefWidth="765.0" AnchorPane.leftAnchor="124.0" AnchorPane.rightAnchor="11.0" AnchorPane.topAnchor="50.0" />
-                           </children>
-                        </AnchorPane>
                      </children>
+                     <BorderPane.margin>
+                        <Insets top="1.0" />
+                     </BorderPane.margin>
                   </AnchorPane>
                </center>
                <top>
                   <AnchorPane prefHeight="60.0" prefWidth="901.0" style="-fx-background-color: #ffffff;" BorderPane.alignment="CENTER">
                      <children>
-                        <Label id="labelTopPaneTitle" layoutX="14.0" layoutY="14.0" style="-fx-background-color: #FFFFFFFF;" text="Friends" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
+                        <Label id="labelTopPaneTitle" layoutX="14.0" layoutY="14.0" style="-fx-background-color: #FFFFFFFF;" text="Notifications" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
                            <font>
                               <Font name="System Bold" size="24.0" />
                            </font>
@@ -316,58 +298,43 @@
                   </AnchorPane>
                </top>
             </BorderPane>
-            <BorderPane fx:id="notificationsPane" layoutX="10.0" layoutY="10.0" prefHeight="740.0" prefWidth="963.0" style="-fx-background-color: #E6ECF0;">
+            <BorderPane fx:id="friendsPane" layoutX="10.0" layoutY="10.0" prefHeight="740.0" prefWidth="963.0" style="-fx-background-color: #E6ECF0;">
                <center>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #E6ECF0;" BorderPane.alignment="CENTER">
                      <children>
-                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" layoutX="-10.0" layoutY="204.0" prefHeight="536.0" prefWidth="901.0" style="-fx-background-color: #E6ECF0;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" layoutX="-10.0" layoutY="204.0" prefHeight="536.0" prefWidth="901.0" style="-fx-background-color: #E6ECF0;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="200.0">
                            <content>
-                              <VBox fx:id="vBoxNotificationsPane" prefHeight="538.0" prefWidth="900.0" spacing="2.0" style="-fx-background-color: #E6ECF0;">
-                                 <children>
-                                    <BorderPane style="-fx-background-color: #ffffff;">
-                                       <center>
-                                          <Label alignment="TOP_LEFT" prefWidth="881.0" text="The content of a post should be put here ..." wrapText="true" BorderPane.alignment="TOP_LEFT">
-                                             <font>
-                                                <Font size="18.0" />
-                                             </font>
-                                             <BorderPane.margin>
-                                                <Insets left="10.0" />
-                                             </BorderPane.margin>
-                                          </Label>
-                                       </center>
-                                       <top>
-                                          <AnchorPane prefHeight="40.0" prefWidth="899.0" BorderPane.alignment="CENTER">
-                                             <children>
-                                                <Label layoutX="651.0" layoutY="14.0" text="Saturday, 31 September 2020" textAlignment="RIGHT" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                </Label>
-                                                <Label layoutX="7.0" layoutY="1.0" text="Felis Domestica" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
-                                                   <font>
-                                                      <Font name="System Bold" size="18.0" />
-                                                   </font>
-                                                </Label>
-                                             </children>
-                                          </AnchorPane>
-                                       </top>
-                                    </BorderPane>
-                                    <BorderPane layoutX="10.0" layoutY="10.0" style="-fx-background-color: #ffffff;" />
-                                    <BorderPane layoutX="10.0" layoutY="79.0" style="-fx-background-color: #ffffff;" />
-                                 </children>
-                              </VBox>
+                              <VBox fx:id="vBoxFriendsPane" prefHeight="538.0" prefWidth="900.0" spacing="2.0" style="-fx-background-color: #E6ECF0;" />
                            </content>
                         </ScrollPane>
+                        <AnchorPane prefHeight="195.0" prefWidth="900.0" style="-fx-background-color: #ffffff;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0">
+                           <children>
+                              <Button fx:id="buttonFriendAdd" layoutX="739.0" layoutY="140.0" mnemonicParsing="false" onAction="#buttonFriendAddOnAction" prefHeight="40.0" prefWidth="150.0" text="Add" AnchorPane.rightAnchor="11.0" AnchorPane.topAnchor="146.0">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Button>
+                              <Label layoutX="22.0" layoutY="14.0" text="Name" AnchorPane.leftAnchor="22.0" AnchorPane.topAnchor="14.0">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="22.0" layoutY="50.0" text="Public Key" AnchorPane.leftAnchor="22.0" AnchorPane.topAnchor="50.0">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="textFieldFriendName" layoutX="124.0" layoutY="14.0" prefHeight="30.0" prefWidth="766.0" AnchorPane.leftAnchor="124.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="14.0" />
+                              <TextArea fx:id="textAreaFriendPublicKey" layoutX="124.0" layoutY="50.0" prefHeight="90.0" prefWidth="765.0" AnchorPane.leftAnchor="124.0" AnchorPane.rightAnchor="11.0" AnchorPane.topAnchor="50.0" />
+                           </children>
+                        </AnchorPane>
                      </children>
-                     <BorderPane.margin>
-                        <Insets top="1.0" />
-                     </BorderPane.margin>
                   </AnchorPane>
                </center>
                <top>
                   <AnchorPane prefHeight="60.0" prefWidth="901.0" style="-fx-background-color: #ffffff;" BorderPane.alignment="CENTER">
                      <children>
-                        <Label id="labelTopPaneTitle" layoutX="14.0" layoutY="14.0" style="-fx-background-color: #FFFFFFFF;" text="Notifications" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
+                        <Label id="labelTopPaneTitle" layoutX="14.0" layoutY="14.0" style="-fx-background-color: #FFFFFFFF;" text="Friends" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
                            <font>
                               <Font name="System Bold" size="24.0" />
                            </font>
