@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: org.vaultage.demo.synthesiser
+Bundle-ManifestVersion: 2
+Bundle-Name: Synthesiser
+Bundle-SymbolicName: org.vaultage.demo.synthesiser
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.vaultage.core;bundle-version="1.0.0"

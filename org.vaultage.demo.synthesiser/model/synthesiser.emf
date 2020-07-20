@@ -1,0 +1,8 @@
+@GenModel(basePackage="org.vaultage.demo.synthesiser")
+@namespace(uri="synthesiser", prefix="synthesiser")
+package synthesiser;
+
+@vault
+class Worker {
+	op int increment(int number);
+}
