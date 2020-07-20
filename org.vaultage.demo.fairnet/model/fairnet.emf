@@ -9,12 +9,8 @@ class FairnetVault {
 	attr String name;
 	val Friend[*] friends;
 	val Post[*] posts;
-		
-	//op Post createPost(String content, Boolean isPublic);
-	//op Boolean isFriend(String friendPublicKey);
-	//op Post getPostById(String postId);
- 
- 	op Boolean addFriend();
+
+	op Boolean addFriend(String friendName);
 	op Post getPost(String postId);
 	op String[*] getPosts();
 }
@@ -25,7 +21,10 @@ class Friend {
 }
 
 class Post {
+	attr String Id;
+	attr String title;
 	attr String content;
+	attr String timestamp;
 	attr boolean isPublic;
 }
 
