@@ -1,5 +1,7 @@
 package org.vaultage.demo.synthesiser.traffic;
 
+import java.io.File;
+import java.io.PrintStream;
 import java.text.MessageFormat;
 
 import org.vaultage.core.VaultageServer;
@@ -13,9 +15,35 @@ import org.vaultage.demo.synthesiser.Worker;
  */
 public class FixedNextTraffic {
 
+	protected long latestRunTime;
+	protected int numWorkers;
+	protected int numOperations;
+
 	public static void main(String[] args) throws Exception {
+		int numReps = 5;
 		int numWorkers = 3;
-		int numOperations = 100;
+		int[] numOperations = { 25, 50, 100, 150, 200 };
+
+		PrintStream profilingStream = new PrintStream(new File("fixedNetResults.csv"));
+		profilingStream.println("NumTasks,TotalTimeMillis");
+
+		for (int numOp : numOperations) {
+			FixedNextTraffic trafficSimulation = new FixedNextTraffic(numWorkers, numOp);
+			for (int rep = 0; rep < numReps; rep++) {
+				trafficSimulation.run();
+				System.out.println(trafficSimulation.getLatestRunDetails());
+				profilingStream.println(String.format("%s,%d", numOp, trafficSimulation.getLatestRunTime()));
+			}
+		}
+		profilingStream.close();
+	}
+
+	public FixedNextTraffic(int numWorkers, int numOperations) {
+		this.numWorkers = numWorkers;
+		this.numOperations = numOperations;
+	}
+
+	public void run() throws Exception {
 		Worker[] workers = new Worker[numWorkers];
 
 		SynthesiserBroker broker = new SynthesiserBroker();
@@ -45,15 +73,28 @@ public class FixedNextTraffic {
 		}
 
 		long end = System.currentTimeMillis();
-		System.out.println(MessageFormat.format(
-				"Num workers: {0}, NumOps/worker: {1}, Total time: {2} ms",
-				numWorkers, numOperations, end - start));
+
+		latestRunTime = end - start;
 
 		// appropriately dispose broker
 		for (int i = 0; i < numWorkers; i++) {
 			workers[i].unregister();
 		}
 		broker.stop();
+	}
+
+	public int getNumOperations() {
+		return numOperations;
+	}
+
+	public long getLatestRunTime() {
+		return latestRunTime;
+	}
+
+	public String getLatestRunDetails() {
+		return MessageFormat.format(
+				"Num workers: {0}, NumOps/worker: {1}, Total time: {2} ms",
+				numWorkers, numOperations, latestRunTime);
 	}
 
 	private static Thread startWork(Worker worker, String remoteWorkerKey) {

@@ -10,9 +10,7 @@ class FairnetVault {
 	val Friend[*] friends;
 	val Post[*] posts;
 
-	@vaultage.operation(async="true")
- 	op Boolean addFriend();
-	
+	op Boolean addFriend(String friendName);
 	op Post getPost(String postId);
 	op String[*] getPosts();
 	
@@ -26,7 +24,10 @@ class Friend {
 }
 
 class Post {
+	attr String Id;
+	attr String title;
 	attr String content;
+	attr String timestamp;
 	attr boolean isPublic;
 }
 
