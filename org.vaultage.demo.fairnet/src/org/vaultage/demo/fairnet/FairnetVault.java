@@ -57,6 +57,7 @@ public class FairnetVault extends FairnetVaultBase {
 		return this.posts.stream().filter(p -> p.getId().equals(postId)).findFirst().orElse(null);
 	}
 	
+	@Override
 	public java.lang.Boolean addFriend(FairnetVault requesterFairnetVault) throws Exception {
 		Friend friend = new Friend();
 		friend.setPublicKey(requesterFairnetVault.getPublicKey());
@@ -64,7 +65,7 @@ public class FairnetVault extends FairnetVaultBase {
 		return true;
 	}
 	
-	
+	@Override
 	public Post getPost(FairnetVault requesterFairnetVault, String postId) throws Exception {
 		if (isFriend(requesterFairnetVault.getPublicKey())) {
 			return this.getPostById(postId);
@@ -73,7 +74,7 @@ public class FairnetVault extends FairnetVaultBase {
 		}
 	}
 	
-	
+	@Override
 	public List<String> getPosts(FairnetVault requesterFairnetVault) throws Exception {
 		if (isFriend(requesterFairnetVault.getPublicKey())) {
 			return this.posts.stream().filter(p -> p.getIsPublic()).map(p -> p.getId())

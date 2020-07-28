@@ -1,5 +1,5 @@
 @GenModel(basePackage="org.vaultage.demo.fairnet")
-@namespace(uri="http://fairnet.is/", prefix="")
+@namespace(uri="fairnet", prefix="")
 package fairnet;
 
 
@@ -9,14 +9,15 @@ class FairnetVault {
 	attr String name;
 	val Friend[*] friends;
 	val Post[*] posts;
-		
-	//op Post createPost(String content, Boolean isPublic);
-	//op Boolean isFriend(String friendPublicKey);
-	//op Post getPostById(String postId);
- 
+
+	@vaultage.operation(async="true")
  	op Boolean addFriend();
+	
 	op Post getPost(String postId);
 	op String[*] getPosts();
+	
+	@public 
+	op String getName();
 }
 
 class Friend {
