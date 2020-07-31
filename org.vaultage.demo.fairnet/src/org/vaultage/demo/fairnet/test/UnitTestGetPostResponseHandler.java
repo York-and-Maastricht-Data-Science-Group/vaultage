@@ -21,7 +21,6 @@ public class UnitTestGetPostResponseHandler implements GetPostResponseHandler {
 		}
 	}
 
-	@Override
 	public Post getResult() {
 		return post;
 	}

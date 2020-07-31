@@ -24,7 +24,6 @@ public class UnitTestGetPostsResponseHandler implements GetPostsResponseHandler 
 		}
 	}
 
-	@Override
 	public List<String> getResult() {
 		return posts;
 	}

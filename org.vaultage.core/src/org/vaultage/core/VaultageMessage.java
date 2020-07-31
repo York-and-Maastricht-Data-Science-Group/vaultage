@@ -24,7 +24,7 @@ public class VaultageMessage {
 	public void initToken() {
 		token = UUID.randomUUID().toString();
 	}
-	
+
 	public String getToken() {
 		return token;
 	}
@@ -80,5 +80,4 @@ public class VaultageMessage {
 	public void setMessageType(MessageType messageType) {
 		this.messageType = messageType;
 	}
-
 }
