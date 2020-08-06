@@ -10,6 +10,8 @@ public class VaultageMessage {
 		REQUEST, RESPONSE
 	};
 
+	private String senderAddress;
+	private int senderPort = -1;
 	private String senderId;
 	private String from;
 	private String to;
@@ -79,5 +81,21 @@ public class VaultageMessage {
 
 	public void setMessageType(MessageType messageType) {
 		this.messageType = messageType;
+	}
+
+	public String getSenderAddress() {
+		return senderAddress;
+	}
+
+	public void setSenderAddress(String senderAddress) {
+		this.senderAddress = senderAddress;
+	}
+
+	public int getSenderPort() {
+		return senderPort;
+	}
+
+	public void setSenderPort(int senderPort) {
+		this.senderPort = senderPort;
 	}
 }

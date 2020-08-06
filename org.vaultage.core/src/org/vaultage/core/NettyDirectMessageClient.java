@@ -1,15 +1,11 @@
 package org.vaultage.core;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.UUID;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -19,14 +15,18 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
-import io.netty.util.ReferenceCountUtil;
 
 public class NettyDirectMessageClient implements DirectMessageClient {
 
 	String serverName;
 	int port;
+	private InetSocketAddress address;
+	private ChannelFuture channelFuture;
+	private EventLoopGroup workerGroup;
+	private Bootstrap bootstrap;
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
@@ -40,47 +40,54 @@ public class NettyDirectMessageClient implements DirectMessageClient {
 		}
 	}
 
+	public NettyDirectMessageClient(InetSocketAddress address) throws UnknownHostException, IOException {
+		this(address.getAddress().getHostAddress(),address.getPort());
+	}
+			
 	public NettyDirectMessageClient(String serverName, int port) throws UnknownHostException, IOException {
 		this.serverName = serverName;
 		this.port = port;
+		this.address = new InetSocketAddress(serverName, port);
 	}
 
-	public void connect(String serverName, int port) throws IOException {
+	public void connect(String serverName, int port) throws IOException, InterruptedException {
 		this.serverName = serverName;
 		this.port = port;
+		this.address = new InetSocketAddress(serverName, port);
+		this.connect();
 	}
 
 	public void connect() throws IOException, InterruptedException {
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		workerGroup = new NioEventLoopGroup();
 
 		try {
-			Bootstrap b = new Bootstrap(); // (1)
-			b.group(workerGroup); // (2)
-			b.channel(NioSocketChannel.class); // (3)
-			b.option(ChannelOption.SO_KEEPALIVE, true); // (4)
-			b.handler(new ChannelInitializer<SocketChannel>() {
+			bootstrap = new Bootstrap();
+			bootstrap.group(workerGroup);
+			bootstrap.channel(NioSocketChannel.class);
+			bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+			bootstrap.handler(new ChannelInitializer<SocketChannel>() {
 				@Override
 				public void initChannel(SocketChannel ch) throws Exception {
-					
+					ch.pipeline().addLast(new LineBasedFrameDecoder(Integer.MAX_VALUE));
 					ch.pipeline().addLast(new StringDecoder());
 					ch.pipeline().addLast(new StringEncoder());
 					ch.pipeline().addLast(new NettyClientHandler());
 				}
 			});
 
-			// Start the client.
-			ChannelFuture f = b.connect(serverName, port).sync(); // (5)
-
-			// send message
-			f.channel().write(UUID.randomUUID().toString() + System.lineSeparator());
-			f.channel().flush();
+			channelFuture = bootstrap.connect(address).sync();
+			
+//			 send message
+//			channelFuture.channel().writeAndFlush(System.lineSeparator());
 
 			// Wait until the connection is closed.
-			f.channel().closeFuture().sync();
-
-		} finally {
-			workerGroup.shutdownGracefully();
-		}
+//			channelFuture.channel().closeFuture().sync();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+//		finally {
+//			workerGroup.shutdownGracefully();
+//		}
 	}
 
 	public void reconnect(String serverName, int port) throws IOException {
@@ -91,17 +98,18 @@ public class NettyDirectMessageClient implements DirectMessageClient {
 
 	}
 
-	public void disconnect() throws IOException {
-
+	public void disconnect() throws IOException, InterruptedException {
+		channelFuture.channel().closeFuture();
 	}
 
 	public void sendMessage(String message) throws IOException {
-
+		channelFuture.channel().writeAndFlush(message + System.lineSeparator());
 	}
 
 	@Override
 	public void shutdown() throws IOException, InterruptedException {
-
+		this.disconnect();
+		workerGroup.shutdownGracefully();	
 	}
 
 	public class NettyClientHandler extends ChannelInboundHandlerAdapter {
@@ -110,7 +118,6 @@ public class NettyDirectMessageClient implements DirectMessageClient {
 		public void channelActive(ChannelHandlerContext ctx) throws Exception {
 //			ctx.writeAndFlush(UUID.randomUUID().toString());
 		}
-
 
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) {

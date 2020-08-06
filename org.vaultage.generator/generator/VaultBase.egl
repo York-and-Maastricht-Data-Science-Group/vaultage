@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.io.IOException;
 
 import java.security.KeyPair;
 
@@ -29,6 +30,17 @@ public abstract class [%=class.getBaseName()%] {
 	public [%=class.getBaseName()%]() throws Exception {
 		this.isListening = false;
 		this.vaultage = new Vaultage(this);
+		vaultage.setRequestMessageHandler(new [%=appName%]RequestMessageHandler());
+		vaultage.setResponseMessageHandler(new [%=appName%]ResponseMessageHandler());
+		
+		KeyPair keyPair = VaultageEncryption.generateKeys();
+		this.publicKey = VaultageEncryption.getPublicKey(keyPair);
+		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
+	}
+	
+	public [%=class.getBaseName()%](String address, int port) throws Exception {
+		this.isListening = false;
+		this.vaultage = new Vaultage(this, address, port);
 		vaultage.setRequestMessageHandler(new [%=appName%]RequestMessageHandler());
 		vaultage.setResponseMessageHandler(new [%=appName%]ResponseMessageHandler());
 		
@@ -96,6 +108,10 @@ public abstract class [%=class.getBaseName()%] {
 
 	public void unregister() throws Exception {
 		vaultage.disconnect();
+	}
+	
+	public void shutdown() throws IOException, InterruptedException {
+		vaultage.shutdown();
 	}
 	
 	// operations

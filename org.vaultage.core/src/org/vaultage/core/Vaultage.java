@@ -1,5 +1,9 @@
 package org.vaultage.core;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.URI;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -39,32 +43,27 @@ import com.google.gson.GsonBuilder;
  */
 public class Vaultage {
 
+	public static final String DEFAULT_SERVER_ADDRESS = "localhost";
+	public static final int DEFAULT_SERVER_PORT = 50000;
+
 	public static Gson Gson = new GsonBuilder().setPrettyPrinting().create();
 
 	private Object vault;
-	private String address;
+	private String brokerAddress;
 	private ActiveMQConnectionFactory connectionFactory;
 	private Connection connection;
 	private Session session;
 	private Set<String> expectedReplyTokens = new HashSet<>();
 
+	private InetSocketAddress directMessageServerAddress;
+	private Map<String, InetSocketAddress> publicKeyToRemoteAddress = new HashMap<>();
+	
+	private DirectMessageServer directMessageServer;
+
 	private RequestMessageHandler requestMessageHandler;
 	private ResponseMessageHandler responseMessageHandler;
 
-	public Set<String> getExpectedReplyTokens() {
-		return expectedReplyTokens;
-	}
 
-	public void setExpectedReplyTokens(Set<String> expectedReplyTokens) {
-		this.expectedReplyTokens = expectedReplyTokens;
-	}
-
-	public Vaultage() {
-	}
-
-	public Vaultage(Object vault) {
-		this.vault = vault;
-	}
 
 	/***
 	 * Test or demo this Vaultage class
@@ -82,7 +81,7 @@ public class Vaultage {
 		// encryption
 		KeyPair receiverKeyPair;
 		KeyPair senderKeyPair;
-		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.CIPHER_ALGORITHM);
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(VaultageEncryption.KEY_GENERATOR_ALGORITHM);
 		keyPairGen.initialize(VaultageEncryption.KEY_LENGTH);
 
 		receiverKeyPair = keyPairGen.generateKeyPair();
@@ -94,13 +93,13 @@ public class Vaultage {
 		String senderPublicKey = Base64.getEncoder().encodeToString(senderKeyPair.getPublic().getEncoded());
 		String senderPrivateKey = Base64.getEncoder().encodeToString(senderKeyPair.getPrivate().getEncoded());
 
-		String address = ActiveMQConnection.DEFAULT_BROKER_URL;
-//		String address = "vm://localhost";
+		String brokerUrl = ActiveMQConnection.DEFAULT_BROKER_URL;
+//		String brokerAddress = "vm://localhost";
 		Vaultage v1 = new Vaultage();
-		v1.connect(address, senderPublicKey);
+		v1.connect(brokerUrl, senderPublicKey);
 
 		Vaultage v2 = new Vaultage();
-		v2.connect(address, receiverPublicKey);
+		v2.connect(brokerUrl, receiverPublicKey);
 
 		Thread.sleep(SLEEP_TIME);
 
@@ -116,6 +115,7 @@ public class Vaultage {
 		Thread.sleep(SLEEP_TIME);
 
 		VaultageMessage message = new VaultageMessage();
+		message.setMessageType(MessageType.REQUEST);
 		message.setFrom(senderPublicKey);
 		message.setTo(receiverPublicKey);
 		message.setOperation(VaultageHandler.class.getName());
@@ -129,6 +129,53 @@ public class Vaultage {
 
 		broker.stop();
 		System.out.println("Finished!");
+	}
+
+	/***
+	 * 
+	 */
+	public Vaultage() {
+	}
+
+	/***
+	 * 
+	 * @param vault
+	 */
+	public Vaultage(Object vault) {
+		this.vault = vault;
+	}
+	
+	public Vaultage(Object vault, String address, int port) {
+		this.vault = vault;
+		this.startDirectMessageServer(address, port);
+	}
+
+	public void startDirectMessageServer(String address, int port) {
+		this.directMessageServerAddress = new InetSocketAddress(address, port);
+		try {
+			directMessageServer = new NettyDirectMessageServer(this.directMessageServerAddress, this);
+			directMessageServer.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public void setPort(int port) {
+		this.directMessageServerAddress = new InetSocketAddress(port);
+	}
+	
+	public int getPort() {
+		return this.directMessageServerAddress.getPort();
+	}
+	
+
+	public Set<String> getExpectedReplyTokens() {
+		return expectedReplyTokens;
+	}
+
+	public void setExpectedReplyTokens(Set<String> expectedReplyTokens) {
+		this.expectedReplyTokens = expectedReplyTokens;
 	}
 
 	public static String serialise(Object obj) {
@@ -151,25 +198,61 @@ public class Vaultage {
 	public void sendMessage(String topicId, String senderPublicKey, String senderPrivateKey, VaultageMessage message)
 			throws InterruptedException {
 		try {
-			// Create the destination (Topic or Queue)
-			Topic destination = session.createTopic(topicId);
-
-			// Create a MessageProducer from the Session to the Topic or Queue
-			MessageProducer producer = session.createProducer(destination);
-			producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-
+			// add local address and port to the message
+			message.setSenderAddress(directMessageServerAddress.getAddress().getHostAddress());
+			message.setSenderPort(directMessageServerAddress.getPort());
+			
 			// Create a message
 			String text = serialise(message).trim();
 
 			// encrypt message
 			String encryptedMessage = VaultageEncryption.doubleEncrypt(text, topicId, senderPrivateKey).trim();
+			String concatenatedMessage = senderPublicKey + encryptedMessage;
+			
+			System.out.println(senderPublicKey);
+			System.out.println(encryptedMessage);			
 
-			TextMessage m = session.createTextMessage(senderPublicKey + encryptedMessage);
+			/** Make a direct connection to the receiver **/
+			// get the receiver's ip address and port from the topic id or public key
+			InetSocketAddress remoteServer = publicKeyToRemoteAddress.get(topicId);
+			boolean remoteServerAvailable = false;
+			if (remoteServer != null) {
+				try {
+					Socket socket = new Socket(remoteServer.getAddress(), remoteServer.getPort());
+					remoteServerAvailable = socket.isConnected();
+				} catch (Exception e) {
+					remoteServerAvailable = false;
+				}
+			}
 
-			producer.send(m);
+			// if the remote receiver is available, make a direct connection
+			if (remoteServerAvailable) {
+				DirectMessageClient directMessageClient = new NettyDirectMessageClient(remoteServer);
+				directMessageClient.connect();
+				directMessageClient.sendMessage(concatenatedMessage);
+				directMessageClient.shutdown();
+			}
+			// if cannot directly to the receiver than use a broker
+			else {
+				// Create the destination (Topic or Queue)
+				Topic destination = session.createTopic(topicId);
+
+				// Create a MessageProducer from the Session to the Topic or Queue
+				MessageProducer producer = session.createProducer(destination);
+
+				// set the delivery mode
+				producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+
+				// create the message
+				TextMessage m = session.createTextMessage(concatenatedMessage);
+
+				// send the message
+				producer.send(m);
+			}
 
 //			System.out.println("Send to: " + topicId);
 
+			// this is to record the token of a message that has been sent
 			expectedReplyTokens.add(message.getToken());
 //			System.out.println("SENT MESSAGE: " + topicId + "\n" + text);
 
@@ -186,9 +269,12 @@ public class Vaultage {
 	 * @param handlers
 	 * @throws InterruptedException
 	 */
-	public void subscribe(String topicId, String receiverPrivateKey)
-			throws InterruptedException {
+	public void subscribe(String topicId, String receiverPrivateKey) throws InterruptedException {
 		try {
+			
+			//give the private key to direct message server
+			directMessageServer.setPrivateKey(receiverPrivateKey);
+			
 			// Create the destination (Topic or Queue)
 			Topic destination = session.createTopic(topicId);
 
@@ -209,8 +295,7 @@ public class Vaultage {
 						String encryptedMessage = mergedMessage.substring(VaultageEncryption.PUBLIC_KEY_LENGTH,
 								mergedMessage.length());
 
-						String content = VaultageEncryption.doubleDecrypt(encryptedMessage,
-								senderPublicKey,
+						String content = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
 								receiverPrivateKey);
 
 //						 System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
@@ -246,14 +331,14 @@ public class Vaultage {
 	/***
 	 * A method to connect to an ActiveMQ broker
 	 * 
-	 * @param address
+	 * @param brokerAddress
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean connect(String address, String clientID) throws Exception {
+	public boolean connect(String brokerAddress, String clientID) throws Exception {
 		try {
-			this.address = address;
-			connectionFactory = new ActiveMQConnectionFactory(this.address);
+			this.brokerAddress = brokerAddress;
+			connectionFactory = new ActiveMQConnectionFactory(this.brokerAddress);
 			connection = connectionFactory.createConnection();
 			connection.setClientID(clientID);
 			connection.start();
@@ -277,23 +362,27 @@ public class Vaultage {
 	}
 
 	/***
-	 * Get the address of the ActiveMQ broker
+	 * Get the brokerAddress of the ActiveMQ broker
 	 * 
-	 * @param address
+	 * @param brokerAddress
 	 */
-	public String getAddress() {
-		return address;
+	public String getBrokerAddress() {
+		return brokerAddress;
 	}
 
 	/***
-	 * Set the address of the ActiveMQ broker
+	 * Set the brokerAddress of the ActiveMQ broker
 	 * 
-	 * @param address
+	 * @param brokerAddress
 	 */
-	public void setAddress(String address) {
-		this.address = address;
+	public void setBrokerAddress(String address) {
+		this.brokerAddress = address;
 	}
 
+	public void shutdown() throws IOException, InterruptedException {
+		this.directMessageServer.shutdown();
+	}
+	
 	public void setRequestMessageHandler(RequestMessageHandler requestMessageHandler) {
 		this.requestMessageHandler = requestMessageHandler;
 	}
@@ -302,4 +391,31 @@ public class Vaultage {
 		this.responseMessageHandler = responseMessageHandler;
 	}
 
+	public InetSocketAddress getDirectMessageServerAddress() {
+		return directMessageServerAddress;
+	}
+
+	public Object getVault() {
+		return vault;
+	}
+
+	public void setVault(Object vault) {
+		this.vault = vault;
+	}
+	
+	public RequestMessageHandler getRequestMessageHandler() {
+		return requestMessageHandler;
+	}
+
+	public ResponseMessageHandler getResponseMessageHandler() {
+		return responseMessageHandler;
+	}
+	
+	public Map<String, InetSocketAddress> getPublicKeyToRemoteAddress() {
+		return publicKeyToRemoteAddress;
+	}
+
+	public void setPrivateKey(String privateKey) {
+		directMessageServer.setPrivateKey(privateKey);
+	}
 }

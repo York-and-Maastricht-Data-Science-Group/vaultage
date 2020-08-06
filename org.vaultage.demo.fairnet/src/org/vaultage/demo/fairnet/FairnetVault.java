@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.vaultage.core.DirectMessageServer;
+import org.vaultage.core.NettyDirectMessageServer;
+import org.vaultage.core.Vaultage;
+
 // import org.vaultage.demo.fairnet.Friend;
 // import org.vaultage.demo.fairnet.Post;
 // import org.vaultage.demo.fairnet.FairnetVaultBase;
@@ -20,7 +24,11 @@ public class FairnetVault extends FairnetVaultBase {
 	public FairnetVault() throws Exception {
 		super();
 	}
-
+	
+	public FairnetVault(String address, int port) throws Exception {
+		super(address, port);
+	}
+	
 	// getter
 	public String getName() {
 		return this.name;
@@ -48,6 +56,10 @@ public class FairnetVault extends FairnetVaultBase {
 	}
 
 	// operations
+	public void setPort(int port) {
+		this.getVaultage().setPort(port);
+	}
+	
 	public Post createPost(String content, Boolean isPublic) throws Exception {
 		Post post = new Post();
 		post.setContent(content);

@@ -18,7 +18,7 @@ public class DirectMessageTest {
 	@Test
 	public void testLocalSocketSever() throws IOException, InterruptedException {
 
-		DirectMessageServer server = new SocketDirectMessageServer(9999);
+		DirectMessageServer server = new SocketDirectMessageServer(50000);
 		server.start();
 		Thread.sleep(2000);
 
@@ -37,22 +37,22 @@ public class DirectMessageTest {
 		assertEquals(true, true);
 
 		Thread.sleep(2000);
-		client1.disconnect();
-		client2.disconnect();
+		client1.shutdown();
+		client2.shutdown();
 		server.shutdown();
 	}
 
 	@Test
 	public void testLocalNettyServer() throws InterruptedException, UnknownHostException, IOException {
 
-		DirectMessageServer server = new NettyDirectMessageServer(9999);
+		DirectMessageServer server = new NettyDirectMessageServer("0.0.0.0", 9999, null);
 		server.start();
-		Thread.sleep(2000);
+//		Thread.sleep(2000);
 
-		System.out.println(server.getLocalAddress() +":" + server.getLocalPort());
+//		System.out.println(server.getLocalAddress() +":" + server.getLocalPort());
 	
-		DirectMessageClient client1 = new NettyDirectMessageClient(server.getLocalAddress(), server.getLocalPort());
-		DirectMessageClient client2 = new NettyDirectMessageClient(server.getLocalAddress(), server.getLocalPort());
+		DirectMessageClient client1 = new NettyDirectMessageClient("0.0.0.0", 9999);
+		DirectMessageClient client2 = new NettyDirectMessageClient("0.0.0.0", 9999);
 		
 		client1.connect();
 		client2.connect();

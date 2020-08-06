@@ -13,6 +13,9 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 	private boolean isListening = false;
 	private long counter = 0;
 
+	private Vaultage vaultage;
+	private String privateKey;
+	
 	public static void main(String[] args) {
 		try {
 			System.out.println("Starting Socket Server ..");
@@ -85,6 +88,10 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 				e.printStackTrace();
 			}
 		}
-	};
+	}
 
+	@Override
+	public void setPrivateKey(String privateKey) {
+		this.privateKey = privateKey;
+	};	
 }
