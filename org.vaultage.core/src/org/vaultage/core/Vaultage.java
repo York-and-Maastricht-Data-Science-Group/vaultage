@@ -57,13 +57,11 @@ public class Vaultage {
 
 	private InetSocketAddress directMessageServerAddress;
 	private Map<String, InetSocketAddress> publicKeyToRemoteAddress = new HashMap<>();
-	
+
 	private DirectMessageServer directMessageServer;
 
 	private RequestMessageHandler requestMessageHandler;
 	private ResponseMessageHandler responseMessageHandler;
-
-
 
 	/***
 	 * Test or demo this Vaultage class
@@ -144,7 +142,7 @@ public class Vaultage {
 	public Vaultage(Object vault) {
 		this.vault = vault;
 	}
-	
+
 	public Vaultage(Object vault, String address, int port) {
 		this.vault = vault;
 		this.startDirectMessageServer(address, port);
@@ -159,16 +157,14 @@ public class Vaultage {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	public void setPort(int port) {
 		this.directMessageServerAddress = new InetSocketAddress(port);
 	}
-	
+
 	public int getPort() {
 		return this.directMessageServerAddress.getPort();
 	}
-	
 
 	public Set<String> getExpectedReplyTokens() {
 		return expectedReplyTokens;
@@ -201,39 +197,46 @@ public class Vaultage {
 			// add local address and port to the message
 			message.setSenderAddress(directMessageServerAddress.getAddress().getHostAddress());
 			message.setSenderPort(directMessageServerAddress.getPort());
-			
+
 			// Create a message
 			String text = serialise(message).trim();
 
 			// encrypt message
 			String encryptedMessage = VaultageEncryption.doubleEncrypt(text, topicId, senderPrivateKey).trim();
 			String concatenatedMessage = senderPublicKey + encryptedMessage;
-			
-			System.out.println(senderPublicKey);
-			System.out.println(encryptedMessage);			
+
+//			System.out.println(senderPublicKey);
+//			System.out.println(encryptedMessage);			
 
 			/** Make a direct connection to the receiver **/
 			// get the receiver's ip address and port from the topic id or public key
 			InetSocketAddress remoteServer = publicKeyToRemoteAddress.get(topicId);
 			boolean remoteServerAvailable = false;
 			if (remoteServer != null) {
-				try {
-					Socket socket = new Socket(remoteServer.getAddress(), remoteServer.getPort());
-					remoteServerAvailable = socket.isConnected();
-				} catch (Exception e) {
-					remoteServerAvailable = false;
+				
+//				try {
+//					Socket socket = new Socket(remoteServer.getAddress(), remoteServer.getPort());
+//					remoteServerAvailable = socket.isConnected();
+//					socket.close();
+//				} catch (Exception e) {
+//					remoteServerAvailable = false;
+//				}
+
+				// Create a direct message client
+				// if the remote receiver is available, send message otherwise use broker
+				DirectMessageClient directMessageClient = new NettyDirectMessageClient(remoteServer);
+				directMessageClient.connect();
+				remoteServerAvailable = directMessageClient.isActive();
+				if (remoteServerAvailable) {
+					System.out.println("Send a direct message from " + directMessageClient.getLocalAddress().toString() +  " to " + directMessageClient.getRemoteAddress().toString());
+					directMessageClient.sendMessage(concatenatedMessage);
+					directMessageClient.shutdown();
 				}
 			}
 
-			// if the remote receiver is available, make a direct connection
-			if (remoteServerAvailable) {
-				DirectMessageClient directMessageClient = new NettyDirectMessageClient(remoteServer);
-				directMessageClient.connect();
-				directMessageClient.sendMessage(concatenatedMessage);
-				directMessageClient.shutdown();
-			}
-			// if cannot directly to the receiver than use a broker
-			else {
+			/** Otherwise use a broker **/
+			// if the remote direct message server is not available then use a broker
+			if (!remoteServerAvailable) {
 				// Create the destination (Topic or Queue)
 				Topic destination = session.createTopic(topicId);
 
@@ -271,10 +274,10 @@ public class Vaultage {
 	 */
 	public void subscribe(String topicId, String receiverPrivateKey) throws InterruptedException {
 		try {
-			
-			//give the private key to direct message server
+
+			// give the private key to direct message server
 			directMessageServer.setPrivateKey(receiverPrivateKey);
-			
+
 			// Create the destination (Topic or Queue)
 			Topic destination = session.createTopic(topicId);
 
@@ -382,7 +385,7 @@ public class Vaultage {
 	public void shutdown() throws IOException, InterruptedException {
 		this.directMessageServer.shutdown();
 	}
-	
+
 	public void setRequestMessageHandler(RequestMessageHandler requestMessageHandler) {
 		this.requestMessageHandler = requestMessageHandler;
 	}
@@ -402,7 +405,7 @@ public class Vaultage {
 	public void setVault(Object vault) {
 		this.vault = vault;
 	}
-	
+
 	public RequestMessageHandler getRequestMessageHandler() {
 		return requestMessageHandler;
 	}
@@ -410,7 +413,7 @@ public class Vaultage {
 	public ResponseMessageHandler getResponseMessageHandler() {
 		return responseMessageHandler;
 	}
-	
+
 	public Map<String, InetSocketAddress> getPublicKeyToRemoteAddress() {
 		return publicKeyToRemoteAddress;
 	}

@@ -67,4 +67,17 @@ public class SocketDirectMessageClient implements DirectMessageClient {
 		this.disconnect();
 	}
 
+	public boolean isActive() {
+		return clientSocket.isConnected();
+
+	}
+
+	public InetSocketAddress getRemoteAddress() {
+		return (InetSocketAddress) this.clientSocket.getRemoteSocketAddress();
+	}
+
+	public InetSocketAddress getLocalAddress() {
+		return (InetSocketAddress) this.clientSocket.getLocalSocketAddress();
+	}
+
 }

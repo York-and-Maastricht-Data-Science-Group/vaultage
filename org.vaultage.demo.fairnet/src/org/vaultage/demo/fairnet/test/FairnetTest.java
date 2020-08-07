@@ -378,23 +378,67 @@ public class FairnetTest {
 //	}
 
 	@Test
-	public void testAddFriendDirectMessage() throws Exception {
+	public void testGetPostDirectMessage() throws Exception {
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
 		// user 1
-		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet, "localhost",
+		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet, "192.168.56.1",
 				Vaultage.DEFAULT_SERVER_PORT);
 		user1.register(fairnet);
 		Thread.sleep(SLEEP_TIME);
 
+		user1.createPost("Hello world!!!", true);
+		user1.createPost("Stay at home, protect the NHS!", false);
+		user1.createPost("Don't worry, be happy!", true);
+		
 		// user 2
-		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet, "127.0.0.1",
+		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet, "192.168.99.80",
 				Vaultage.DEFAULT_SERVER_PORT + 1);
 		user2.register(fairnet);
 		Thread.sleep(SLEEP_TIME);
 
-		// exchange addresses
+		// exchange addresses for direct messaging
+		exchangeNetworkAddresses(user1, user2);
+
+		//set handler
+		user2.setGetPostResponseHandler(new UnitTestGetPostResponseHandler());
+		user2.setGetPostsResponseHandler(new UnitTestGetPostsResponseHandler());
+
+		// exchange public keys
+		exchangePublicKeys(user1, user2);
+//		// user 2 adds user 1 as a friend 
+		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(user2, user1.getPublicKey());
+
+		synchronized (user2.getGetPostsResponseHandler()) {
+			remoteRequester.getPosts();
+			user2.getGetPostsResponseHandler().wait();
+		}
+
+		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getGetPostsResponseHandler())
+				.getResult();
+
+		// simulate request user1's post contents per post
+		for (String postId : retrievedUser1posts) {
+			Post post = user1.getPostById(postId);
+
+			synchronized (user2.getGetPostResponseHandler()) {
+				remoteRequester.getPost(postId);
+				user2.getGetPostResponseHandler().wait();
+			}
+			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getGetPostResponseHandler()).getResult();
+			assertEquals(post.getContent(), retrievedUser1post.getContent());
+		}
+		
+
+		user1.unregister();
+		user2.unregister();
+//		
+		user1.shutdown();
+		user2.shutdown();
+	}
+
+	protected void exchangeNetworkAddresses(FairnetVault user1, FairnetVault user2) {
 		String user1publicKey = user1.getPublicKey();
 		InetSocketAddress user1address = user1.getVaultage().getDirectMessageServerAddress();
 
@@ -403,27 +447,6 @@ public class FairnetTest {
 
 		user1.getVaultage().getPublicKeyToRemoteAddress().put(user2publicKey, user2address);
 		user2.getVaultage().getPublicKeyToRemoteAddress().put(user1publicKey, user1address);
-
-		// set handler
-		user2.setAddFriendResponseHandler(new UnitTestAddFriendResponseHandler());
-
-//		// user 2 adds user 1 as a friend 
-		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(user2, user1.getPublicKey());
-//
-//		// simulate add user 2 by user 1
-		synchronized (user2.getAddFriendResponseHandler()) {
-			remoteRequester.addFriend();
-			user2.getAddFriendResponseHandler().wait();
-		}
-
-		assertEquals(true, user1.getFriends().stream().anyMatch(f -> f.getPublicKey().equals(user2.getPublicKey())));
-		assertEquals(true, user2.getFriends().stream().anyMatch(f -> f.getPublicKey().equals(user1.getPublicKey())));
-
-		user1.unregister();
-		user2.unregister();
-//		
-		user1.shutdown();
-		user2.shutdown();
 	}
 
 	/***

@@ -41,9 +41,21 @@ public class NettyDirectMessageClient implements DirectMessageClient {
 	}
 
 	public NettyDirectMessageClient(InetSocketAddress address) throws UnknownHostException, IOException {
-		this(address.getAddress().getHostAddress(),address.getPort());
+		this(address.getAddress().getHostAddress(), address.getPort());
 	}
-			
+
+	public InetSocketAddress getRemoteAddress() {
+		return (InetSocketAddress) this.channelFuture.channel().remoteAddress();
+	}
+
+	public InetSocketAddress getLocalAddress() {
+		return (InetSocketAddress) this.channelFuture.channel().localAddress();
+	}
+
+	public boolean isActive() {
+		return this.channelFuture.channel().isActive();
+	}
+
 	public NettyDirectMessageClient(String serverName, int port) throws UnknownHostException, IOException {
 		this.serverName = serverName;
 		this.port = port;
@@ -76,7 +88,7 @@ public class NettyDirectMessageClient implements DirectMessageClient {
 			});
 
 			channelFuture = bootstrap.connect(address).sync();
-			
+
 //			 send message
 //			channelFuture.channel().writeAndFlush(System.lineSeparator());
 
@@ -84,7 +96,7 @@ public class NettyDirectMessageClient implements DirectMessageClient {
 //			channelFuture.channel().closeFuture().sync();
 		} catch (Exception e) {
 			e.printStackTrace();
-		} 
+		}
 //		finally {
 //			workerGroup.shutdownGracefully();
 //		}
@@ -109,7 +121,7 @@ public class NettyDirectMessageClient implements DirectMessageClient {
 	@Override
 	public void shutdown() throws IOException, InterruptedException {
 		this.disconnect();
-		workerGroup.shutdownGracefully();	
+		workerGroup.shutdownGracefully();
 	}
 
 	public class NettyClientHandler extends ChannelInboundHandlerAdapter {

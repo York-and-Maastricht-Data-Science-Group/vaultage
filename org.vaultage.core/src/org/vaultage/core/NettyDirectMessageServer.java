@@ -108,14 +108,14 @@ public class NettyDirectMessageServer extends Thread implements DirectMessageSer
 //					System.out.print((char) textMessage.readByte());
 //					System.out.flush();
 //				}
-				System.out.println(mergedMessage);
+//				System.out.println(mergedMessage);
 
 				String senderPublicKey = mergedMessage.substring(0, VaultageEncryption.PUBLIC_KEY_LENGTH);
 				String encryptedMessage = mergedMessage.substring(VaultageEncryption.PUBLIC_KEY_LENGTH,
 						mergedMessage.length());
 
-				System.out.println(senderPublicKey);
-				System.out.println(encryptedMessage);
+//				System.out.println(senderPublicKey);
+//				System.out.println(encryptedMessage);
 
 				if (vaultage != null) {
 					String content = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
