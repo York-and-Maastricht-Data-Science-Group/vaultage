@@ -12,60 +12,69 @@ import org.vaultage.core.NettyDirectMessageClient;
 import org.vaultage.core.NettyDirectMessageServer;
 import org.vaultage.core.SocketDirectMessageClient;
 import org.vaultage.core.SocketDirectMessageServer;
+import org.vaultage.core.Vaultage;
 
+/***
+ * A class to test direct message server.
+ * 
+ * @author Alfa Yohannis
+ *
+ */
 public class DirectMessageTest {
 
-	@Test
-	public void testLocalSocketSever() throws IOException, InterruptedException {
+	static final long SLEEP_TIME = 500;
 
-		DirectMessageServer server = new SocketDirectMessageServer(50000);
+	/***
+	 * Test multiple connections to Socket direct message server 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	@Test
+	public void testConnectToSocketSever() throws IOException, InterruptedException {
+
+		DirectMessageServer server = new SocketDirectMessageServer(Vaultage.DEFAULT_SERVER_ADDRESS,
+				Vaultage.DEFAULT_SERVER_PORT, null);
 		server.start();
-		Thread.sleep(2000);
+		Thread.sleep(SLEEP_TIME);
 
 		DirectMessageClient client1 = new SocketDirectMessageClient(server.getLocalAddress(), server.getLocalPort());
 		DirectMessageClient client2 = new SocketDirectMessageClient(server.getLocalAddress(), server.getLocalPort());
-		
-		client1.connect();
-		client2.connect();
-		
-		client2.sendMessage("B");
-		client1.sendMessage("A");
-		client1.sendMessage("A");
-		client2.sendMessage("B");
-		client1.sendMessage("A");
-	
-		assertEquals(true, true);
 
-		Thread.sleep(2000);
+		boolean result1 = client1.connect();
+		boolean result2 = client2.connect();
+
+		assertEquals(true, result1);
+		assertEquals(true, result2);
+
+		Thread.sleep(SLEEP_TIME);
 		client1.shutdown();
 		client2.shutdown();
 		server.shutdown();
 	}
 
+	/***
+	 * Test multiple connections to Netty direct message server 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	@Test
-	public void testLocalNettyServer() throws InterruptedException, UnknownHostException, IOException {
+	public void testConnectToNettySever() throws InterruptedException, UnknownHostException, IOException {
 
-		DirectMessageServer server = new NettyDirectMessageServer("0.0.0.0", 9999, null);
+		DirectMessageServer server = new NettyDirectMessageServer(Vaultage.DEFAULT_SERVER_ADDRESS,
+				Vaultage.DEFAULT_SERVER_PORT, null);
 		server.start();
-//		Thread.sleep(2000);
+		Thread.sleep(SLEEP_TIME);
 
-//		System.out.println(server.getLocalAddress() +":" + server.getLocalPort());
-	
-		DirectMessageClient client1 = new NettyDirectMessageClient("0.0.0.0", 9999);
-		DirectMessageClient client2 = new NettyDirectMessageClient("0.0.0.0", 9999);
-		
-		client1.connect();
-		client2.connect();
-		
-		client2.sendMessage("B");
-		client1.sendMessage("A");
-		client1.sendMessage("A");
-		client2.sendMessage("B");
-		client1.sendMessage("A");
-		
-		assertEquals(true, true);
-		
-		Thread.sleep(2000);
+		DirectMessageClient client1 = new NettyDirectMessageClient(server.getLocalAddress(), server.getLocalPort());
+		DirectMessageClient client2 = new NettyDirectMessageClient(server.getLocalAddress(), server.getLocalPort());
+
+		boolean result1 = client1.connect();
+		boolean result2 = client2.connect();
+
+		assertEquals(true, result1);
+		assertEquals(true, result2);
+
+		Thread.sleep(SLEEP_TIME);
 		client1.shutdown();
 		client2.shutdown();
 		server.shutdown();

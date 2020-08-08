@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Scanner;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -377,6 +378,11 @@ public class FairnetTest {
 //		charlie.unregister();
 //	}
 
+
+	/***
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void testGetPostDirectMessage() throws Exception {
 
@@ -391,7 +397,7 @@ public class FairnetTest {
 		user1.createPost("Hello world!!!", true);
 		user1.createPost("Stay at home, protect the NHS!", false);
 		user1.createPost("Don't worry, be happy!", true);
-		
+
 		// user 2
 		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet, "192.168.99.80",
 				Vaultage.DEFAULT_SERVER_PORT + 1);
@@ -401,13 +407,13 @@ public class FairnetTest {
 		// exchange addresses for direct messaging
 		exchangeNetworkAddresses(user1, user2);
 
-		//set handler
+		// set handler
 		user2.setGetPostResponseHandler(new UnitTestGetPostResponseHandler());
 		user2.setGetPostsResponseHandler(new UnitTestGetPostsResponseHandler());
 
 		// exchange public keys
 		exchangePublicKeys(user1, user2);
-//		// user 2 adds user 1 as a friend 
+		// user 2 adds user 1 as a friend 
 		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(user2, user1.getPublicKey());
 
 		synchronized (user2.getGetPostsResponseHandler()) {
@@ -429,15 +435,20 @@ public class FairnetTest {
 			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getGetPostResponseHandler()).getResult();
 			assertEquals(post.getContent(), retrievedUser1post.getContent());
 		}
-		
 
 		user1.unregister();
 		user2.unregister();
-//		
+		
 		user1.shutdown();
 		user2.shutdown();
 	}
 
+	/***
+	 * Simulate exchanging network addresses, ips and ports, between user1 and user2.
+	 * Public keys are used as the keys to retrieve the addresses. 
+	 * @param user1
+	 * @param user2
+	 */
 	protected void exchangeNetworkAddresses(FairnetVault user1, FairnetVault user2) {
 		String user1publicKey = user1.getPublicKey();
 		InetSocketAddress user1address = user1.getVaultage().getDirectMessageServerAddress();
