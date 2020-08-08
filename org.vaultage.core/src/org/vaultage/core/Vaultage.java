@@ -37,7 +37,7 @@ import com.google.gson.GsonBuilder;
  * and receive messages directly through from and to Direct Message Server and
  * Client or a broker server, Apache ActiveMQ server.
  * 
- * Vaultage will try to send the message directly from to the receiver (another
+ * Vaultage will try to send the message directly to the receiver (another
  * vault). In other words, the message is sent from a direct message client
  * (local) to a direct message server (remote). However, if the connection
  * cannot be established, it will send it to an ActiveMQ message broker.
@@ -267,8 +267,10 @@ public class Vaultage {
 			throws InterruptedException {
 		try {
 			// add local address and port to the message
-			message.setSenderAddress(directMessageServerAddress.getAddress().getHostAddress());
-			message.setSenderPort(directMessageServerAddress.getPort());
+			if (directMessageServerAddress != null) {
+				message.setSenderAddress(directMessageServerAddress.getAddress().getHostAddress());
+				message.setSenderPort(directMessageServerAddress.getPort());
+			}
 
 			// Create a message
 			String text = serialise(message).trim();
@@ -353,8 +355,9 @@ public class Vaultage {
 	public void subscribe(String topicId, String receiverPrivateKey) throws InterruptedException {
 		try {
 
-			// give the private key to direct message server
-			directMessageServer.setPrivateKey(receiverPrivateKey);
+//			// give the private key to direct message server
+			if (directMessageServer != null)
+				directMessageServer.setPrivateKey(receiverPrivateKey);
 
 			// Create the destination (Topic or Queue)
 			Topic destination = session.createTopic(topicId);
@@ -384,8 +387,10 @@ public class Vaultage {
 						VaultageMessage vaultageMessage = Vaultage.deserialise(content, VaultageMessage.class);
 						MessageType msgType = vaultageMessage.getMessageType();
 
-						Vaultage.this.getPublicKeyToRemoteAddress().put(senderPublicKey, new InetSocketAddress(
-								vaultageMessage.getSenderAddress(), vaultageMessage.getSenderPort()));
+						// save sender's ip and port to public key and address map
+						if (vaultageMessage.getSenderAddress() != null && vaultageMessage.getSenderPort() >= 0)
+							Vaultage.this.getPublicKeyToRemoteAddress().put(senderPublicKey, new InetSocketAddress(
+									vaultageMessage.getSenderAddress(), vaultageMessage.getSenderPort()));
 
 						switch (msgType) {
 						case REQUEST:
