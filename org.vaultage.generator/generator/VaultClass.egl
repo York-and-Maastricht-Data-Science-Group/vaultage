@@ -22,6 +22,10 @@ public class [%=class.name%] [%=parentClass%] {
 		super();
 	}
 	
+	public [%=class.name%](String address, int port) throws Exception {
+		super(address, port);
+	}
+	
 	// getter
 [% for (feature in class.eStructuralFeatures){ %]
 	public [%=feature.getType()%] get[%=feature.name.firstToUpperCase()%]() {

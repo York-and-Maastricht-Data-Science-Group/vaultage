@@ -3,6 +3,7 @@ package org.vaultage.demo.fairnet.test;
 import org.vaultage.demo.fairnet.AddFriendResponseHandler;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
+import org.vaultage.demo.fairnet.Post;
 import org.vaultage.demo.fairnet.RemoteFairnetVault;
 
 public class UnitTestAddFriendResponseHandler implements AddFriendResponseHandler {
@@ -23,8 +24,8 @@ public class UnitTestAddFriendResponseHandler implements AddFriendResponseHandle
 		}
 	}
 
-	@Override
-	public Boolean getResult() {
+	public boolean getResult() {
 		return isSuccess;
 	}
+	
 }
