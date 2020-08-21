@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 // import org.vaultage.demo.vcommerce.CustomerBase;
 
 public class Customer extends CustomerBase {
+	private String name = new String();
 
 	public Customer() throws Exception {
 		super();
@@ -32,17 +33,23 @@ public class Customer extends CustomerBase {
 	}
 	
 	// getter
+	public String getName() {
+		return this.name;
+	}
 
 	// setter
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	// operations
 	
-	public void getBillingAddress(Customer requesterCustomer, String requestToken, Shop shop) throws Exception {
+	public void getBillingAddress(Customer requesterCustomer, String requestToken) throws Exception {
 		throw new Exception();
 	}
 	
 	
-	public void getShippingAddress(Customer requesterCustomer, String requestToken, Courier courier) throws Exception {
+	public void getShippingAddress(Customer requesterCustomer, String requestToken) throws Exception {
 		throw new Exception();
 	}
 	

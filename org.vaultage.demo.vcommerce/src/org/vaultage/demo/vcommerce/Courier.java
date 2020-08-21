@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 // import org.vaultage.demo.vcommerce.CourierBase;
 
 public class Courier extends CourierBase {
+	private String name = new String();
 
 	public Courier() throws Exception {
 		super();
@@ -32,8 +33,14 @@ public class Courier extends CourierBase {
 	}
 	
 	// getter
+	public String getName() {
+		return this.name;
+	}
 
 	// setter
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	// operations
 	

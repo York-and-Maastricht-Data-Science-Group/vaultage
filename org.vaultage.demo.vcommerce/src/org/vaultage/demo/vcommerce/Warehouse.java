@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 // import org.vaultage.demo.vcommerce.WarehouseBase;
 
 public class Warehouse extends WarehouseBase {
+	private String name = new String();
 
 	public Warehouse() throws Exception {
 		super();
@@ -32,8 +33,14 @@ public class Warehouse extends WarehouseBase {
 	}
 	
 	// getter
+	public String getName() {
+		return this.name;
+	}
 
 	// setter
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	// operations
 	

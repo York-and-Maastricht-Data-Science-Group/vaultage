@@ -49,6 +49,22 @@ rule VaultClass transform class : EClass {
 }
 
 /***
+ * To generate a vault class
+***/
+rule VaultClass transform class : EClass {
+	guard : class.hasVaultAnnotation() 
+	parameters : Map {
+  		"packageName" = packageName,    
+    	"class" = class,
+    	"parentClass" = "extends " + class.name + "Base",
+    	"requesterPublicKey" = requesterPublicKey
+    }
+  	template: "VaultClass.egl"
+  	target: outputSource + class.filename()
+  	overwrite: false
+}
+
+/***
 
 /***
  * To generate the base class of a vault class
@@ -104,17 +120,15 @@ rule BrokerService {
 /***
  * To generate a vault request message handler
 ***/
-rule RequestMessageHandler transform class : EClass {
-	guard : class.hasVaultAnnotation() 
+rule RequestMessageHandler {
 	parameters : Map {
-  		"packageName" = packageName,    
-    	"class" = class,
-    	"appName" = ePackage.name.firstToUpperCase()
-    }
+		"packageName" = packageName,    
+		"ePackage" = ePackage,
+		"appName" = ePackage.name.firstToUpperCase()
+	}
   	template: "RequestMessageHandler.egl"
   	target: outputGen + ePackage.name.firstToUpperCase() + "RequestMessageHandler.java"
 }
-
 
 /***
  * To generate a vault response message handler
@@ -129,4 +143,6 @@ rule ResponseMessageHandler transform class : EClass {
   	template: "ResponseMessageHandler.egl"
   	target: outputGen + ePackage.name.firstToUpperCase() + "ResponseMessageHandler.java"
 }
+
+
 

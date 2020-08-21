@@ -1,4 +1,7 @@
-[% import 'Util.eol'; %]
+[% 	import 'Util.eol'; %]
+[% 	
+	var classes = ePackage.getVaultClasses();
+%]
 package [%=packageName%];
 
 import java.util.ArrayList;
@@ -12,6 +15,12 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 
 	@Override
 	public void process(VaultageMessage message, String senderPublicKey, Object vault) throws Exception {
+[% var count = 1; %]	
+[% for (class in classes) { %]
+	[% if (count > 1) { %] 
+	else 
+	[% } %]
+	if (vault instanceof [%=class.name%]){
 		[%=class.name%] [%=class.name.firstToLowerCase()%] = ([%=class.name%]) vault;
 		[%=class.name%] requester = new [%=class.name%]();
 		requester.setPublicKey(senderPublicKey);
@@ -26,11 +35,14 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 				[%=eParameter.getTypeName()%] [%=eParameter.name%] = Vaultage.deserialise(message.getValue("[%=eParameter.name%]"), [%=eParameter.getTypeImplementation()%].class);
 [% } %]
 				[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken[%= eOperation.getParamsWithoutTypes() %]);
-			}
-			break;
-[% } %]		default:
+				}
+				break;
+[% } %]			default:
 				throw new Exception("Operation " + operation + " is not supported!");
 		}
 	}
-
+[% 
+		count = count + 1;
+	} %]
+	}
 }

@@ -278,3 +278,8 @@ operation EOperation getClassResponseBaseHandlerName(): String {
 operation EOperation getResponseBaseHandlerFilename(): String {
 	return self.name.firstToUpperCase() + "ResponseBaseHandler.java"; 
 }
+
+operation EPackage getVaultClasses(): Collection{
+	return EClass.all().select(a | a.eAnnotations.first() <> null and a.eAnnotations.first().source = "vault");
+	
+}
