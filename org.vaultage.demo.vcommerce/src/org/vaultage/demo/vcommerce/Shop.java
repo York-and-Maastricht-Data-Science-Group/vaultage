@@ -52,6 +52,11 @@ public class Shop extends ShopBase {
 	public void createOrder(Shop requesterShop, String requestToken, Basket basket) throws Exception {
 		throw new Exception();
 	}
+
+	public void createGoodsReceiptOrder(Warehouse warehouse) {
+		RemoteWarehouse requester = new RemoteWarehouse(this, warehouse.getPublicKey());
+		
+	}
 	
 		
 }

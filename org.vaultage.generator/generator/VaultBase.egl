@@ -1,20 +1,17 @@
 [% import 'Util.eol'; %]
 package [%=packageName%];
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.io.IOException;
 
 import java.security.KeyPair;
 
 import org.vaultage.util.VaultageEncryption;
+import org.vaultage.core.Vault;
 import org.vaultage.core.Vaultage;
-import org.vaultage.core.VaultageHandler;
 import org.vaultage.core.VaultageServer;
 
-public abstract class [%=class.getBaseName()%] {
+public abstract class [%=class.getBaseName()%] implements Vault {
 
 	protected String id = UUID.randomUUID().toString();
 	protected String privateKey;
