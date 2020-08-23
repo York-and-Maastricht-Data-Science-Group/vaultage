@@ -6,30 +6,50 @@ package vcommerce;
 @vault
 class Customer {
 	attr String name;
+	
+	@vaultage(requester="Shop")
 	op BillingAddress getBillingAddress();
+	
+	@vaultage(requester="Warehouse")
 	op ShippingAddress getShippingAddress();
 }
 
 @vault
 class Shop {
 	attr String name;
+	
+	@vaultage(requester="Customer")
 	op Item[*] getItems();
+	
+	@vaultage(requester="Customer")
 	op CustomerOrder createOrder(Basket basket);
 }
 
 @vault
 class Warehouse {
 	attr String name;
+	
+	@vaultage(requester="Shop")
 	op int getItemQuantity(String itemId);
+	
+	@vaultage(requester="Shop")
 	op GoodsReceiptConfirmation receiveGoods(GoodsReceiptOrder goodsReceiptOrder);
+	
+	@vaultage(requester="Shop")
 	op GoodsIssueConfirmation issueGoods(GoodsIssueOrder goodsIssueOrder);
+	
+	@vaultage(requester="Courier")
 	op OutboundAddress getOutboundAddress();
 }
 
 @vault
 class Courier {
 	attr String name;
+	
+	@vaultage(requester="Shop")
 	op String deliverGoods(ShippingOrder shippingOrder);
+	
+	@vaultage(requester="Customer, Shop")
 	op DeliveryStatus trackDelivery(String trackingId);
 }
 

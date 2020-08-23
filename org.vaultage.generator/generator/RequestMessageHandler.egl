@@ -1,7 +1,5 @@
 [% 	import 'Util.eol'; %]
-[% 	
-	var classes = ePackage.getVaultClasses();
-%]
+[% 	var classes = ePackage.getVaultClasses(); %]
 package [%=packageName%];
 
 import java.util.ArrayList;
@@ -22,8 +20,9 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 	[% } %]
 	if (vault instanceof [%=class.name%]){
 		[%=class.name%] [%=class.name.firstToLowerCase()%] = ([%=class.name%]) vault;
-		[%=class.name%] requester = new [%=class.name%]();
-		requester.setPublicKey(senderPublicKey);
+		// [%=class.name%] requester = new [%=class.name%]();
+		// requester.setPublicKey(senderPublicKey);
+		String requester = senderPublicKey;
 		
 		String operation = message.getOperation();
 		String messageToken = message.getToken();

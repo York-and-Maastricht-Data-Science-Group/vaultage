@@ -72,6 +72,7 @@ rule VaultClass transform class : EClass {
 rule VaultBaseClass transform class : EClass {
 	guard : class.hasVaultAnnotation()
 	parameters : Map {
+		"ePackage" = ePackage,
   		"packageName" = packageName,
     	"appName" = ePackage.name.firstToUpperCase()
     }
@@ -97,6 +98,7 @@ rule RemoteVaultClass transform class : EClass {
 rule ResponseOperationHandlerInterface transform eOperation : EOperation {
 	guard : eOperation.eContainer.hasVaultAnnotation()
 	parameters : Map {
+		"ePackage" = ePackage,
 		"packageName" = packageName,
 		"requesterPublicKey"= requesterPublicKey
 	}
@@ -137,7 +139,7 @@ rule ResponseMessageHandler transform class : EClass {
 	guard : class.hasVaultAnnotation() 
 	parameters : Map {
   		"packageName" = packageName,    
-    	"class" = class,
+    	"ePackage" = ePackage,
     	"appName" = ePackage.name.firstToUpperCase()
     }
   	template: "ResponseMessageHandler.egl"

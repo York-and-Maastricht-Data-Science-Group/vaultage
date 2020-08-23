@@ -44,12 +44,12 @@ public class Courier extends CourierBase {
 
 	// operations
 	
-	public void deliverGoods(Courier requesterCourier, String requestToken, ShippingOrder shippingOrder) throws Exception {
+	public void deliverGoods(String requesterPublicKey, String requestToken, ShippingOrder shippingOrder) throws Exception {
 		throw new Exception();
 	}
 	
 	
-	public void trackDelivery(Courier requesterCourier, String requestToken, String trackingId) throws Exception {
+	public void trackDelivery(String requesterPublicKey, String requestToken, String trackingId) throws Exception {
 		throw new Exception();
 	}
 	

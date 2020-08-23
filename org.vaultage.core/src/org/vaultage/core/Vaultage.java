@@ -1,6 +1,7 @@
 package org.vaultage.core;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.KeyPair;
@@ -241,7 +242,7 @@ public class Vaultage {
 	}
 
 	/**
-	 * Derialise from Json to object with type <T> using GSON library
+	 * De-serialise from JSON to object with type <T> using GSON library
 	 * 
 	 * @param <T>
 	 * @param content
@@ -250,6 +251,18 @@ public class Vaultage {
 	 */
 	public static <T> T deserialise(String content, Class<T> c) {
 		return Gson.fromJson(content, c);
+	}
+	
+	/**
+	 * De-serialise  from JSON to object with type <T> and Type using GSON library
+	 * @param <T>
+	 * @param content
+	 * @param c
+	 * @param type
+	 * @return
+	 */
+	public static <T> T deserialise(String content, Class<T> c, Type type) {
+		return Gson.fromJson(content, type);
 	}
 
 	/***

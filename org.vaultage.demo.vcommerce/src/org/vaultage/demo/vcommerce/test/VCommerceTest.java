@@ -12,14 +12,20 @@ import org.junit.Test;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.vcommerce.Courier;
 import org.vaultage.demo.vcommerce.Customer;
+import org.vaultage.demo.vcommerce.GetItemsResponseHandler;
+import org.vaultage.demo.vcommerce.GoodsReceiptConfirmation;
 import org.vaultage.demo.vcommerce.GoodsReceiptOrder;
 import org.vaultage.demo.vcommerce.Item;
+import org.vaultage.demo.vcommerce.ReceiveGoodsResponseHandler;
+import org.vaultage.demo.vcommerce.RemoteShop;
+import org.vaultage.demo.vcommerce.RemoteWarehouse;
 import org.vaultage.demo.vcommerce.Shop;
 import org.vaultage.demo.vcommerce.VcommerceBroker;
 import org.vaultage.demo.vcommerce.Warehouse;
 
 public class VCommerceTest {
 
+	private static final long SLEEP_TIME = 1000;
 	static VcommerceBroker BROKER;
 	static double FIXED_RESPONSE = 10.0;
 
@@ -62,6 +68,9 @@ public class VCommerceTest {
 		warehouse.register(server);
 		courier.register(server);
 
+		shop.setWarehouse(warehouse);
+		shop.setCourier(courier);
+
 		/**
 		 * start with the shop creating order to receive goods at the warehouse's
 		 * in-bound
@@ -79,18 +88,78 @@ public class VCommerceTest {
 		items.add(item1);
 		items.add(item2);
 		// create the order
-		GoodsReceiptOrder receiptOrder = new GoodsReceiptOrder();
-		receiptOrder.setItems(items);
-		receiptOrder.setRemarks("Goods will arrive on Monday 13:30 PM.");
-		receiptOrder.setShopName(shop.getName());
+		GoodsReceiptOrder goodsReceiptOrder = new GoodsReceiptOrder();
+		goodsReceiptOrder.setItems(items);
+		goodsReceiptOrder.setRemarks("Goods will arrive on Monday 13:30 PM.");
+		goodsReceiptOrder.setShopName(shop.getName());
 
+		// set what how the shop should respond to when a warehouse has responded to a
+		// GoodsReceiptOrder
+		shop.setReceiveGoodsResponseHandler(new ReceiveGoodsResponseHandler() {
+			@Override
+			public void run(Shop localShop, RemoteWarehouse other, String responseToken,
+					GoodsReceiptConfirmation result) throws Exception {
+				for (Item receivedItem : result.getItems()) {
+					Item item = localShop.getItems().stream().filter(i -> i.getItemId().equals(receivedItem.getItemId())
+							|| i.getName().equals(receivedItem.getName())).findFirst().orElse(null);
+					if (item == null) {
+						localShop.getItems().add(receivedItem);
+					} else {
+						item.setQuantity(item.getQuantity() + receivedItem.getQuantity());
+					}
+				}
+				synchronized (localShop.getReceiveGoodsResponseHandler()) {
+					localShop.getReceiveGoodsResponseHandler().notify();
+				}
+			}
+
+			@Override
+			public void run(Warehouse me, RemoteWarehouse other, String responseToken, GoodsReceiptConfirmation result)
+					throws Exception {
+			}
+		});
 		// put the order
-		shop.createGoodsReceiptOrder(warehouse);
+		synchronized (shop.getReceiveGoodsResponseHandler()) {
+			shop.createGoodsReceiptOrder(goodsReceiptOrder);
+			shop.getReceiveGoodsResponseHandler().wait();
+		}
+
+		/**
+		 * Customer request a list of items and their quantities.
+		 */
+		final List<Item> availableItems = new ArrayList<>();
+		customer.setGetItemsResponseHandler(new GetItemsResponseHandler() {
+			@Override
+			public void run(Customer localCustomer, RemoteShop other, String responseToken, List<Item> result)
+					throws Exception {
+				availableItems.clear();
+				availableItems.addAll(result);
+				synchronized (localCustomer.getGetItemsResponseHandler()) {
+					localCustomer.getGetItemsResponseHandler().notify();
+				}
+			}
+
+			@Override
+			public void run(Shop localCustomer, RemoteShop other, String responseToken, List<Item> result) throws Exception {
+			}
+		});
+
+
+
+		synchronized (customer.getGetItemsResponseHandler()) {
+			customer.getItems(shop);
+			customer.getGetItemsResponseHandler().wait();
+		}
+		// display of all available items
+		for (Item item : availableItems) {
+			System.out.println(item.getName() + ": " + item.getQuantity());
+		}
 
 		// assert!
 		assertEquals(true, received);
 
 		// disconnect from the broker server
+
 		customer.unregister();
 		shop.unregister();
 		warehouse.unregister();
