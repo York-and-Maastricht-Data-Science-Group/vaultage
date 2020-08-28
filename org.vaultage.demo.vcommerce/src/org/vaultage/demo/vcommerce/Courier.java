@@ -1,37 +1,21 @@
 package org.vaultage.demo.vcommerce;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-// import org.vaultage.demo.vcommerce.GoodsReceiptOrder;
-// import org.vaultage.demo.vcommerce.GoodsReceiptConfirmation;
-// import org.vaultage.demo.vcommerce.GoodsIssueOrder;
-// import org.vaultage.demo.vcommerce.GoodsIssueConfirmation;
-// import org.vaultage.demo.vcommerce.CustomerOrder;
-// import org.vaultage.demo.vcommerce.BillingAddress;
-// import org.vaultage.demo.vcommerce.ShippingAddress;
-// import org.vaultage.demo.vcommerce.OutboundAddress;
-// import org.vaultage.demo.vcommerce.Item;
-// import org.vaultage.demo.vcommerce.Basket;
-// import org.vaultage.demo.vcommerce.ShippingOrder;
-// import org.vaultage.demo.vcommerce.DeliveryStatus;
-// import org.vaultage.demo.vcommerce.CourierBase;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Courier extends CourierBase {
 	private String name = new String();
+	private Map<String, ShippingOrder> trackShippingOrders = new HashMap<>();
 
 	public Courier() throws Exception {
 		super();
 	}
-	
+
 	public Courier(String address, int port) throws Exception {
 		super(address, port);
 	}
-	
+
 	// getter
 	public String getName() {
 		return this.name;
@@ -43,15 +27,58 @@ public class Courier extends CourierBase {
 	}
 
 	// operations
-	
-	public void deliverGoods(String requesterPublicKey, String requestToken, ShippingOrder shippingOrder) throws Exception {
-		throw new Exception();
+
+	public void deliverGoods(String requesterPublicKey, String requestToken, ShippingOrder shippingOrder)
+			throws Exception {
+
+		/** get the shipping address directly from the customer **/
+		String customerPK = shippingOrder.getCustomerPublicKey();
+		RemoteCustomer remoteCustomer = new RemoteCustomer(this, customerPK);
+
+		this.setGetShippingAddressResponseHandler(new GetShippingAddressResponseHandler() {
+			@Override
+			public void run(Customer me, RemoteCustomer other, String responseToken, ShippingAddress result)
+					throws Exception {
+			}
+
+			@Override
+			public void run(Courier me, RemoteCustomer other, String responseToken, ShippingAddress result)
+					throws Exception {
+				/** get the out-bound address directly from the warehouse **/
+				String warehousePK = shippingOrder.getWarehousePulicKey();
+				RemoteWarehouse remoteWarehouse = new RemoteWarehouse(Courier.this, warehousePK);
+
+				Courier.this.setGetOutboundAddressResponseHandler(new GetOutboundAddressResponseHandler() {
+					@Override
+					public void run(Warehouse me, RemoteWarehouse other, String responseToken, OutboundAddress result)
+							throws Exception {
+					}
+
+					@Override
+					public void run(Courier me, RemoteWarehouse other, String responseToken, OutboundAddress result)
+							throws Exception {
+						// send the trackingId back to shop
+						RemoteCourier remoteCourier = new RemoteCourier(Courier.this, requesterPublicKey);
+						String trackingId = UUID.randomUUID().toString();
+						trackShippingOrders.put(trackingId, shippingOrder);
+						remoteCourier.respondToDeliverGoods(trackingId, requestToken);
+					}
+				});
+				remoteWarehouse.getOutboundAddress();
+			}
+		});
+		remoteCustomer.getShippingAddress();
 	}
-	
-	
+
 	public void trackDelivery(String requesterPublicKey, String requestToken, String trackingId) throws Exception {
-		throw new Exception();
+		RemoteCourier remoteCourier = new RemoteCourier(this, requesterPublicKey);
+		DeliveryStatus ds = new DeliveryStatus();
+		if (trackShippingOrders.get(trackingId) != null) {
+			ds.setStatus("Delivering");
+		} else {
+			ds.setStatus("Delivered");
+		}
+		remoteCourier.respondToTrackDelivery(ds, requestToken);
 	}
-	
-		
+
 }

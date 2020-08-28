@@ -3,11 +3,11 @@ package org.vaultage.demo.vcommerce;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Warehouse extends WarehouseBase {
 	private String name = new String();
+	private OutboundAddress outboundAddress = new OutboundAddress();
 
-	List<Item> itemList = new ArrayList<>();
+	List<Item> stockItems = new ArrayList<>();
 
 	public Warehouse() throws Exception {
 		super();
@@ -27,11 +27,18 @@ public class Warehouse extends WarehouseBase {
 		this.name = name;
 	}
 
-	// operations
+	public OutboundAddress getOutboundAddress() {
+		return outboundAddress;
+	}
 
+	public void setOutboundAddress(OutboundAddress outboundAddress) {
+		this.outboundAddress = outboundAddress;
+	}
+
+	// operations
 	public void getItemQuantity(String requesterPublicKey, String requestToken, String itemId) throws Exception {
 		int result = 0;
-		Item item = itemList.stream().filter(i -> i.getItemId().equals(itemId)).findFirst().orElse(null);
+		Item item = stockItems.stream().filter(i -> i.getItemId().equals(itemId)).findFirst().orElse(null);
 		if (item != null) {
 			result = item.getQuantity();
 		}
@@ -42,17 +49,18 @@ public class Warehouse extends WarehouseBase {
 	public void receiveGoods(String requesterPublicKey, String requestToken, GoodsReceiptOrder goodsReceiptOrder)
 			throws Exception {
 		GoodsReceiptConfirmation result = new GoodsReceiptConfirmation();
-		
+		result.setItems(new ArrayList<>());
+
 		for (Item receivedItem : goodsReceiptOrder.getItems()) {
-			Item item = itemList.stream().filter(
+			Item item = stockItems.stream().filter(
 					i -> i.getItemId().equals(receivedItem.getItemId()) || i.getName().equals(receivedItem.getName()))
 					.findFirst().orElse(null);
 			if (item == null) {
-				itemList.add(receivedItem);
+				stockItems.add(receivedItem);
 			} else {
 				item.setQuantity(item.getQuantity() + receivedItem.getQuantity());
 			}
-			result.setItems(goodsReceiptOrder.getItems());
+			result.getItems().add(receivedItem);
 		}
 		
 		RemoteWarehouse confirmer = new RemoteWarehouse(this, requesterPublicKey);
@@ -62,11 +70,27 @@ public class Warehouse extends WarehouseBase {
 
 	public void issueGoods(String requesterPublicKey, String requestToken, GoodsIssueOrder goodsIssueOrder)
 			throws Exception {
-		throw new Exception();
+		GoodsIssueConfirmation result = new GoodsIssueConfirmation();
+		result.setItems(new ArrayList<>());
+		
+		// reduce the quantity of the stock items based on the goods issue order
+		for (Item toBeIssuedItem : goodsIssueOrder.getItems()) {
+			Item stockItem = stockItems.stream().filter(
+					i -> i.getItemId().equals(toBeIssuedItem.getItemId()) || i.getName().equals(toBeIssuedItem.getName()))
+					.findFirst().orElse(null);
+			stockItem.setQuantity(stockItem.getQuantity() - toBeIssuedItem.getQuantity());
+			result.getItems().add(toBeIssuedItem);
+		}
+
+		result.setGoodsIssueOrderId(goodsIssueOrder.getId());
+		RemoteWarehouse confirmer = new RemoteWarehouse(this, requesterPublicKey);
+		result.setRemarks("All items are in the outbound terminal ready to be delivered.");
+		confirmer.respondToIssueGoods(result, requestToken);
 	}
 
 	public void getOutboundAddress(String requesterPublicKey, String requestToken) throws Exception {
-		throw new Exception();
+		RemoteWarehouse confirmer = new RemoteWarehouse(this, requesterPublicKey);
+		confirmer.respondToGetOutboundAddress(this.getOutboundAddress(), requestToken);
 	}
 
 }

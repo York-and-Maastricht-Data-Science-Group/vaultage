@@ -10,16 +10,22 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.vaultage.core.VaultageServer;
+import org.vaultage.demo.vcommerce.Basket;
 import org.vaultage.demo.vcommerce.Courier;
+import org.vaultage.demo.vcommerce.CreateOrderResponseHandler;
 import org.vaultage.demo.vcommerce.Customer;
+import org.vaultage.demo.vcommerce.CustomerOrder;
+import org.vaultage.demo.vcommerce.DeliveryStatus;
 import org.vaultage.demo.vcommerce.GetItemsResponseHandler;
 import org.vaultage.demo.vcommerce.GoodsReceiptConfirmation;
 import org.vaultage.demo.vcommerce.GoodsReceiptOrder;
 import org.vaultage.demo.vcommerce.Item;
 import org.vaultage.demo.vcommerce.ReceiveGoodsResponseHandler;
+import org.vaultage.demo.vcommerce.RemoteCourier;
 import org.vaultage.demo.vcommerce.RemoteShop;
 import org.vaultage.demo.vcommerce.RemoteWarehouse;
 import org.vaultage.demo.vcommerce.Shop;
+import org.vaultage.demo.vcommerce.TrackDeliveryResponseHandler;
 import org.vaultage.demo.vcommerce.VcommerceBroker;
 import org.vaultage.demo.vcommerce.Warehouse;
 
@@ -49,6 +55,14 @@ public class VCommerceTest {
 		Customer customer = new Customer();
 		customer.setId("Alice");
 		customer.setName("Alice");
+		customer.getBillingAddress().setName(customer.getName());
+		customer.getBillingAddress().setEmail("alice@wonderland.com");
+		customer.getBillingAddress().setMobile("+44001122334455");
+		customer.getBillingAddress().setAddress("Christopher Road 56");
+		customer.getShippingAddress().setName(customer.getName());
+		customer.getShippingAddress().setEmail("alice@wonderland.com");
+		customer.getShippingAddress().setMobile("+44001122334455");
+		customer.getShippingAddress().setAddress("Holgate Avenue 99");
 
 		Shop shop = new Shop();
 		shop.setId("Bobazon");
@@ -57,6 +71,10 @@ public class VCommerceTest {
 		Warehouse warehouse = new Warehouse();
 		warehouse.setId("CharlieHouse");
 		warehouse.setName("CharlieHouse");
+		warehouse.getOutboundAddress().setName(warehouse.getName());
+		warehouse.getOutboundAddress().setEmail("charlie@charliehouse.com");
+		warehouse.getOutboundAddress().setMobile("+44556677889900");
+		warehouse.getOutboundAddress().setAddress("Jump Street 21");
 
 		Courier courier = new Courier();
 		courier.setId("DanHL");
@@ -140,23 +158,116 @@ public class VCommerceTest {
 			}
 
 			@Override
-			public void run(Shop localCustomer, RemoteShop other, String responseToken, List<Item> result) throws Exception {
+			public void run(Shop localCustomer, RemoteShop other, String responseToken, List<Item> result)
+					throws Exception {
 			}
 		});
-
-
 
 		synchronized (customer.getGetItemsResponseHandler()) {
 			customer.getItems(shop);
 			customer.getGetItemsResponseHandler().wait();
 		}
-		// display of all available items
-		for (Item item : availableItems) {
-			System.out.println(item.getName() + ": " + item.getQuantity());
+//		// display of all available items
+//		for (Item item : availableItems) {
+//			System.out.println(item.getName() + ": " + item.getQuantity());
+//		}
+
+		/***
+		 * User starts to order
+		 */
+		// filling basket
+		Basket basket = new Basket();
+		basket.setItems(new ArrayList<>());
+		Item itemToBuy1 = new Item();
+		itemToBuy1.setItemId(availableItems.get(0).getItemId());
+		itemToBuy1.setName(availableItems.get(0).getName());
+		itemToBuy1.setQuantity(2);
+		basket.getItems().add(itemToBuy1);
+
+		Item itemToBuy2 = new Item();
+		itemToBuy2.setItemId(availableItems.get(1).getItemId());
+		itemToBuy2.setName(availableItems.get(1).getName());
+		itemToBuy2.setQuantity(1);
+		basket.getItems().add(itemToBuy2);
+
+		CustomerOrder[] customerOrders = new CustomerOrder[1];
+		customer.setCreateOrderResponseHandler(new CreateOrderResponseHandler() {
+			@Override
+			public void run(Shop me, RemoteShop other, String responseToken, CustomerOrder result) throws Exception {
+			}
+
+			@Override
+			public void run(Customer me, RemoteShop other, String responseToken, CustomerOrder result)
+					throws Exception {
+				synchronized (me.getCreateOrderResponseHandler()) {
+					customerOrders[0] = result;
+					me.getCreateOrderResponseHandler().notify();
+				}
+			}
+		});
+		synchronized (customer.getCreateOrderResponseHandler()) {
+			customer.putOrder(shop, basket);
+			customer.getCreateOrderResponseHandler().wait();
+		}
+
+		// Customer tracks the delivery
+		String trackingId = customerOrders[0].getTrackingId();
+		DeliveryStatus[] dsCustomer = new DeliveryStatus[1];
+		customer.setTrackDeliveryResponseHandler(new TrackDeliveryResponseHandler() {
+			@Override
+			public void run(Courier me, RemoteCourier other, String responseToken, DeliveryStatus result)
+					throws Exception {
+			}
+
+			@Override
+			public void run(Shop me, RemoteCourier other, String responseToken, DeliveryStatus result)
+					throws Exception {
+			}
+
+			@Override
+			public void run(Customer me, RemoteCourier other, String responseToken, DeliveryStatus result)
+					throws Exception {
+				synchronized (me.getTrackDeliveryResponseHandler()) {
+					dsCustomer[0] = result;
+					me.getTrackDeliveryResponseHandler().notify();
+				}
+			}
+		});
+		synchronized (customer.getTrackDeliveryResponseHandler()) {
+			customer.trackDelivery(trackingId, courier);
+			customer.getTrackDeliveryResponseHandler().wait();
+		}
+		
+		// Shop tracks the delivery
+		DeliveryStatus[] dsShop = new DeliveryStatus[1];
+		shop.setTrackDeliveryResponseHandler(new TrackDeliveryResponseHandler() {
+			@Override
+			public void run(Courier me, RemoteCourier other, String responseToken, DeliveryStatus result)
+					throws Exception {
+			}
+
+			@Override
+			public void run(Shop me, RemoteCourier other, String responseToken, DeliveryStatus result)
+					throws Exception {
+				synchronized (me.getTrackDeliveryResponseHandler()) {
+					dsShop[0] = result;
+					me.getTrackDeliveryResponseHandler().notify();
+				}
+			}
+
+			@Override
+			public void run(Customer me, RemoteCourier other, String responseToken, DeliveryStatus result)
+					throws Exception {
+				
+			}
+		});
+		synchronized (shop.getTrackDeliveryResponseHandler()) {
+			shop.trackDelivery(trackingId, courier);
+			shop.getTrackDeliveryResponseHandler().wait();
 		}
 
 		// assert!
-		assertEquals(true, received);
+		assertEquals(dsCustomer[0].getStatus(), dsShop[0].getStatus());
 
 		// disconnect from the broker server
 

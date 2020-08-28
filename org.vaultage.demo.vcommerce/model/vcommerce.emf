@@ -6,11 +6,14 @@ package vcommerce;
 @vault
 class Customer {
 	attr String name;
+	val BillingAddress billingAddress;
+	val ShippingAddress shippingAddress;
+	
 	
 	@vaultage(requester="Shop")
 	op BillingAddress getBillingAddress();
 	
-	@vaultage(requester="Warehouse")
+	@vaultage(requester="Courier")
 	op ShippingAddress getShippingAddress();
 }
 
@@ -109,7 +112,8 @@ class OutboundAddress {
 class Item {
 	attr String itemId;
 	attr String name;
-	attr Integer quantity; 
+	attr Integer quantity;
+	attr String message; 
 }
 
 class Basket {
@@ -117,6 +121,7 @@ class Basket {
 }
 
 class ShippingOrder {
+	attr String goodsIssueOrderId;
 	// to get customer's shipping address
 	attr String customerPublicKey;
 	// to get warehouse's address to pick up goods
