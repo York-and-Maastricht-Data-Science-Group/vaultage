@@ -4,11 +4,14 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.vaultage.core.Vault;
+import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.vcommerce.Basket;
 import org.vaultage.demo.vcommerce.Courier;
@@ -49,10 +52,88 @@ public class VCommerceTest {
 	@Test
 	public void testGoodsReceivedByCustomer() throws Exception {
 
-		// initialisation
-		boolean received = false;
+		VaultageServer server = new VaultageServer(VcommerceBroker.BROKER_ADDRESS);
 
 		Customer customer = new Customer();
+		Shop shop = new Shop();
+		Warehouse warehouse = new Warehouse();
+		Courier courier = new Courier();
+
+		DeliveryStatus[] dsCustomer = new DeliveryStatus[1];
+		DeliveryStatus[] dsShop = new DeliveryStatus[1];
+
+		runSequentialScenario(server, customer, shop, warehouse, courier, dsCustomer, dsShop);
+
+		// assert!
+		assertEquals(dsCustomer[0].getStatus(), dsShop[0].getStatus());
+
+		// disconnect from the broker server
+
+		customer.unregister();
+		shop.unregister();
+		warehouse.unregister();
+		courier.unregister();
+	}
+
+	@Test
+	public void testGoodsReceivedByCustomerDirectMessage() throws Exception {
+
+		VaultageServer server = new VaultageServer(VcommerceBroker.BROKER_ADDRESS);
+
+		Customer customer = new Customer();
+		Shop shop = new Shop();
+		Warehouse warehouse = new Warehouse();
+		Courier courier = new Courier();
+
+		// temporary values to assert
+		DeliveryStatus[] dsCustomer = new DeliveryStatus[1];
+		DeliveryStatus[] dsShop = new DeliveryStatus[1];
+
+		int port = new Integer(Vaultage.DEFAULT_SERVER_PORT);
+
+		customer.startServer("127.0.0.1", port++);
+		shop.startServer("192.168.56.1", port++);
+		courier.startServer("192.168.14.2", port++);
+		warehouse.startServer("192.168.99.80", port++);
+
+		/**
+		 * Set up all vaults to trust each other. Therefore, they don't have to use a
+		 * broker to communicate. Initially, vaults will use a broker as a channel to
+		 * communicate to get the trusted addresses of other vaults. If other vaults are
+		 * trusted, they will use direct messaging instead. It the remote vaults cannot
+		 * be reached by direct messaging, a broker will be re-used.
+		 **/
+		Vault[] vaults = { customer, shop, warehouse, courier };
+		for (Vault vault1 : vaults) {
+			for (Vault vault2 : vaults) {
+				if (!vault1.equals(vault2)) {
+					vault1.getVaultage().getPublicKeyToRemoteAddress().put(vault2.getPublicKey(),
+							vault2.getVaultage().getDirectMessageServerAddress());
+				}
+			}
+		}
+		
+		Thread.sleep(SLEEP_TIME);
+
+		runSequentialScenario(server, customer, shop, warehouse, courier, dsCustomer, dsShop);
+
+		// assert!
+		assertEquals(dsCustomer[0].getStatus(), dsShop[0].getStatus());
+
+		customer.unregister();
+		shop.unregister();
+		warehouse.unregister();
+		courier.unregister();
+
+		customer.shutdownServer();
+		shop.shutdownServer();
+		warehouse.shutdownServer();
+		courier.shutdownServer();
+	}
+
+	protected void runSequentialScenario(VaultageServer server, Customer customer, Shop shop, Warehouse warehouse,
+			Courier courier, DeliveryStatus[] dsCustomer, DeliveryStatus[] dsShop)
+			throws Exception, InterruptedException {
 		customer.setId("Alice");
 		customer.setName("Alice");
 		customer.getBillingAddress().setName(customer.getName());
@@ -64,11 +145,9 @@ public class VCommerceTest {
 		customer.getShippingAddress().setMobile("+44001122334455");
 		customer.getShippingAddress().setAddress("Holgate Avenue 99");
 
-		Shop shop = new Shop();
 		shop.setId("Bobazon");
 		shop.setName("Bobazon");
 
-		Warehouse warehouse = new Warehouse();
 		warehouse.setId("CharlieHouse");
 		warehouse.setName("CharlieHouse");
 		warehouse.getOutboundAddress().setName(warehouse.getName());
@@ -76,11 +155,9 @@ public class VCommerceTest {
 		warehouse.getOutboundAddress().setMobile("+44556677889900");
 		warehouse.getOutboundAddress().setAddress("Jump Street 21");
 
-		Courier courier = new Courier();
 		courier.setId("DanHL");
 		courier.setName("DanHL");
 
-		VaultageServer server = new VaultageServer(VcommerceBroker.BROKER_ADDRESS);
 		customer.register(server);
 		shop.register(server);
 		warehouse.register(server);
@@ -212,7 +289,7 @@ public class VCommerceTest {
 
 		// Customer tracks the delivery
 		String trackingId = customerOrders[0].getTrackingId();
-		DeliveryStatus[] dsCustomer = new DeliveryStatus[1];
+
 		customer.setTrackDeliveryResponseHandler(new TrackDeliveryResponseHandler() {
 			@Override
 			public void run(Courier me, RemoteCourier other, String responseToken, DeliveryStatus result)
@@ -237,9 +314,9 @@ public class VCommerceTest {
 			customer.trackDelivery(trackingId, courier);
 			customer.getTrackDeliveryResponseHandler().wait();
 		}
-		
+
 		// Shop tracks the delivery
-		DeliveryStatus[] dsShop = new DeliveryStatus[1];
+
 		shop.setTrackDeliveryResponseHandler(new TrackDeliveryResponseHandler() {
 			@Override
 			public void run(Courier me, RemoteCourier other, String responseToken, DeliveryStatus result)
@@ -258,23 +335,13 @@ public class VCommerceTest {
 			@Override
 			public void run(Customer me, RemoteCourier other, String responseToken, DeliveryStatus result)
 					throws Exception {
-				
+
 			}
 		});
 		synchronized (shop.getTrackDeliveryResponseHandler()) {
 			shop.trackDelivery(trackingId, courier);
 			shop.getTrackDeliveryResponseHandler().wait();
 		}
-
-		// assert!
-		assertEquals(dsCustomer[0].getStatus(), dsShop[0].getStatus());
-
-		// disconnect from the broker server
-
-		customer.unregister();
-		shop.unregister();
-		warehouse.unregister();
-		courier.unregister();
 	}
 
 }

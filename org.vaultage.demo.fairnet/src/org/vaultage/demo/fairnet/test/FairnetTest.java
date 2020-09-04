@@ -441,8 +441,8 @@ public class FairnetTest {
 		user1.unregister();
 		user2.unregister();
 
-		user1.shutdown();
-		user2.shutdown();
+		user1.shutdownServer();
+		user2.shutdownServer();
 	}
 
 	/***

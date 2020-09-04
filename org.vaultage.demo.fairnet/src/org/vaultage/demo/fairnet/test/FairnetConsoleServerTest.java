@@ -61,7 +61,7 @@ public class FairnetConsoleServerTest {
 		// disconnect user1 from broker
 		user1.unregister();
 		// shutdown the direct message server of user1
-		user1.shutdown();
+		user1.shutdownServer();
 		// stop the broker server
 		BROKER.stop();
 	}

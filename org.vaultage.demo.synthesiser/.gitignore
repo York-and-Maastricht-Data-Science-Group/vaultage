@@ -2,4 +2,4 @@
 /target/
 /gen/
 /activemq-data/
-/fixedNetResults.csv
+/*.csv

@@ -90,7 +90,7 @@ public class FairnetConsoleClientTest {
 		// disconnect user2 from the broker 
 		user2.unregister();
 		/// shutdown direct message server of user2
-		user2.shutdown();
+		user2.shutdownServer();
 		
 		System.out.println("Finished!");
 	}
