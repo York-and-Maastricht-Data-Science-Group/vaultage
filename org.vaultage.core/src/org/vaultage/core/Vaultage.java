@@ -320,8 +320,8 @@ public class Vaultage {
 					e.printStackTrace();
 				}
 				if (remoteServerAvailable) {
-					System.out.println("Send a direct message from " + directMessageClient.getLocalAddress().toString()
-							+ " to " + directMessageClient.getRemoteAddress().toString());
+//					System.out.println("Send a direct message from " + directMessageClient.getLocalAddress().toString()
+//							+ " to " + directMessageClient.getRemoteAddress().toString());
 					directMessageClient.sendMessage(concatenatedMessage);
 					directMessageClient.shutdown();
 				}

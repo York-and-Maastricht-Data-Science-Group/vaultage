@@ -65,7 +65,7 @@ public class FairnetConsoleClientTest {
 
 		// add user1 as user2's friend
 		synchronized (user2.getAddFriendResponseHandler()) {
-			remoteRequester.addFriend();
+			remoteRequester.addFriend(user2.getName());
 			user2.getAddFriendResponseHandler().wait();
 		}
 

@@ -210,9 +210,6 @@ operation EOperation getRespondToParamsWithoutTypes(): String {
 
 operation EOperation getRequesteeParams(): String {
 	var params = "";
-	if (not self.isPublic()){
-		params = params + requesteePublicKey;
-	}
   	for (eParameter in self.eParameters) {
   	  params = params + ", ";
       params = params + eParameter.getType() + " " + eParameter.name; 

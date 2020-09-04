@@ -53,7 +53,7 @@ public class SimpleClient {
 		user.setSendNumberPollResponseHandler(new SendNumberPollResponseHandler() {
 
 			@Override
-			public void run(User me, RemoteUser other, String responseToken, double result) throws Exception {
+			public void run(User me, RemoteUser other, String responseToken, java.lang.Double result) throws Exception {
 				NumberPoll poll = me.getPendingNumberPollByResponseToken(responseToken);
 				if (poll != null) {
 					int index = poll.getParticipants().indexOf(me.getPublicKey());

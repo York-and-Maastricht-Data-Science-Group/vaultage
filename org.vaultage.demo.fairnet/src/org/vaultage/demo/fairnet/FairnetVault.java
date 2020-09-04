@@ -24,11 +24,11 @@ public class FairnetVault extends FairnetVaultBase {
 	public FairnetVault() throws Exception {
 		super();
 	}
-	
+
 	public FairnetVault(String address, int port) throws Exception {
 		super(address, port);
 	}
-	
+
 	// getter
 	public String getName() {
 		return this.name;
@@ -59,7 +59,7 @@ public class FairnetVault extends FairnetVaultBase {
 	public void setPort(int port) {
 		this.getVaultage().setPort(port);
 	}
-	
+
 	public Post createPost(String content, Boolean isPublic) throws Exception {
 		Post post = new Post();
 		post.setContent(content);
@@ -77,29 +77,31 @@ public class FairnetVault extends FairnetVaultBase {
 	}
 
 	@Override
-	public void addFriend(FairnetVault requesterFairnetVault, String requestToken) throws Exception {
+	public void addFriend(String requesterPublicKey, String requestToken, String friendName) throws Exception {
 		Friend friend = new Friend();
-		friend.setPublicKey(requesterFairnetVault.getPublicKey());
+		friend.setPublicKey(requesterPublicKey);
 		friends.add(friend);
-		(new RemoteFairnetVault(this, requesterFairnetVault.getPublicKey())).respondToAddFriend(true, requestToken);
+		(new RemoteFairnetVault(this, requesterPublicKey)).respondToAddFriend(true, requestToken);
 	}
 
 	@Override
-	public void getPost(FairnetVault requesterFairnetVault, String requestToken, String postId) throws Exception {
-		if (isFriend(requesterFairnetVault.getPublicKey())) {
+	public void getPost(String requesterPublicKey, String requestToken, String postId) throws Exception {
+		if (isFriend(requesterPublicKey)) {
 			Post post = this.getPostById(postId);
-			(new RemoteFairnetVault(this, requesterFairnetVault.getPublicKey())).respondToGetPost(post, requestToken);
+			(new RemoteFairnetVault(this, requesterPublicKey)).respondToGetPost(post, requestToken);
 		}
+
 	}
 
 	@Override
-	public void getPosts(FairnetVault requesterFairnetVault, String requestToken) throws Exception {
+	public void getPosts(String requesterPublicKey, String requestToken) throws Exception {
 		List<String> posts = null;
-		if (isFriend(requesterFairnetVault.getPublicKey())) {
+		if (isFriend(requesterPublicKey)) {
 			posts = this.posts.stream().filter(p -> p.getIsPublic()).map(p -> p.getId())
 					.collect(Collectors.toCollection(ArrayList::new));
-			(new RemoteFairnetVault(this, requesterFairnetVault.getPublicKey())).respondToGetPosts(posts, requestToken);
+			(new RemoteFairnetVault(this, requesterPublicKey)).respondToGetPosts(posts, requestToken);
 		}
+
 	}
 
 }

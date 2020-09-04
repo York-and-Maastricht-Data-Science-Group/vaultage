@@ -17,7 +17,7 @@ public class UnitTestGetPostsResponseHandler implements GetPostsResponseHandler 
 	public void run(FairnetVault me, RemoteFairnetVault other, String responseToken, List<String> result)
 			throws Exception {
 		this.posts = result;
-		System.out.println("All post ids from " + other.getRemotePublicKey() + " have been received");
+//		System.out.println("All post ids from " + other.getRemotePublicKey() + " have been received");
 		
 		synchronized (this) {
 			this.notify();

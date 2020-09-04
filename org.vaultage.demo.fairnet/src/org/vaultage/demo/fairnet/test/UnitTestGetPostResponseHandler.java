@@ -14,7 +14,7 @@ public class UnitTestGetPostResponseHandler implements GetPostResponseHandler {
 	@Override
 	public void run(FairnetVault me, RemoteFairnetVault other, String responseToken, Post result) throws Exception {
 		this.post = result;
-		System.out.println("Post with id " + result.getId() + " has been received");
+//		System.out.println("Post with id " + result.getId() + " has been received");
 		
 		synchronized (this) {
 			this.notify();
