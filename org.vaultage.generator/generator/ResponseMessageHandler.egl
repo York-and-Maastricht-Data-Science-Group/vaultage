@@ -1,6 +1,8 @@
 [% import 'Util.eol'; %]
+[% 	var classes = ePackage.getVaultClasses(); %]
 package [%=packageName%];
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,25 +10,65 @@ import org.vaultage.core.ResponseMessageHandler;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 
+import com.google.gson.reflect.TypeToken;
+
 public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 
 	@Override
 	public void process(VaultageMessage message, String senderPublicKey, Object vault) throws Exception {
+[% var count = 1; %]	
+[% for (class in classes) { %]
+	[% if (count > 1) { %] 
+	else 
+	[% } %]
+	if (vault instanceof [%=class.name%]){
 		[%=class.name%] [%=class.name.firstToLowerCase()%] = ([%=class.name%]) vault;
-		Remote[%=class.name%] sender = new Remote[%=class.name%]([%=class.name.firstToLowerCase()%], senderPublicKey);
-
 		String operation = message.getOperation();
 
 		switch (operation) {
+			/*** Responding to a message from a vault of a different type ***/
+[% for (class2 in classes) { 
+ 		if (class2.name <> class.name) { 
+ 			for (eOperation in class2.eOperations){ 
+				if (eOperation.eAnnotations.first().source == "vaultage") { 
+					var eAnnotation = eOperation.eAnnotations.first(); 
+					for (detail in eAnnotation.details) { 
+						if (detail.key = "requester") { 
+							var values = detail.value.split(",");  
+							for (v in values) {  
+								var value = v.trim();  
+								if (class.name = value) { %]
+ 			case "[%=eOperation.name%]": {
+ 				Remote[%=class2.name%] sender = new Remote[%=class2.name%]([%=class.name.firstToLowerCase()%], senderPublicKey);
+ 				Type type = new TypeToken<[%=eOperation.getTypeImplementationWithSubtype()%]>(){}.getType();
+				[%= eOperation.getReturnType() %] result = Vaultage.deserialise(message.getValue("result"), [%=eOperation.getTypeImplementation()%].class, type);
+				[%=class.name.firstToLowerCase()%].get[%=eOperation.name.firstToUpperCase()%]ResponseHandler().run([%=class.name.firstToLowerCase()%], sender, message.getToken(), result);
+			}
+			break;
+[%								} 
+							}
+						}
+					}
+ 				}			
+ 			}			
+ 		}
+ } %]
+			/*** Responding to a message from a vault of the same type ***/
 [% for (eOperation in class.eOperations){ %]
 			case "[%=eOperation.name%]": {
-				[%= eOperation.getReturnType() %] result = Vaultage.deserialise(message.getValue("result"), [%=eOperation.getTypeImplementation()%].class);
+				Remote[%=class.name%] sender = new Remote[%=class.name%]([%=class.name.firstToLowerCase()%], senderPublicKey);
+				Type type = new TypeToken<[%=eOperation.getTypeImplementationWithSubtype()%]>(){}.getType();
+				[%= eOperation.getReturnType() %] result = Vaultage.deserialise(message.getValue("result"), [%=eOperation.getTypeImplementation()%].class, type);
 				[%=class.name.firstToLowerCase()%].get[%=eOperation.name.firstToUpperCase()%]ResponseHandler().run([%=class.name.firstToLowerCase()%], sender, message.getToken(), result);
 			}
 			break;
 [% } %]		default:
 				throw new Exception("Operation " + operation + " is not supported!");
 		}
+	}
+[% 
+		count = count + 1;
+	} %]
 	}
 
 }

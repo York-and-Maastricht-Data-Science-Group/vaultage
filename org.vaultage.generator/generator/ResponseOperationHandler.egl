@@ -1,4 +1,5 @@
 [% import 'Util.eol'; %]
+[% 	var classes = ePackage.getVaultClasses(); %]
 package [%=packageName%];
 [%
 	var class = eOperation.eContainer();
@@ -8,5 +9,21 @@ import java.util.List;
 
 public interface [%=eOperation.getClassResponseHandlerName()%] {
 
+	/*** For a message from a vault of a different type ***/
+[%  
+var eAnnotation = eOperation.eAnnotations.first();
+if (eAnnotation <> null) { 
+	for (detail in eAnnotation.details) { 
+		if (detail.key = "requester") { 
+			var values = detail.value.split(",");  
+			for (v in values) {  
+				var class2 = v.trim(); %]
+	 	public void run([%=class2%] me, [%=class.remoteName()%] other, String responseToken, [%=eOperation.getReturnType()%] result) throws Exception;
+	[%		
+			}
+		}
+	} 
+}%]
+ 	/*** For a message from a vault of the same type ***/
 	public void run([%=class.name%] me, [%=class.remoteName()%] other, String responseToken, [%=eOperation.getReturnType()%] result) throws Exception;
 }

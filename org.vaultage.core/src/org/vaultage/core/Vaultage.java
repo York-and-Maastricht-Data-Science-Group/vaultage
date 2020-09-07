@@ -1,6 +1,7 @@
 package org.vaultage.core;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.KeyPair;
@@ -183,7 +184,7 @@ public class Vaultage {
 	 */
 	public Vaultage(Object vault, String address, int port) {
 		this.vault = vault;
-		this.startDirectMessageServer(address, port);
+		this.startServer(address, port);
 	}
 
 	/***
@@ -192,7 +193,7 @@ public class Vaultage {
 	 * @param address the ip or hostname of the direct message server
 	 * @param port    the port of the direct message server
 	 */
-	public void startDirectMessageServer(String address, int port) {
+	public void startServer(String address, int port) {
 		this.directMessageServerAddress = new InetSocketAddress(address, port);
 		try {
 			directMessageServer = new NettyDirectMessageServer(this.directMessageServerAddress, this);
@@ -241,7 +242,7 @@ public class Vaultage {
 	}
 
 	/**
-	 * Derialise from Json to object with type <T> using GSON library
+	 * De-serialise from JSON to object with type <T> using GSON library
 	 * 
 	 * @param <T>
 	 * @param content
@@ -250,6 +251,19 @@ public class Vaultage {
 	 */
 	public static <T> T deserialise(String content, Class<T> c) {
 		return Gson.fromJson(content, c);
+	}
+
+	/**
+	 * De-serialise from JSON to object with type <T> and Type using GSON library
+	 * 
+	 * @param <T>
+	 * @param content
+	 * @param c
+	 * @param type
+	 * @return
+	 */
+	public static <T> T deserialise(String content, Class<T> c, Type type) {
+		return Gson.fromJson(content, type);
 	}
 
 	/***
@@ -307,8 +321,8 @@ public class Vaultage {
 					e.printStackTrace();
 				}
 				if (remoteServerAvailable) {
-					System.out.println("Send a direct message from " + directMessageClient.getLocalAddress().toString()
-							+ " to " + directMessageClient.getRemoteAddress().toString());
+//					System.out.println("Send a direct message from " + directMessageClient.getLocalAddress().toString()
+//							+ " to " + directMessageClient.getRemoteAddress().toString());
 					directMessageClient.sendMessage(concatenatedMessage);
 					directMessageClient.shutdown();
 				}
@@ -355,7 +369,7 @@ public class Vaultage {
 	public void subscribe(String topicId, String receiverPrivateKey) throws InterruptedException {
 		try {
 
-//			// give the private key to direct message server
+			// give the private key to direct message server
 			if (directMessageServer != null)
 				directMessageServer.setPrivateKey(receiverPrivateKey);
 
@@ -473,7 +487,7 @@ public class Vaultage {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void shutdown() throws IOException, InterruptedException {
+	public void shutdownServer() throws IOException, InterruptedException {
 		this.directMessageServer.shutdown();
 	}
 
@@ -556,5 +570,14 @@ public class Vaultage {
 	 */
 	public void setPrivateKey(String privateKey) {
 		directMessageServer.setPrivateKey(privateKey);
+	}
+
+	/***
+	 * Get the direct message server for direct messaging.
+	 * 
+	 * @return
+	 */
+	public DirectMessageServer getDirectMessageServer() {
+		return directMessageServer;
 	}
 }

@@ -8,6 +8,8 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.vaultage.core.Vault;
+import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.pollen.NumberPoll;
 import org.vaultage.demo.pollen.PollenBroker;
@@ -38,31 +40,28 @@ public class PollenTest {
 	public class UnitTestNumberPollResponseHandler implements SendNumberPollResponseHandler {
 
 		@Override
-		public void run(User me, RemoteUser other, String responseToken, double result) throws Exception {
+		public void run(User me, RemoteUser other, String responseToken, java.lang.Double result) throws Exception {
 			NumberPoll poll = me.getPendingNumberPollByResponseToken(responseToken);
 			if (poll != null) {
 				int index = poll.getParticipants().indexOf(me.getPublicKey());
 				String previousParticipant;
 				if (index == 0) {
 					previousParticipant = poll.getOriginator();
-				}
-				else {
+				} else {
 					previousParticipant = poll.getParticipants().get(index - 1);
 				}
 				RemoteUser previous = new RemoteUser(me, previousParticipant);
 				String requestToken = me.getMappedRequestToken(responseToken);
 				double myResponse = FIXED_RESPONSE; // respond with a fixed value
 				previous.respondToSendNumberPoll(result + myResponse, requestToken);
-			}
-			else {
+			} else {
 				poll = me.getInitiatedNumberPoll(responseToken);
 				if (poll != null) {
 					synchronized (me.getSendNumberPollResponseHandler()) {
 						me.addNumberPollAnswer(poll.getId(), result);
 						me.getSendNumberPollResponseHandler().notify();
 					}
-				}
-				else {
+				} else {
 					throw new RuntimeException("I should be either originator or participant of the poll!");
 				}
 			}
@@ -72,19 +71,98 @@ public class PollenTest {
 	@Test
 	public void testSeveralParticipantsPoll() throws Exception {
 
+		VaultageServer server = new VaultageServer(PollenBroker.BROKER_ADDRESS);
+		
 		User alice = new User();
+		User bob = new User();
+		User charlie = new User();
+		User dan = new User();
+		
+		double fakeValue;
+		double result;
+		
+		NumberPoll salaryPoll = runScenario(server, alice, bob, charlie, dan);
+
+		fakeValue = alice.getNumberPollFakeValue(salaryPoll.getId());
+		result = alice.getNumberPollAnswer(salaryPoll.getId());
+
+		// the total response should be the fixed one times the number of participants
+		assertTrue((result - fakeValue) == FIXED_RESPONSE * 3);
+
+		alice.unregister();
+		bob.unregister();
+		charlie.unregister();
+		dan.unregister();
+	}
+	
+	@Test
+	public void testSeveralParticipantsPollDirectMessage() throws Exception {
+
+		VaultageServer server = new VaultageServer(PollenBroker.BROKER_ADDRESS);
+		
+		User alice = new User();
+		User bob = new User();
+		User charlie = new User();
+		User dan = new User();
+		
+		//start the direct message server of each vault
+		int port = new Integer(Vaultage.DEFAULT_SERVER_PORT);
+		alice.startServer("127.0.0.1", port++);
+		bob.startServer("192.168.56.1", port++);
+		charlie.startServer("192.168.14.2", port++);
+		dan.startServer("192.168.99.80", port++);
+		
+		/**
+		 * Set up all vaults to trust each other. Therefore, they don't have to use a
+		 * broker to communicate. Initially, vaults will use a broker as a channel to
+		 * communicate to get the trusted addresses of other vaults. If other vaults are
+		 * trusted, they will use direct messaging instead. It the remote vaults cannot
+		 * be reached by direct messaging, a broker will be re-used.
+		 **/
+		User[] users = { alice, bob, charlie, dan };
+		for (User userLocal : users) {
+			for (User userRemote : users) {
+				if (!userLocal.equals(userRemote)) {
+					userLocal.getVaultage().getPublicKeyToRemoteAddress().put(userRemote.getPublicKey(),
+							userRemote.getVaultage().getDirectMessageServerAddress());
+				}
+			}
+		}
+		
+		double fakeValue;
+		double result;
+		
+		NumberPoll salaryPoll = runScenario(server, alice, bob, charlie, dan);
+
+		fakeValue = alice.getNumberPollFakeValue(salaryPoll.getId());
+		result = alice.getNumberPollAnswer(salaryPoll.getId());
+
+		// the total response should be the fixed one times the number of participants
+		assertTrue((result - fakeValue) == FIXED_RESPONSE * 3);
+
+		alice.unregister();
+		bob.unregister();
+		charlie.unregister();
+		dan.unregister();
+		
+		alice.shutdownServer();
+		bob.shutdownServer();
+		charlie.shutdownServer();
+		dan.shutdownServer();
+	}
+
+
+	protected NumberPoll runScenario(VaultageServer server, User alice, User bob, User charlie, User dan)
+			throws Exception, InterruptedException {
 		alice.setId("Alice");
 		alice.setName("Alice");
 
-		User bob = new User();
 		bob.setId("Bob");
 		bob.setName("Bob");
 
-		User charlie = new User();
 		charlie.setId("Charlie");
 		charlie.setName("Charlie");
-
-		User dan = new User();
+		
 		dan.setId("Dan");
 		dan.setName("Dan");
 
@@ -93,7 +171,6 @@ public class PollenTest {
 		charlie.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
 		dan.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
 
-		VaultageServer server = new VaultageServer(PollenBroker.BROKER_ADDRESS);
 		alice.register(server);
 		bob.register(server);
 		charlie.register(server);
@@ -114,102 +191,6 @@ public class PollenTest {
 			alice.addInitiatedNumberPoll(salaryPoll, token);
 			alice.getSendNumberPollResponseHandler().wait(); // wait for the response
 		}
-
-		double fakeValue = alice.getNumberPollFakeValue(salaryPoll.getId());
-		double result = alice.getNumberPollAnswer(salaryPoll.getId());
-
-		// the total response should be the fixed one times the number of participants
-		assertTrue((result - fakeValue) == FIXED_RESPONSE * 3);
-
-		alice.unregister();
-		bob.unregister();
-		charlie.unregister();
-		dan.unregister();
+		return salaryPoll;
 	}
-
-	//	@Test
-	//	public void testInteractiveSalaryPoll() throws Exception {
-	//
-	//		Scanner scanner = new Scanner(System.in);
-	//
-	//		// Alice
-	//		User alice = new User();
-	//		alice.setId("Alice");
-	//		alice.setName("Alice");
-	//
-	//		// Bob
-	//		User bob = new User();
-	//		bob.setId("Bob");
-	//		bob.setName("Bob");
-	//
-	//		// Charlie
-	//		User charlie = new User();
-	//		charlie.setId("Charlie");
-	//		charlie.setName("Charlie");
-	//
-	//		VaultageServer server = new VaultageServer(PollenBroker.BROKER_ADDRESS);
-	//
-	//		// register participants
-	//		alice.register(server);
-	//		bob.register(server);
-	//		charlie.register(server);
-	//
-	//		List<String> participants = new ArrayList<>();
-	//		participants.add(bob.getPublicKey());
-	//		participants.add(charlie.getPublicKey());
-	//		participants.add(alice.getPublicKey());
-	//
-	//		NumberPoll salaryPoll = PollRepository.createSalaryPoll();
-	//		salaryPoll.setOriginator(alice.getPublicKey());
-	//		salaryPoll.setParticipants(participants);
-	//
-	//		alice.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
-	//		bob.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
-	//		charlie.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
-	//
-	//		double bobAnswer = 100;
-	//		bob.setOnPollReceivedListener(new OnPollReceivedListener() {
-	//			@Override
-	//			public void onPollReceived(User user, NumberPoll poll) {
-	//				System.out.println(poll.getQuestion());
-	//				System.out.println(user.getName() + ", type your answer: ");
-	//				PollAnswer pa = bob.getPollAnswer(poll.getId());
-	//				pa.submitAnswer(bobAnswer);
-	//			}
-	//		});
-	//		
-	//		double charlieAnswer = 150;
-	//		charlie.setOnPollReceivedListener(new OnPollReceivedListener() {
-	//			@Override
-	//			public void onPollReceived(User user, NumberPoll poll) {
-	//				System.out.println(poll.getQuestion());
-	//				System.out.println(user.getName() + ", type your answer: ");
-	//				PollAnswer pa = user.getPollAnswer(poll.getId());
-	//				pa.submitAnswer(charlieAnswer);
-	//			}
-	//		});
-	//
-	//		// send poll, initiated by Alice
-	//		RemoteUser firstParticipant = new RemoteUser(alice, participants.get(0));
-	//		synchronized (alice.getSendNumberPollResponseHandler()) {
-	//			System.out.println("Sending poll question to Bob");
-	//			String token = firstParticipant.sendNumberPoll(salaryPoll);
-	//			alice.getPolls().put(token, salaryPoll);
-	//			SendNumberPollResponseHandler handler = alice.getSendNumberPollResponseHandler();
-	//			handler.wait(); // wait for the response
-	//		}
-	//
-	//		double fakeValue = alice.getPollFakeValue(salaryPoll.getId());
-	//		double actualResult = ((UnitTestNumberPollResponseHandler) alice.getSendNumberPollResponseHandler())
-	//				.getResult();
-	//
-	//		System.out.println("(Alice) Poll result  = " + actualResult);
-	//		assertEquals(fakeValue + bobAnswer + charlieAnswer, actualResult, 0);
-	//
-	//		alice.unregister();
-	//		bob.unregister();
-	//
-	//		scanner.close();
-	//	}
-
 }

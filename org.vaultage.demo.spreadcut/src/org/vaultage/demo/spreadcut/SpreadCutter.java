@@ -17,6 +17,10 @@ public class SpreadCutter extends SpreadCutterBase {
 		super();
 	}
 	
+	public SpreadCutter(String address, int port) throws Exception {
+		super(address, port);
+	}
+	
 	// getter
 	public List<ProximityContact> getContacts() {
 		return this.contacts;
@@ -29,12 +33,12 @@ public class SpreadCutter extends SpreadCutterBase {
 	
 	// operations
 	
-	public void getContacts(SpreadCutter requesterSpreadCutter, String requestToken, String timestamp) throws Exception {
+	public void getContacts(String requesterPublicKey, String requestToken, String timestamp) throws Exception {
 		throw new Exception();
 	}
 	
 	
-	public void confirmContact(SpreadCutter requesterSpreadCutter, String requestToken, String timestamp) throws Exception {
+	public void confirmContact(String requesterPublicKey, String requestToken, String timestamp) throws Exception {
 		throw new Exception();
 	}
 	

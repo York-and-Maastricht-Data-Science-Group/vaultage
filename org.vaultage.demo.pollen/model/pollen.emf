@@ -19,7 +19,7 @@ templates are more mature.
 class User {
 	attr String name;
 
-	op double sendNumberPoll(NumberPoll poll);
+	op Double sendNumberPoll(NumberPoll poll);
 	op int[*] sendMultivaluedPoll(MultivaluedPoll poll);
 }
 

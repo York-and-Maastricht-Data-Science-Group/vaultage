@@ -10,7 +10,7 @@ class SpreadCutter {
 	op ProximityContact[*] getContacts(String timestamp);
 	
 	// confirm that the requested user also has a registered contact with you
-	op boolean confirmContact(String timestamp);
+	op Boolean confirmContact(String timestamp);
 }
 
 class ProximityContact {

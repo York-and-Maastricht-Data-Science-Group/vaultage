@@ -101,6 +101,21 @@ operation ETypedElement getTypeImplementation(): String {
 	return type;
 }
 
+operation ETypedElement getTypeImplementationWithSubtype(): String {
+	var type = "";
+	if (self.eType <> null){
+		var auxType = self.getTypeName();
+
+		if (self.upperBound <> 1) {
+			type = "ArrayList<" + auxType + ">";
+		}
+		else {
+			type = auxType;
+		}
+	}
+	return type;
+}
+
 operation EOperation getReturnType(): String {
 	var type = self.getType();
 	if (type == "") {
@@ -195,9 +210,6 @@ operation EOperation getRespondToParamsWithoutTypes(): String {
 
 operation EOperation getRequesteeParams(): String {
 	var params = "";
-	if (not self.isPublic()){
-		params = params + requesteePublicKey;
-	}
   	for (eParameter in self.eParameters) {
   	  params = params + ", ";
       params = params + eParameter.getType() + " " + eParameter.name; 
@@ -208,7 +220,8 @@ operation EOperation getRequesteeParams(): String {
 operation EOperation getRequesterParams(): String {
 	var params = "";
 	if (not self.isPublic()){
-		params = self.eContainer.name + " requester" + self.eContainer.name;
+		params = "String requesterPublicKey";
+		//params = self.eContainer.name + " requester" + self.eContainer.name;
 		params += ", ";
 	}
 	params += "String requestToken";
@@ -277,4 +290,9 @@ operation EOperation getClassResponseBaseHandlerName(): String {
 
 operation EOperation getResponseBaseHandlerFilename(): String {
 	return self.name.firstToUpperCase() + "ResponseBaseHandler.java"; 
+}
+
+operation EPackage getVaultClasses(): Collection{
+	return EClass.all().select(a | a.eAnnotations.first() <> null and a.eAnnotations.first().source = "vault");
+	
 }

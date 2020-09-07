@@ -3,20 +3,23 @@ package [%=packageName%];
 
 import java.util.List;
 
+import org.vaultage.core.Vault;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageMessage.MessageType;
 
 public class [%=class.remoteName()%] {
 
-	protected [%=class.name%] localVault;
+	//protected [%=class.name%] localVault;
+	protected Vault localVault;
 	protected String remotePublicKey;
 
 	public String getRemotePublicKey() {
 		return remotePublicKey;
 	}
 
-	public [%=class.remoteName()%]([%=class.name%] localVault, String remotePublicKey) {
+	//public [%=class.remoteName()%]([%=class.name%] localVault, String remotePublicKey) {
+	public [%=class.remoteName()%](Vault localVault, String remotePublicKey) {
 		this.localVault = localVault;
 		this.remotePublicKey = remotePublicKey;
 	}

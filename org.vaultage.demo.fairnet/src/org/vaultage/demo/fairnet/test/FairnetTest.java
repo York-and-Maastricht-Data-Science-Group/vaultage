@@ -45,7 +45,8 @@ public class FairnetTest {
 
 	@Test
 	public void testRegistration() throws Exception {
-
+		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
+		
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
 		/*** User ***/
@@ -64,6 +65,8 @@ public class FairnetTest {
 //
 	@Test
 	public void testCreatePost() throws Exception {
+		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
+		
 		FairnetVault user1 = new FairnetVault();
 		user1.setId("bob[at]publickey.net");
 		user1.setName("Bob");
@@ -76,8 +79,7 @@ public class FairnetTest {
 
 	@Test
 	public void testAddFriendLocally() throws Exception {
-
-		System.out.println("\n---TestAddFriend---");
+		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
@@ -104,7 +106,7 @@ public class FairnetTest {
 	@Test
 	public void testDoubleEncryption() throws Exception {
 
-		System.out.println("\n---Test Double Encryption---");
+		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
@@ -135,7 +137,7 @@ public class FairnetTest {
 	@Test
 	public void testIsFriend() throws Exception {
 
-		System.out.println("\n---TestIsFriend--");
+		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
@@ -162,7 +164,7 @@ public class FairnetTest {
 	@Test
 	public void testGetMyPosts() throws Exception {
 
-		System.out.println("\n---test Get My Posts--");
+		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
@@ -178,9 +180,9 @@ public class FairnetTest {
 		String post1id = posts.stream().filter(p -> p.getId().equals(post1.getId())).findFirst().orElse(null).getId();
 		String post2id = posts.stream().filter(p -> p.getId().equals(post2.getId())).findFirst().orElse(null).getId();
 
-		System.out.println(post1.getId());
+//		System.out.println(post1.getId());
 		assertEquals(post1.getId(), post1id);
-		System.out.println(post2.getId());
+//		System.out.println(post2.getId());
 		assertEquals(post2.getId(), post2id);
 
 	}
@@ -207,7 +209,7 @@ public class FairnetTest {
 
 		// simulate add user 2 by user 1
 		synchronized (user2.getAddFriendResponseHandler()) {
-			remoteRequester.addFriend();
+			remoteRequester.addFriend(user2.getName());
 			user2.getAddFriendResponseHandler().wait();
 		}
 
@@ -220,6 +222,7 @@ public class FairnetTest {
 
 	@Test
 	public void testGetFriendPosts() throws Exception {
+		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
@@ -378,9 +381,8 @@ public class FairnetTest {
 //		charlie.unregister();
 //	}
 
-
 	/***
-	 * 
+	 * Test get my friend's posts one-by-one using direct messaging
 	 * @throws Exception
 	 */
 	@Test
@@ -413,7 +415,7 @@ public class FairnetTest {
 
 		// exchange public keys
 		exchangePublicKeys(user1, user2);
-		// user 2 adds user 1 as a friend 
+		// user 2 adds user 1 as a friend
 		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(user2, user1.getPublicKey());
 
 		synchronized (user2.getGetPostsResponseHandler()) {
@@ -438,14 +440,15 @@ public class FairnetTest {
 
 		user1.unregister();
 		user2.unregister();
-		
-		user1.shutdown();
-		user2.shutdown();
+
+		user1.shutdownServer();
+		user2.shutdownServer();
 	}
 
 	/***
-	 * Simulate exchanging network addresses, ips and ports, between user1 and user2.
-	 * Public keys are used as the keys to retrieve the addresses. 
+	 * Simulate exchanging network addresses, ips and ports, between user1 and
+	 * user2. Public keys are used as the keys to retrieve the addresses.
+	 * 
 	 * @param user1
 	 * @param user2
 	 */

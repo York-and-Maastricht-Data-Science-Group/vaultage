@@ -19,8 +19,8 @@ public class Worker extends WorkerBase {
 	}
 
 	@Override
-	public void increment(Worker requesterWorker, String requestToken, Integer number) throws Exception {
-		RemoteWorker remote = new RemoteWorker(this, requesterWorker.getPublicKey());
+	public void increment(String requesterPublicKey, String requestToken, Integer number) throws Exception {
+		RemoteWorker remote = new RemoteWorker(this, requesterPublicKey);
 		remote.respondToIncrement(number + 1, requestToken);
 	}
 
@@ -35,4 +35,5 @@ public class Worker extends WorkerBase {
 	public void setCompletedValue(int completedValue) {
 		this.completedValue = completedValue;
 	}
+
 }

@@ -27,12 +27,11 @@
 		</plugins>
 	</build>
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.openjfx/javafx -->
+		<!-- https://mvnrepository.com/artifact/org.openjfx/javafx-fxml -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx</artifactId>
+			<artifactId>javafx-fxml</artifactId>
 			<version>11</version>
-			<type>pom</type>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on -->
 		<dependency>

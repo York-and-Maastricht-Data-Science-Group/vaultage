@@ -1,20 +1,19 @@
 [% import 'Util.eol'; %]
+[% 	var classes = ePackage.getVaultClasses(); %]
 package [%=packageName%];
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.io.IOException;
 
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 
 import org.vaultage.util.VaultageEncryption;
+import org.vaultage.core.Vault;
 import org.vaultage.core.Vaultage;
-import org.vaultage.core.VaultageHandler;
 import org.vaultage.core.VaultageServer;
 
-public abstract class [%=class.getBaseName()%] {
+public abstract class [%=class.getBaseName()%] implements Vault {
 
 	protected String id = UUID.randomUUID().toString();
 	protected String privateKey;
@@ -23,6 +22,28 @@ public abstract class [%=class.getBaseName()%] {
 	protected Vaultage vaultage;
 	protected VaultageServer vaultageServer;
 
+	/*** For a message from a vault of a different type ***/
+[% for (class2 in classes) { 
+ 		if (class2.name <> class.name) { 
+ 			for (eOperation in class2.eOperations){ 
+				if (eOperation.eAnnotations.first().source == "vaultage") { 
+					var eAnnotation = eOperation.eAnnotations.first(); 
+					for (detail in eAnnotation.details) { 
+						if (detail.key = "requester") { 
+							var values = detail.value.split(",");  
+							for (v in values) {  
+								var value = v.trim();  
+								if (class.name = value) { %]
+ 	protected [%=eOperation.getClassResponseHandlerName()%] [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];
+[%								} 
+							}
+						}
+					}
+ 				}			
+ 			}			
+ 		}
+ } %]
+ 	/*** For a message from a vault of the same type ***/
 [% for (eOperation in class.eOperations){ %]
 	protected [%=eOperation.getClassResponseHandlerName()%] [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];
 [% } %]	
@@ -30,20 +51,18 @@ public abstract class [%=class.getBaseName()%] {
 	public [%=class.getBaseName()%]() throws Exception {
 		this.isListening = false;
 		this.vaultage = new Vaultage(this);
-		vaultage.setRequestMessageHandler(new [%=appName%]RequestMessageHandler());
-		vaultage.setResponseMessageHandler(new [%=appName%]ResponseMessageHandler());
-		
-		KeyPair keyPair = VaultageEncryption.generateKeys();
-		this.publicKey = VaultageEncryption.getPublicKey(keyPair);
-		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
+		initialise();
 	}
 	
 	public [%=class.getBaseName()%](String address, int port) throws Exception {
 		this.isListening = false;
 		this.vaultage = new Vaultage(this, address, port);
+		initialise();
+	}
+	
+	private void initialise() throws NoSuchAlgorithmException {
 		vaultage.setRequestMessageHandler(new [%=appName%]RequestMessageHandler());
 		vaultage.setResponseMessageHandler(new [%=appName%]ResponseMessageHandler());
-		
 		KeyPair keyPair = VaultageEncryption.generateKeys();
 		this.publicKey = VaultageEncryption.getPublicKey(keyPair);
 		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
@@ -85,6 +104,35 @@ public abstract class [%=class.getBaseName()%] {
 		this.publicKey = publicKey;
 	}
 
+	/*** For a message from a vault of a different type ***/
+[% for (class2 in classes) { 
+ 		if (class2.name <> class.name) { 
+ 			for (eOperation in class2.eOperations){ 
+				if (eOperation.eAnnotations.first().source == "vaultage") { 
+					var eAnnotation = eOperation.eAnnotations.first(); 
+					for (detail in eAnnotation.details) { 
+						if (detail.key = "requester") { 
+							var values = detail.value.split(",");  
+							for (v in values) {  
+								var value = v.trim();  
+								if (class.name = value) { %]
+ 	public void set[%=eOperation.getClassResponseHandlerName()%]([%=eOperation.getClassResponseHandlerName()%] handler) {
+		this.[%=eOperation.getClassResponseHandlerName().firstToLowerCase()%] = handler;
+	}
+	
+	public [%=eOperation.getClassResponseHandlerName()%] get[%=eOperation.getClassResponseHandlerName()%]() {
+		return [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];
+	}
+	
+[%								} 
+							}
+						}
+					}
+ 				}			
+ 			}			
+ 		}
+ } %]
+ 	/*** For a message from a vault of the same type ***/
 [% for (eOperation in class.eOperations){ %]
 	public void set[%=eOperation.getClassResponseHandlerName()%]([%=eOperation.getClassResponseHandlerName()%] handler) {
 		this.[%=eOperation.getClassResponseHandlerName().firstToLowerCase()%] = handler;
@@ -110,8 +158,24 @@ public abstract class [%=class.getBaseName()%] {
 		vaultage.disconnect();
 	}
 	
-	public void shutdown() throws IOException, InterruptedException {
-		vaultage.shutdown();
+	/***
+	 * A method to start the direct messaging server of this vault.
+	 * 
+	 * @param address
+	 * @param port
+	 */
+	public void startServer(String address, int port) {
+		this.vaultage.startServer(address, port);
+		this.vaultage.setPrivateKey(this.getPrivateKey());
+	}
+	
+	/***
+	 * A method to stop the direct messaging server of this vault.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void shutdownServer() throws IOException, InterruptedException {
+		vaultage.shutdownServer();
 	}
 	
 	// operations

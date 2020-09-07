@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Vecommerce
+Bundle-SymbolicName: org.vaultage.demo.vcommerce
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.vaultage.core,
+ org.junit

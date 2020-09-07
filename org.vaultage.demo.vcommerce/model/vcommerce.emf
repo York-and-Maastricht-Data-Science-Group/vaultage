@@ -1,0 +1,133 @@
+@GenModel(basePackage="org.vaultage.demo.vcommerce")
+@namespace(uri="vcommerce", prefix="")
+package vcommerce;
+
+
+@vault
+class Customer {
+	attr String name;
+	val BillingAddress billingAddress;
+	val ShippingAddress shippingAddress;
+	
+	
+	@vaultage(requester="Shop")
+	op BillingAddress getBillingAddress();
+	
+	@vaultage(requester="Courier")
+	op ShippingAddress getShippingAddress();
+}
+
+@vault
+class Shop {
+	attr String name;
+	
+	@vaultage(requester="Customer")
+	op Item[*] getItems();
+	
+	@vaultage(requester="Customer")
+	op CustomerOrder createOrder(Basket basket);
+}
+
+@vault
+class Warehouse {
+	attr String name;
+	
+	@vaultage(requester="Shop")
+	op int getItemQuantity(String itemId);
+	
+	@vaultage(requester="Shop")
+	op GoodsReceiptConfirmation receiveGoods(GoodsReceiptOrder goodsReceiptOrder);
+	
+	@vaultage(requester="Shop")
+	op GoodsIssueConfirmation issueGoods(GoodsIssueOrder goodsIssueOrder);
+	
+	@vaultage(requester="Courier")
+	op OutboundAddress getOutboundAddress();
+}
+
+@vault
+class Courier {
+	attr String name;
+	
+	@vaultage(requester="Shop")
+	op String deliverGoods(ShippingOrder shippingOrder);
+	
+	@vaultage(requester="Customer, Shop")
+	op DeliveryStatus trackDelivery(String trackingId);
+}
+
+/*** Other Entities ***/
+
+class GoodsReceiptOrder {
+	attr String shopName; 
+	val Item[*] items;
+	attr String remarks;
+}
+
+class GoodsReceiptConfirmation {
+	attr String goodsReceiptOrderId;
+	val Item[*] items;
+	attr String remarks;	 
+}
+
+class GoodsIssueOrder {
+	attr String shopName;
+	val Item[*] items;
+	attr String remarks;
+}
+
+class GoodsIssueConfirmation {
+	attr String goodsIssueOrderId; 
+	val Item[*] items;
+	attr String remarks;
+}
+
+class CustomerOrder {
+	attr String orderId; 
+	val Item[*] items;
+	attr String trackingId;
+}
+
+class BillingAddress {
+	attr String name;
+	attr String address;
+	attr String email;
+	attr String mobile;
+}
+
+class ShippingAddress {
+	attr String name;
+	attr String address;
+	attr String email;
+	attr String mobile;
+}
+
+class OutboundAddress {
+	attr String name;
+	attr String address;
+	attr String email;
+	attr String mobile;
+}
+
+class Item {
+	attr String itemId;
+	attr String name;
+	attr Integer quantity;
+	attr String message; 
+}
+
+class Basket {
+	val Item[*] items;
+}
+
+class ShippingOrder {
+	attr String goodsIssueOrderId;
+	// to get customer's shipping address
+	attr String customerPublicKey;
+	// to get warehouse's address to pick up goods
+	attr String warehousePulicKey; 
+}
+
+class DeliveryStatus {
+	attr String status;
+}

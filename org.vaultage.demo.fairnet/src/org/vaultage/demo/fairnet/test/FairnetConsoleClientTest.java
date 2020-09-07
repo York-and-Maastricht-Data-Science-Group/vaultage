@@ -65,7 +65,7 @@ public class FairnetConsoleClientTest {
 
 		// add user1 as user2's friend
 		synchronized (user2.getAddFriendResponseHandler()) {
-			remoteRequester.addFriend();
+			remoteRequester.addFriend(user2.getName());
 			user2.getAddFriendResponseHandler().wait();
 		}
 
@@ -90,7 +90,7 @@ public class FairnetConsoleClientTest {
 		// disconnect user2 from the broker 
 		user2.unregister();
 		/// shutdown direct message server of user2
-		user2.shutdown();
+		user2.shutdownServer();
 		
 		System.out.println("Finished!");
 	}
