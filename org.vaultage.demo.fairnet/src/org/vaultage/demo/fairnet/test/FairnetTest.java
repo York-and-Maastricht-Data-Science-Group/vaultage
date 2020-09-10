@@ -30,6 +30,7 @@ public class FairnetTest {
 	// used for testing
 	private static final int SLEEP_TIME = 50;
 	private static final String BROKER_ADDRESS = "tcp://localhost:61616";
+//	private static final String BROKER_ADDRESS = "tcp://178.79.178.61:61616"; test using Linode
 	private static FairnetBroker BROKER = null;
 
 	@BeforeClass
