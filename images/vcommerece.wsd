@@ -1,0 +1,54 @@
+@startuml
+participant Customer order 1
+participant Shop order 2
+participant Warehouse order 3
+participant Courier order 4
+
+group Order to Receive Incoming Goods
+  Shop -> Warehouse : receiveGoods(GoodsReceiptOrder gro)
+  Shop <-- Warehouse : GoodsReceiptConfirmation
+end
+
+group Browse Items
+  Customer -> Shop : getItems()
+  loop n times
+    Shop -> Warehouse : getItemQuantity(String itemId)
+    Shop <-- Warehouse : Item Quantity [Integer]
+  end
+  Customer <-- Shop : List<Item>
+end
+
+group Put Order
+  Customer -> Shop : createOrder(Basket basket)
+
+  group Order to Issue Goods
+    Shop -> Warehouse: issueGoods(GoodsIssueOrder gio)
+    Shop <-- Warehouse: GoodsIssueConfirmation 
+  end
+
+  group Order to Pick Up and Deliver Goods
+    Shop -> Courier: deliverGoods(ShippingOrder shippingOrder)
+    group Get Addresses    
+      Courier -> Warehouse : getOutboundAddress()
+      Courier <-- Warehouse : OutboundAddress
+      Courier -> Customer : getShippingAddress()
+      Courier <-- Customer : ShippingAddress
+    end
+    Shop <-- Courier: TrackingId [String]
+  end 
+
+  Shop -> Customer : getBillingAddress()
+  Shop <-- Customer : BillingAddress
+  Customer <-- Shop : CustomerOrder [Contains TrackingId]
+end
+
+group Track Order by Shop
+  Shop -> Courier : trackDelivery(String trackingId)
+  Shop <-- Courier : DeliveryStatus
+end
+
+group Track Order by Customer
+  Customer -> Courier : trackDelivery(String trackingId)
+  Customer <-- Courier : DeliveryStatus
+end
+@enduml
