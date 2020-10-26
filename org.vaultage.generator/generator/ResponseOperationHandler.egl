@@ -25,5 +25,7 @@ if (eAnnotation <> null) {
 	} 
 }%]
  	/*** For a message from a vault of the same type ***/
+[% if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
 	public void run([%=class.name%] me, [%=class.remoteName()%] other, String responseToken, [%=eOperation.getReturnType()%] result) throws Exception;
+[% } %]
 }

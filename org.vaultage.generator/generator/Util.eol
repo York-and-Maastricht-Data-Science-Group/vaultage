@@ -172,13 +172,9 @@ operation EOperation getParams(): String {
 }
 
 operation EOperation getParamsWithoutTypes(): String {
-	var params = "";
-	var count = 0;
-  	for (eParameter in self.eParameters) {
-  	  params = params + ", ";
-      params = params +  eParameter.name;
-  	}
-   return params;
+	return self.eParameters
+		.collect(p | p.name)
+		.concat(", ");
 }
 
 operation EOperation getRespondToParams(): String {

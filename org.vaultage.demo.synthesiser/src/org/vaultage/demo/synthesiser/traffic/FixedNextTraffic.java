@@ -11,7 +11,7 @@ import org.vaultage.demo.synthesiser.Worker;
 /**
  * FixedNext: All work operations to the same worker: the next in the list
  *
- * @author Alfonso de la Vega
+ * @author Alfonso de la Vega, Alfa Yohannis
  */
 public class FixedNextTraffic {
 

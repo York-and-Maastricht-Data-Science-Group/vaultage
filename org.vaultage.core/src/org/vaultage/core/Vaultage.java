@@ -166,7 +166,7 @@ public class Vaultage {
 	}
 
 	/***
-	 * Contructor with vault parameters.
+	 * Constructor with vault parameters.
 	 * 
 	 * @param vault a reference to the object of the vault that uses Vaultage
 	 */
@@ -269,7 +269,7 @@ public class Vaultage {
 	/***
 	 * A method to send a message. Vaultage will try to send the message directly to
 	 * the receiver (another vault), but if the connection cannot be established, it
-	 * will send it to an ActiveMQ message broker.
+	 * will send it to an ActiveMQ message broker. Message is encrypted.
 	 * 
 	 * @param topicId
 	 * @param senderPublicKey
@@ -279,6 +279,23 @@ public class Vaultage {
 	 */
 	public void sendMessage(String topicId, String senderPublicKey, String senderPrivateKey, VaultageMessage message)
 			throws InterruptedException {
+		this.sendMessage(topicId, senderPublicKey, senderPrivateKey, message, true);
+	}
+
+	/***
+	 * A method to send a message. Vaultage will try to send the message directly to
+	 * the receiver (another vault), but if the connection cannot be established, it
+	 * will send it to an ActiveMQ message broker.
+	 * 
+	 * @param topicId
+	 * @param senderPublicKey
+	 * @param senderPrivateKey
+	 * @param message
+	 * @param isEncrypted      Message is encrypted or not
+	 * @throws InterruptedException
+	 */
+	public void sendMessage(String topicId, String senderPublicKey, String senderPrivateKey, VaultageMessage message,
+			boolean isEncrypted) throws InterruptedException {
 		try {
 			// add local address and port to the message
 			if (directMessageServerAddress != null) {
@@ -290,8 +307,13 @@ public class Vaultage {
 			String text = serialise(message).trim();
 
 			// encrypt message
-			String encryptedMessage = VaultageEncryption.doubleEncrypt(text, topicId, senderPrivateKey).trim();
-			String concatenatedMessage = senderPublicKey + encryptedMessage;
+			String encryptedMessage = (isEncrypted)
+					? VaultageEncryption.doubleEncrypt(text, topicId, senderPrivateKey).trim()
+					: text;
+
+			String encryptionFlag = (isEncrypted) ? "1" : "0";
+
+			String concatenatedMessage = encryptionFlag + senderPublicKey + encryptedMessage;
 
 //			System.out.println(senderPublicKey);
 //			System.out.println(encryptedMessage);			
@@ -386,17 +408,23 @@ public class Vaultage {
 				@Override
 				public void onMessage(Message message) {
 					try {
+//						Thread t = new Thread() {
+//
+//							@Override
+//							public void run() {
+//								try {
 						TextMessage textMessage = (TextMessage) message;
 
 						String mergedMessage = textMessage.getText();
-						String senderPublicKey = mergedMessage.substring(0, VaultageEncryption.PUBLIC_KEY_LENGTH);
-						String encryptedMessage = mergedMessage.substring(VaultageEncryption.PUBLIC_KEY_LENGTH,
+						String encryptionFlag = mergedMessage.substring(0, 1);
+						String senderPublicKey = mergedMessage.substring(1, 1 + VaultageEncryption.PUBLIC_KEY_LENGTH);
+						String encryptedMessage = mergedMessage.substring(1 + VaultageEncryption.PUBLIC_KEY_LENGTH,
 								mergedMessage.length());
 
-						String content = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
-								receiverPrivateKey);
+						String content = (encryptionFlag.equals("1")) ? VaultageEncryption.doubleDecrypt(
+								encryptedMessage, senderPublicKey, receiverPrivateKey) : encryptedMessage;
 
-//						 System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
+//							 System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
 
 						VaultageMessage vaultageMessage = Vaultage.deserialise(content, VaultageMessage.class);
 						MessageType msgType = vaultageMessage.getMessageType();
@@ -415,6 +443,13 @@ public class Vaultage {
 							// calls the registered handler of the operation
 							responseMessageHandler.process(vaultageMessage, senderPublicKey, vault);
 						}
+//								} catch (Exception e) {
+//									e.printStackTrace();
+//								}
+//							}
+//						};
+//						t.start();
+
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
