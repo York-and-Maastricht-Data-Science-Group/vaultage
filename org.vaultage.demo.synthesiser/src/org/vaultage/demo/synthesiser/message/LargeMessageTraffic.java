@@ -21,32 +21,33 @@ public class LargeMessageTraffic {
 	protected boolean isEncrypted;
 
 	public static void main(String[] args) throws Exception {
-		
+
 		int numReps = 5;
 		int numWorkers = 2;
-		int[] numberOfBytes = {1, 
-				100000, 1000000, 2000000, 3000000};
+		int[] numberOfBytes = { 9000, 10000, 20000, 30000 };
 
 		PrintStream profilingStream = new PrintStream(new File("largeMessageResults.csv"));
 		profilingStream.println("IsEncrypted,MessageBytes,TotalTimeMillis");
 
-		boolean isEncrypted = false; 
+		boolean isEncrypted = false;
 		for (int numBytes : numberOfBytes) {
 			LargeMessageTraffic trafficSimulation = new LargeMessageTraffic(numWorkers, numBytes, isEncrypted);
 			for (int rep = 0; rep < numReps; rep++) {
 				trafficSimulation.run();
 				System.out.println(trafficSimulation.getLatestRunDetails());
-				profilingStream.println(String.format("%b,%s,%d", isEncrypted, numBytes, trafficSimulation.getLatestRunTime()));
+				profilingStream.println(
+						String.format("%b,%s,%d", isEncrypted, numBytes, trafficSimulation.getLatestRunTime()));
 			}
 		}
-		
+
 		isEncrypted = true;
 		for (int numBytes : numberOfBytes) {
 			LargeMessageTraffic trafficSimulation = new LargeMessageTraffic(numWorkers, numBytes, isEncrypted);
 			for (int rep = 0; rep < numReps; rep++) {
 				trafficSimulation.run();
 				System.out.println(trafficSimulation.getLatestRunDetails());
-				profilingStream.println(String.format("%b,%s,%d", isEncrypted, numBytes, trafficSimulation.getLatestRunTime()));
+				profilingStream.println(
+						String.format("%b,%s,%d", isEncrypted, numBytes, trafficSimulation.getLatestRunTime()));
 			}
 		}
 		profilingStream.close();
@@ -76,19 +77,19 @@ public class LargeMessageTraffic {
 		for (int i = 0; i < numBytes; i++) {
 			sb.append("a");
 		}
-		
+
 		Thread threads[] = new Thread[numWorkers];
 		threads[0] = startWork(workers[0], workers[1].getPublicKey(), sb.toString(), isEncrypted);
-		
+
 		long start = System.currentTimeMillis();
-		
+
 		threads[0].start();
 		threads[0].join();
-		
+
 		long end = System.currentTimeMillis();
-		
+
 		latestRunTime = end - start;
-		
+
 		// appropriately dispose broker
 		for (int i = 0; i < numWorkers; i++) {
 			workers[i].unregister();
@@ -105,8 +106,8 @@ public class LargeMessageTraffic {
 	}
 
 	public String getLatestRunDetails() {
-		return MessageFormat.format("Num workers: {0}, NumOfBytes: {1}, Total time: {2} ms", numWorkers,
-				numBytes, latestRunTime);
+		return MessageFormat.format("Num workers: {0}, NumOfBytes: {1}, Total time: {2} ms", numWorkers, numBytes,
+				latestRunTime);
 	}
 
 	private static Thread startWork(Worker worker, String remoteWorkerKey, String text, boolean isEncrypted) {
