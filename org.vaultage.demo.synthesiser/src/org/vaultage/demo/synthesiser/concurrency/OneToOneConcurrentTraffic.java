@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.text.MessageFormat;
 
+import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.synthesiser.SynthesiserBroker;
 import org.vaultage.demo.synthesiser.Worker;
@@ -23,21 +24,39 @@ public class OneToOneConcurrentTraffic {
 
 	public static void main(String[] args) throws Exception {
 
-		int numReps = 1;
-		int[] numRequesters = { 30 };
+//		int numReps = 1;
+		int numReps = 5;
+		int[] numRequesters = {1, 10, 25, 50};
+//		int[] numRequesters = {10};
 		int numOperations = 1;
 
 		PrintStream profilingStream = new PrintStream(new File("oneToOneConcurrentTrafficResults.csv"));
-		profilingStream.println("NumRequesters,TotalTimeMillis");
+		profilingStream.println("Mode,NumRequesters,TotalTimeMillis");
 
+		// run direct messaging first
 		for (int numRequester : numRequesters) {
-			OneToOneConcurrentTraffic trafficSimulation = new OneToOneConcurrentTraffic(numRequester, numOperations);
+			OneToOneConcurrentTraffic directTrafficSimulation = new OneToOneConcurrentTraffic(numRequester,
+					numOperations);
 			for (int rep = 0; rep < numReps; rep++) {
-				trafficSimulation.run();
-				System.out.println(trafficSimulation.getLatestRunDetails());
-				profilingStream.println(String.format("%s,%d", numRequester, trafficSimulation.getLatestWaitTime()));
+				directTrafficSimulation.runDirectMessaging();
+				System.out.println(directTrafficSimulation.getLatestRunDetails());
+				profilingStream.println(
+						String.format("%s,%s,%d", "direct", numRequester, directTrafficSimulation.getLatestWaitTime()));
 			}
 		}
+		
+		// and then through a broker 
+		for (int numRequester : numRequesters) {
+			OneToOneConcurrentTraffic brokeredTrafficSimulation = new OneToOneConcurrentTraffic(numRequester,
+					numOperations);
+			for (int rep = 0; rep < numReps; rep++) {
+				brokeredTrafficSimulation.runBrokeredMessaging();
+				System.out.println(brokeredTrafficSimulation.getLatestRunDetails());
+				profilingStream
+						.println(String.format("%s,%s,%d", "brokered",numRequester, brokeredTrafficSimulation.getLatestWaitTime()));
+			}
+		}
+
 		profilingStream.close();
 		System.out.println("Finished!");
 	}
@@ -47,7 +66,8 @@ public class OneToOneConcurrentTraffic {
 		this.numOperations = numOperations;
 	}
 
-	public void run() throws Exception {
+	/** RUN BROKERED MESSAGING **/
+	public void runBrokeredMessaging() throws Exception {
 		Worker[] workers = new Worker[numRequester];
 		Worker[] requesters = new Worker[numRequester];
 
@@ -56,9 +76,10 @@ public class OneToOneConcurrentTraffic {
 		VaultageServer server = new VaultageServer(SynthesiserBroker.BROKER_ADDRESS);
 //		VaultageServer server = new VaultageServer("tcp://178.79.178.61:61616");
 
+		// through a broker
 		for (int i = 0; i < numRequester; i++) {
 			workers[i] = new Worker();
-			workers[i].setId("" + numRequester + i);
+			workers[i].setId("Worker " + numRequester + i);
 			workers[i].setCompletedValue(numOperations);
 			workers[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
 			workers[i].register(server);
@@ -66,7 +87,7 @@ public class OneToOneConcurrentTraffic {
 
 		for (int i = 0; i < numRequester; i++) {
 			requesters[i] = new Worker();
-			requesters[i].setId("" + i);
+			requesters[i].setId("Requester" + i);
 			requesters[i].setCompletedValue(numOperations);
 			requesters[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
 			requesters[i].register(server);
@@ -94,7 +115,7 @@ public class OneToOneConcurrentTraffic {
 
 		long end = System.currentTimeMillis();
 		System.out.println("Total Time = " + (end - start));
-		
+
 		// get maximum waiting time
 		long max = 0;
 		for (int i = 0; i < numRequester; i++) {
@@ -107,9 +128,89 @@ public class OneToOneConcurrentTraffic {
 
 		// appropriately dispose broker
 		for (int i = 0; i < numRequester; i++) {
+			workers[i].unregister();
 			requesters[i].unregister();
 		}
 		broker.stop();
+	}
+
+	/** RUN DIRECT MESSAGING **/
+	public void runDirectMessaging() throws Exception {
+
+		Worker[] workers = new Worker[numRequester];
+		Worker[] requesters = new Worker[numRequester];
+
+		int port = 60000;
+
+		// through a broker
+		for (int i = 0; i < numRequester; i++) {
+			workers[i] = new Worker();
+			workers[i].setId("Worker " + numRequester + i);
+			workers[i].setCompletedValue(numOperations);
+			workers[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
+			workers[i].startServer("127.0.0.1", port++);
+		}
+
+		for (int i = 0; i < numRequester; i++) {
+			requesters[i] = new Worker();
+			requesters[i].setId("Requester " + i);
+			requesters[i].setCompletedValue(numOperations);
+			requesters[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
+			requesters[i].startServer("127.0.0.1", port++);
+		}
+
+		// setting up workers to trust each other so no need to communicate via broker,
+		// only if the the communication mode is direct
+		for (int i = 0; i < numRequester; i++) {
+			Worker worker = workers[i];
+			Worker requester = requesters[i];
+			worker.getVaultage().getPublicKeyToRemoteAddress().put(requester.getPublicKey(),
+					requester.getVaultage().getDirectMessageServerAddress());
+			requester.getVaultage().getPublicKeyToRemoteAddress().put(worker.getPublicKey(),
+					worker.getVaultage().getDirectMessageServerAddress());
+		}
+
+		// initialise all threads first
+		Thread threads[] = new Thread[numRequester];
+		for (int i = 0; i < numRequester; i++) {
+			threads[i] = initThread(requesters[i], workers[i].getPublicKey());
+		}
+
+		long start = System.currentTimeMillis();
+
+		// start all threads at once
+		for (int i = 0; i < numRequester; i++) {
+			threads[i].start();
+//			threads[i].join();
+		}
+
+		System.console();
+		
+		// wait for all requesters to finish
+		for (int i = 0; i < numRequester; i++) {
+			threads[i].join();
+		}
+		
+		long end = System.currentTimeMillis();
+		System.out.println("Total Time = " + (end - start));
+
+		// get maximum waiting time
+		long max = 0;
+		for (int i = 0; i < numRequester; i++) {
+			if (((SendOperationThread) threads[i]).getExecutionTime() > max) {
+				max = ((SendOperationThread) threads[i]).getExecutionTime();
+			}
+		}
+
+		latestWaitTime = max;
+
+		// appropriately dispose broker
+		for (int i = 0; i < numRequester; i++) {
+			workers[i].shutdownServer();
+			requesters[i].shutdownServer();
+		}
+
+		System.console();
 	}
 
 	public int getNumOperations() {
@@ -137,6 +238,7 @@ public class OneToOneConcurrentTraffic {
 		private long executionTime;
 
 		public SendOperationThread(Worker worker, String remoteWorkerKey) {
+			this.setName(worker.getId());
 			this.executionTime = 0;
 			this.worker = worker;
 			this.remoteWorkerKey = remoteWorkerKey;

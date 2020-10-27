@@ -57,7 +57,8 @@ public class Vaultage {
 	public static final String DEFAULT_SERVER_ADDRESS = "localhost";
 	public static final int DEFAULT_SERVER_PORT = 50000;
 
-	public static Gson Gson = new GsonBuilder().setPrettyPrinting().create();
+//	public static Gson Gson = new GsonBuilder().setPrettyPrinting().create();
+	public static Gson Gson = new Gson();
 
 	private Object vault;
 	private String brokerAddress;
@@ -493,6 +494,7 @@ public class Vaultage {
 	 * @throws Exception
 	 */
 	public void disconnect() throws Exception {
+		if (session == null)
 		session.close();
 		connection.stop();
 		connection.close();

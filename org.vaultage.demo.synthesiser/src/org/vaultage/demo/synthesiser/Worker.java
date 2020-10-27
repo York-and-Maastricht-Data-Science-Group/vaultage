@@ -13,9 +13,12 @@ public class Worker extends WorkerBase {
 	}
 
 	public void sendOperation(String workerPublicKey) throws Exception {
+		this.sendOperation(workerPublicKey, true);
+	}
+	public void sendOperation(String workerPublicKey, boolean isEncrypted) throws Exception {
 		RemoteWorker worker = new RemoteWorker(this, workerPublicKey);
 		synchronized (this.getIncrementResponseHandler()) {
-			worker.increment(currentValue);
+			worker.increment(currentValue, isEncrypted);
 			this.getIncrementResponseHandler().wait();
 		}
 	}

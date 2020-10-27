@@ -29,7 +29,9 @@ hs_err_pid*
 
 # R specific files
 *.RData
-*.RHistory
+*.Rhistory
+
+*.pdf
 
 /target/
 /bin/
