@@ -25,15 +25,27 @@ public class OneToOneConcurrentTraffic {
 	public static void main(String[] args) throws Exception {
 
 //		int numReps = 1;
-		int numReps = 5;
-		int[] numRequesters = {1, 10, 25, 50};
+		int numReps = 10;
+		int[] numRequesters = { 1, 10, 30, 50 };
 //		int[] numRequesters = {10};
-		int numOperations = 1;
+		int numOperations = 5;
 
 		PrintStream profilingStream = new PrintStream(new File("oneToOneConcurrentTrafficResults.csv"));
 		profilingStream.println("Mode,NumRequesters,TotalTimeMillis");
 
-		// run direct messaging first
+		// brokered messaging
+		for (int numRequester : numRequesters) {
+			OneToOneConcurrentTraffic brokeredTrafficSimulation = new OneToOneConcurrentTraffic(numRequester,
+					numOperations);
+			for (int rep = 0; rep < numReps; rep++) {
+				brokeredTrafficSimulation.runBrokeredMessaging();
+				System.out.println(brokeredTrafficSimulation.getLatestRunDetails());
+				profilingStream.println(String.format("%s,%s,%d", "brokered", numRequester,
+						brokeredTrafficSimulation.getLatestWaitTime()));
+			}
+		}
+
+		// direct messaging
 		for (int numRequester : numRequesters) {
 			OneToOneConcurrentTraffic directTrafficSimulation = new OneToOneConcurrentTraffic(numRequester,
 					numOperations);
@@ -42,18 +54,6 @@ public class OneToOneConcurrentTraffic {
 				System.out.println(directTrafficSimulation.getLatestRunDetails());
 				profilingStream.println(
 						String.format("%s,%s,%d", "direct", numRequester, directTrafficSimulation.getLatestWaitTime()));
-			}
-		}
-		
-		// and then through a broker 
-		for (int numRequester : numRequesters) {
-			OneToOneConcurrentTraffic brokeredTrafficSimulation = new OneToOneConcurrentTraffic(numRequester,
-					numOperations);
-			for (int rep = 0; rep < numReps; rep++) {
-				brokeredTrafficSimulation.runBrokeredMessaging();
-				System.out.println(brokeredTrafficSimulation.getLatestRunDetails());
-				profilingStream
-						.println(String.format("%s,%s,%d", "brokered",numRequester, brokeredTrafficSimulation.getLatestWaitTime()));
 			}
 		}
 
@@ -71,10 +71,11 @@ public class OneToOneConcurrentTraffic {
 		Worker[] workers = new Worker[numRequester];
 		Worker[] requesters = new Worker[numRequester];
 
-		SynthesiserBroker broker = new SynthesiserBroker();
-		broker.start(SynthesiserBroker.BROKER_ADDRESS);
-		VaultageServer server = new VaultageServer(SynthesiserBroker.BROKER_ADDRESS);
+//		SynthesiserBroker broker = new SynthesiserBroker();
+//		broker.start(SynthesiserBroker.BROKER_ADDRESS);
+//		VaultageServer server = new VaultageServer(SynthesiserBroker.BROKER_ADDRESS);
 //		VaultageServer server = new VaultageServer("tcp://178.79.178.61:61616");
+		VaultageServer server = new VaultageServer("tcp://localhost:61616");
 
 		// through a broker
 		for (int i = 0; i < numRequester; i++) {
@@ -131,7 +132,7 @@ public class OneToOneConcurrentTraffic {
 			workers[i].unregister();
 			requesters[i].unregister();
 		}
-		broker.stop();
+//		broker.stop();
 	}
 
 	/** RUN DIRECT MESSAGING **/
@@ -140,7 +141,7 @@ public class OneToOneConcurrentTraffic {
 		Worker[] workers = new Worker[numRequester];
 		Worker[] requesters = new Worker[numRequester];
 
-		int port = 60000;
+		int port = 61000;
 
 		// through a broker
 		for (int i = 0; i < numRequester; i++) {
@@ -185,12 +186,12 @@ public class OneToOneConcurrentTraffic {
 		}
 
 		System.console();
-		
+
 		// wait for all requesters to finish
 		for (int i = 0; i < numRequester; i++) {
 			threads[i].join();
 		}
-		
+
 		long end = System.currentTimeMillis();
 		System.out.println("Total Time = " + (end - start));
 
@@ -245,7 +246,7 @@ public class OneToOneConcurrentTraffic {
 		}
 
 		public void run() {
-			System.out.println("Requester " + worker.getId() + " start...");
+//			System.out.println("Requester " + worker.getId() + " start...");
 			long start = System.currentTimeMillis();
 			while (!worker.isWorkComplete()) {
 				try {
@@ -256,7 +257,7 @@ public class OneToOneConcurrentTraffic {
 			}
 			long end = System.currentTimeMillis();
 			executionTime = end - start;
-			System.out.println("Requester " + worker.getId() + " ended = " + executionTime);
+//			System.out.println("Requester " + worker.getId() + " ended = " + executionTime);
 		}
 
 		public long getExecutionTime() {
