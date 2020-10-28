@@ -23,12 +23,12 @@ target_file <- paste("graphs", .Platform$file.sep, "oneToOneConcurrentTrafficRes
 raw <- read.table(source_file, sep = ",", header = TRUE)
 
 # adjust values to kilos (K)
-raw$NumRequesters <- raw$NumRequesters / 1000
+raw$NumRequesters <- raw$NumRequesters
 
 # adjust time to seconds (s)
 raw$TotalTimeMillis <- raw$TotalTimeMillis / 1000
 
-ID <- rep(1:5,len=20)
+ID <- rep(1:5,len=80)
 data <- cbind(id=ID, raw)
 melted_data <- melt(data, id=c("Mode", "NumRequesters", "id"))
 data_average <- dcast(melted_data, Mode ~ NumRequesters, mean)
@@ -80,7 +80,7 @@ legend(
 )
 
 title(ylab="Execution Time (s)", line=2, cex.lab=1)
-title(xlab="Message Size (KBs)", line=2, cex.lab=1)
+title(xlab="Number of one-to-one concurrent requests", line=2, cex.lab=1)
 box()
 
 dev.off()

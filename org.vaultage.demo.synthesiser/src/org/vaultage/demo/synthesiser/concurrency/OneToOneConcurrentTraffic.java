@@ -14,7 +14,7 @@ import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandle
  * OneToOne Concurrent Traffic: Each requester send a work operation to a unique
  * worker worker concurrently
  *
- * @author Alfonso de la Vega, Alfa Yohannis
+ * @author Alfonso de la Vega, Alfa Yohannis 
  */
 public class OneToOneConcurrentTraffic {
 
