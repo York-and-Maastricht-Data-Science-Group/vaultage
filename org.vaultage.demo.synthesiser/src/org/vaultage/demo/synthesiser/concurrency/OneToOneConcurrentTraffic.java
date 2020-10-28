@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.text.MessageFormat;
 
-import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageServer;
-import org.vaultage.demo.synthesiser.SynthesiserBroker;
 import org.vaultage.demo.synthesiser.Worker;
 import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandler;
 
@@ -27,7 +25,7 @@ public class OneToOneConcurrentTraffic {
 //		int numReps = 1;
 		int numReps = 10;
 		int[] numRequesters = { 1, 10, 30, 50 };
-//		int[] numRequesters = {10};
+//		int[] numRequesters = {50};
 		int numOperations = 5;
 
 		PrintStream profilingStream = new PrintStream(new File("oneToOneConcurrentTrafficResults.csv"));
@@ -80,7 +78,7 @@ public class OneToOneConcurrentTraffic {
 		// through a broker
 		for (int i = 0; i < numRequester; i++) {
 			workers[i] = new Worker();
-			workers[i].setId("Worker " + numRequester + i);
+			workers[i].setId("Worker-" + numRequester + i);
 			workers[i].setCompletedValue(numOperations);
 			workers[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
 			workers[i].register(server);
@@ -88,7 +86,7 @@ public class OneToOneConcurrentTraffic {
 
 		for (int i = 0; i < numRequester; i++) {
 			requesters[i] = new Worker();
-			requesters[i].setId("Requester" + i);
+			requesters[i].setId("Requester-" + i);
 			requesters[i].setCompletedValue(numOperations);
 			requesters[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
 			requesters[i].register(server);
@@ -146,7 +144,7 @@ public class OneToOneConcurrentTraffic {
 		// through a broker
 		for (int i = 0; i < numRequester; i++) {
 			workers[i] = new Worker();
-			workers[i].setId("Worker " + numRequester + i);
+			workers[i].setId("Worker-" + numRequester + i);
 			workers[i].setCompletedValue(numOperations);
 			workers[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
 			workers[i].startServer("127.0.0.1", port++);
@@ -154,7 +152,7 @@ public class OneToOneConcurrentTraffic {
 
 		for (int i = 0; i < numRequester; i++) {
 			requesters[i] = new Worker();
-			requesters[i].setId("Requester " + i);
+			requesters[i].setId("Requester-" + i);
 			requesters[i].setCompletedValue(numOperations);
 			requesters[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
 			requesters[i].startServer("127.0.0.1", port++);
@@ -227,13 +225,13 @@ public class OneToOneConcurrentTraffic {
 				numOperations, latestWaitTime);
 	}
 
-	private static Thread initThread(Worker worker, String remoteWorkerKey) {
+	private Thread initThread(Worker worker, String remoteWorkerKey) {
 		Thread t = new SendOperationThread(worker, remoteWorkerKey);
 //		t.start();
 		return t;
 	}
 
-	public static class SendOperationThread extends Thread {
+	public class SendOperationThread extends Thread {
 		private final Worker worker;
 		private final String remoteWorkerKey;
 		private long executionTime;

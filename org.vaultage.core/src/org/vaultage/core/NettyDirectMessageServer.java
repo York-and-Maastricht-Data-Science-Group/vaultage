@@ -30,6 +30,7 @@ import io.netty.util.ReferenceCountUtil;
  */
 public class NettyDirectMessageServer extends Thread implements DirectMessageServer {
 
+	private static final int BACKLOG_NUMBER = 128;
 	private EventLoopGroup bossGroup;
 	private EventLoopGroup workerGroup;
 	private ServerBootstrap serverBootstrap;
@@ -122,7 +123,7 @@ public class NettyDirectMessageServer extends Thread implements DirectMessageSer
 							ch.pipeline().addLast(new StringEncoder());
 							ch.pipeline().addLast(new NettyServerHandler());
 						}
-					}).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
+					}).option(ChannelOption.SO_BACKLOG, BACKLOG_NUMBER).childOption(ChannelOption.SO_KEEPALIVE, true);
 
 			channelFuture = serverBootstrap.bind(localAddress).sync();
 

@@ -58,7 +58,7 @@ public class Vaultage {
 	public static final int DEFAULT_SERVER_PORT = 50000;
 
 //	public static Gson Gson = new GsonBuilder().setPrettyPrinting().create();
-	public static Gson Gson = new Gson();
+	public static Gson Gson = new GsonBuilder().create();
 
 	private Object vault;
 	private String brokerAddress;
@@ -197,8 +197,8 @@ public class Vaultage {
 	public void startServer(String address, int port) {
 		this.directMessageServerAddress = new InetSocketAddress(address, port);
 		try {
-			directMessageServer = new NettyDirectMessageServer(this.directMessageServerAddress, this);
-//			directMessageServer = new SocketDirectMessageServer(this.directMessageServerAddress.getAddress().getHostAddress(), port, this);
+//			directMessageServer = new NettyDirectMessageServer(this.directMessageServerAddress, this);
+			directMessageServer = new SocketDirectMessageServer(this.directMessageServerAddress, this);
 			directMessageServer.start();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -335,8 +335,8 @@ public class Vaultage {
 
 				// Create a direct message client
 				// if the remote receiver is available, send message otherwise use broker
-				DirectMessageClient directMessageClient = new NettyDirectMessageClient(remoteServer);
-//				DirectMessageClient directMessageClient = new SocketDirectMessageClient(remoteServer.getHostName(), remoteServer.getPort());
+//				DirectMessageClient directMessageClient = new NettyDirectMessageClient(remoteServer);
+				DirectMessageClient directMessageClient = new SocketDirectMessageClient(remoteServer);
 				directMessageClient.connect();
 				try {
 					remoteServerAvailable = directMessageClient.isActive();
