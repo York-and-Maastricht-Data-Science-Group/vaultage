@@ -12,7 +12,7 @@ import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandle
  * OneToOne Concurrent Traffic: Each requester send a work operation to a unique
  * worker worker concurrently
  *
- * @author Alfonso de la Vega, Alfa Yohannis 
+ * @author Alfonso de la Vega, Alfa Yohannis
  */
 public class OneToOneConcurrentTraffic {
 
@@ -24,34 +24,34 @@ public class OneToOneConcurrentTraffic {
 
 //		int numReps = 1;
 		int numReps = 10;
-		int[] numRequesters = { 1, 10, 30, 50 };
+		int[] numOperations = { 1, 10, 30, 50};
 //		int[] numRequesters = {50};
-		int numOperations = 5;
+		int numRequesters = 1;
 
 		PrintStream profilingStream = new PrintStream(new File("oneToOneConcurrentTrafficResults.csv"));
-		profilingStream.println("Mode,NumRequesters,TotalTimeMillis");
+		profilingStream.println("Mode,NumOperations,TotalTimeMillis");
 
 		// brokered messaging
-		for (int numRequester : numRequesters) {
-			OneToOneConcurrentTraffic brokeredTrafficSimulation = new OneToOneConcurrentTraffic(numRequester,
-					numOperations);
+		for (int numOperation : numOperations) {
+			OneToOneConcurrentTraffic brokeredTrafficSimulation = new OneToOneConcurrentTraffic(numRequesters,
+					numOperation);
 			for (int rep = 0; rep < numReps; rep++) {
 				brokeredTrafficSimulation.runBrokeredMessaging();
 				System.out.println(brokeredTrafficSimulation.getLatestRunDetails());
-				profilingStream.println(String.format("%s,%s,%d", "brokered", numRequester,
+				profilingStream.println(String.format("%s,%s,%d", "brokered", numOperation,
 						brokeredTrafficSimulation.getLatestWaitTime()));
 			}
 		}
 
 		// direct messaging
-		for (int numRequester : numRequesters) {
-			OneToOneConcurrentTraffic directTrafficSimulation = new OneToOneConcurrentTraffic(numRequester,
-					numOperations);
+		for (int numOperation : numOperations) {
+			OneToOneConcurrentTraffic directTrafficSimulation = new OneToOneConcurrentTraffic(numRequesters,
+					numOperation);
 			for (int rep = 0; rep < numReps; rep++) {
 				directTrafficSimulation.runDirectMessaging();
 				System.out.println(directTrafficSimulation.getLatestRunDetails());
 				profilingStream.println(
-						String.format("%s,%s,%d", "direct", numRequester, directTrafficSimulation.getLatestWaitTime()));
+						String.format("%s,%s,%d", "direct", numOperation, directTrafficSimulation.getLatestWaitTime()));
 			}
 		}
 
@@ -113,7 +113,7 @@ public class OneToOneConcurrentTraffic {
 		}
 
 		long end = System.currentTimeMillis();
-		System.out.println("Total Time = " + (end - start));
+//		System.out.println("Total Time = " + (end - start));
 
 		// get maximum waiting time
 		long max = 0;
@@ -191,7 +191,7 @@ public class OneToOneConcurrentTraffic {
 		}
 
 		long end = System.currentTimeMillis();
-		System.out.println("Total Time = " + (end - start));
+//		System.out.println("Total Time = " + (end - start));
 
 		// get maximum waiting time
 		long max = 0;

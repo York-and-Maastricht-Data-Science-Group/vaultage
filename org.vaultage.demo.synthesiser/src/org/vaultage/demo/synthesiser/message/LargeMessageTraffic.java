@@ -22,7 +22,7 @@ public class LargeMessageTraffic {
 
 	public static void main(String[] args) throws Exception {
 
-		int numReps = 5;
+		int numReps = 10;
 		int numWorkers = 2;
 		int[] numberOfBytes = { 9000, 10000, 20000, 30000 };
 

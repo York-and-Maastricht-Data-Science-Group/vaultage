@@ -22,8 +22,8 @@ public class ManyToOneConcurrentTraffic {
 
 	public static void main(String[] args) throws Exception {
 
-		int numReps = 1;
-		int[] numRequesters = { 50 };
+		int numReps = 10;
+		int[] numRequesters = { 1, 20, 30, 50 };
 		int numOperations = 1;
 
 		PrintStream profilingStream = new PrintStream(new File("manyToOneConcurrentTrafficResults.csv"));
@@ -107,7 +107,7 @@ public class ManyToOneConcurrentTraffic {
 		}
 
 		long end = System.currentTimeMillis();
-		System.out.println("Total Time = " + (end - start));
+//		System.out.println("Total Time = " + (end - start));
 
 		// get maximum waiting time
 		long max = 0;
@@ -141,7 +141,7 @@ public class ManyToOneConcurrentTraffic {
 		worker.setCompletedValue(numOperations);
 		worker.setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
 		worker.startServer("127.0.0.1", port++);
-		
+
 		for (int i = 0; i < numRequester; i++) {
 			requesters[i] = new Worker();
 			requesters[i].setId("Requester-" + i);
@@ -182,7 +182,7 @@ public class ManyToOneConcurrentTraffic {
 		}
 
 		long end = System.currentTimeMillis();
-		System.out.println("Total Time = " + (end - start));
+//		System.out.println("Total Time = " + (end - start));
 
 		// get maximum waiting time
 		long max = 0;
@@ -235,7 +235,7 @@ public class ManyToOneConcurrentTraffic {
 		}
 
 		public void run() {
-			System.out.println("Requester " + worker.getId() + " start...");
+//			System.out.println("Requester " + worker.getId() + " start...");
 			long start = System.currentTimeMillis();
 			while (!worker.isWorkComplete()) {
 				try {
@@ -246,7 +246,7 @@ public class ManyToOneConcurrentTraffic {
 			}
 			long end = System.currentTimeMillis();
 			executionTime = end - start;
-			System.out.println("Requester " + worker.getId() + " ended = " + executionTime);
+//			System.out.println("Requester " + worker.getId() + " ended = " + executionTime);
 		}
 
 		public long getExecutionTime() {

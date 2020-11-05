@@ -23,16 +23,16 @@ target_file <- paste("graphs", .Platform$file.sep, "oneToOneConcurrentTrafficRes
 raw <- read.table(source_file, sep = ",", header = TRUE)
 
 # adjust values to kilos (K)
-raw$NumRequesters <- raw$NumRequesters
+raw$NumOperations <- raw$NumOperations
 
 # adjust time to seconds (s)
 raw$TotalTimeMillis <- raw$TotalTimeMillis / 1000
 
 ID <- rep(1:5,len=80)
 data <- cbind(id=ID, raw)
-melted_data <- melt(data, id=c("Mode", "NumRequesters", "id"))
-data_average <- dcast(melted_data, Mode ~ NumRequesters, mean)
-data_sd <- dcast(melted_data, Mode ~ NumRequesters, sd)
+melted_data <- melt(data, id=c("Mode", "NumOperations", "id"))
+data_average <- dcast(melted_data, Mode ~ NumOperations, mean)
+data_sd <- dcast(melted_data, Mode ~ NumOperations, sd)
 
 #avg
 rownames(data_average) <- data_average[,1]
@@ -79,8 +79,9 @@ legend(
   # bty="n"
 )
 
+title(main="One-to-one Brokered vs. Direct Messaging")
 title(ylab="Execution Time (s)", line=2, cex.lab=1)
-title(xlab="Number of one-to-one concurrent requests", line=2, cex.lab=1)
+title(xlab="Number of operations", line=2, cex.lab=1)
 box()
 
 dev.off()

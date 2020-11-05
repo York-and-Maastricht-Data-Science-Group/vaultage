@@ -79,8 +79,9 @@ legend(
   # bty="n"
 )
 
+title(main="Many-to-one Brokered vs. Direct Messaging")
 title(ylab="Execution Time (s)", line=2, cex.lab=1)
-title(xlab="Number of many-to-one concurrent requests", line=2, cex.lab=1)
+title(xlab="Number of operations", line=2, cex.lab=1)
 box()
 
 dev.off()

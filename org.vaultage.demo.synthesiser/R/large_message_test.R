@@ -79,6 +79,7 @@ legend(
   # bty="n"
 )
 
+title(main="One-to-one Encrypted vs. Unencrypted Messaging")
 title(ylab="Execution Time (s)", line=2, cex.lab=1)
 title(xlab="Message Size (KBs)", line=2, cex.lab=1)
 box()
