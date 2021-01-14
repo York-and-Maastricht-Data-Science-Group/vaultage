@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -40,10 +41,10 @@ public class UpholdWallet implements Wallet {
 	public String authorise(String clientId, String scope, String state)
 			throws URISyntaxException, IOException, ClientProtocolException {
 
-		URI authenticationUri = null;
+		URI uri = null;
 
 		if (walletEnvironment == WalletEnvironment.SANDBOX_TEST) {
-			authenticationUri = new URIBuilder() //
+			uri = new URIBuilder() //
 					.setScheme("https") //
 					.setHost("sandbox.uphold.com") //
 					.setPath("/authorize/" + clientId) //
@@ -51,7 +52,7 @@ public class UpholdWallet implements Wallet {
 					.setParameter("state", state) //
 					.build();
 		} else {
-			authenticationUri = new URIBuilder() //
+			uri = new URIBuilder() //
 					.setScheme("https") //
 					.setHost("uphold.com") //
 					.setPath("/authorize/" + clientId) //
@@ -60,16 +61,16 @@ public class UpholdWallet implements Wallet {
 					.build();
 		}
 
-		CloseableHttpClient authenticationHttpClient = HttpClients.createDefault();
+		CloseableHttpClient httpClient = HttpClients.createDefault();
 
-		HttpPost authenticationRequest = new HttpPost(authenticationUri);
-		CloseableHttpResponse authenticationResponse = authenticationHttpClient.execute(authenticationRequest);
+		HttpPost request = new HttpPost(uri);
+		CloseableHttpResponse response = httpClient.execute(request);
 
-		HttpEntity entity = authenticationResponse.getEntity();
+		HttpEntity entity = response.getEntity();
 		String result = EntityUtils.toString(entity);
 
-		authenticationHttpClient.close();
-		authenticationResponse.close();
+		httpClient.close();
+		response.close();
 
 		return result;
 	}
@@ -79,33 +80,33 @@ public class UpholdWallet implements Wallet {
 	 */
 	public String getAccessToken(String clientId, String clientSecret)
 			throws URISyntaxException, UnsupportedEncodingException, IOException, ClientProtocolException {
-		
+
 		String auth = UpholdUtil.credential(clientId, clientSecret);
 
-		String getAccessTokenUri = null;
+		String uri = null;
 		if (walletEnvironment == WalletEnvironment.SANDBOX_TEST) {
-			getAccessTokenUri = "https://api-sandbox.uphold.com/oauth2/token";
+			uri = "https://api-sandbox.uphold.com/oauth2/token";
 		} else {
-			getAccessTokenUri = "https://api.uphold.com/oauth2/token";
+			uri = "https://api.uphold.com/oauth2/token";
 		}
 
-		HttpPost getAccessTokenRequest = new HttpPost(getAccessTokenUri);
+		HttpPost request = new HttpPost(uri);
 
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("grant_type", "client_credentials"));
-		getAccessTokenRequest.setEntity(new UrlEncodedFormEntity(params));
+		request.setEntity(new UrlEncodedFormEntity(params));
 
-		getAccessTokenRequest.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + auth);
-		getAccessTokenRequest.addHeader("content-type", "application/x-www-form-urlencoded");
+		request.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + auth);
+		request.addHeader("content-type", "application/x-www-form-urlencoded");
 
-		CloseableHttpClient getAccessHttpClient = HttpClients.createDefault();
-		CloseableHttpResponse getAccessTokenResponse = getAccessHttpClient.execute(getAccessTokenRequest);
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse response = httpClient.execute(request);
 
-		HttpEntity entity = getAccessTokenResponse.getEntity();
+		HttpEntity entity = response.getEntity();
 		String json = EntityUtils.toString(entity);
 
-		getAccessHttpClient.close();
-		getAccessTokenResponse.close();
+		httpClient.close();
+		response.close();
 
 		JsonNode jsonNode = (new ObjectMapper()).readTree(json);
 		String accessToken = jsonNode.get("access_token").asText();
@@ -113,29 +114,128 @@ public class UpholdWallet implements Wallet {
 	}
 
 	public JsonNode getUserInfo(String accessToken) throws IOException {
-	
-		String getUserInfoUri = null;
+
+		String uri = null;
 		if (walletEnvironment == WalletEnvironment.SANDBOX_TEST) {
-			getUserInfoUri = "https://api-sandbox.uphold.com/v0/me";
+			uri = "https://api-sandbox.uphold.com/v0/me";
 		} else {
-			getUserInfoUri = "https://api.uphold.com/v0/me";
+			uri = "https://api.uphold.com/v0/me";
 		}
 
-		HttpGet getUserInfoRequest = new HttpGet(getUserInfoUri);
+		HttpGet request = new HttpGet(uri);
 
-		getUserInfoRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+		request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 
-		CloseableHttpClient getUserInfoHttpClient = HttpClients.createDefault();
-		CloseableHttpResponse getUserInfoResponse = getUserInfoHttpClient.execute(getUserInfoRequest);
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse response = httpClient.execute(request);
 
-		HttpEntity entity = getUserInfoResponse.getEntity();
+		HttpEntity entity = response.getEntity();
 		String json = EntityUtils.toString(entity);
 
-		getUserInfoHttpClient.close();
-		getUserInfoResponse.close();
+		httpClient.close();
+		response.close();
 
 		JsonNode jsonNode = (new ObjectMapper()).readTree(json);
 		return jsonNode;
 
+	}
+
+	public JsonNode getAuthenticationMethods(String username, String password)
+			throws ClientProtocolException, IOException {
+
+		String auth = UpholdUtil.credential(username, password);
+
+		String uri = null;
+		if (walletEnvironment == WalletEnvironment.SANDBOX_TEST) {
+			uri = "https://api-sandbox.uphold.com/v0/me/authentication_methods";
+		} else {
+			uri = "https://api.uphold.com/v0/me/authentication_methods";
+		}
+
+		HttpGet request = new HttpGet(uri);
+
+		request.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + auth);
+
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse response = httpClient.execute(request);
+
+		HttpEntity entity = response.getEntity();
+		String json = EntityUtils.toString(entity);
+
+		httpClient.close();
+		response.close();
+
+		JsonNode jsonNode = (new ObjectMapper()).readTree(json);
+		return jsonNode;
+	}
+
+	public String createNewPersonalAccessToken(String description, String username, String password, String otpMethodId,
+			String otpToken) throws ParseException, IOException {
+
+		String auth = UpholdUtil.credential(username, password);
+		//YWxmYS55b2hhbm5pc0BnbWFpbC5jb206TG9sb2wzeCE=
+		//YWxmYS55b2hhbm5pc0BnbWFpbC5jb206TG9sb2wzeCE=
+
+		String uri = null;
+		if (walletEnvironment == WalletEnvironment.SANDBOX_TEST) {
+			uri = "https://api-sandbox.uphold.com/v0/me/tokens";
+			otpToken = "000000";
+		} else {
+			uri = "https://api.uphold.com/v0/me/tokens";
+		}
+
+		HttpPost request = new HttpPost(uri);
+
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("description", description));
+		request.setEntity(new UrlEncodedFormEntity(params));
+
+		request.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + auth);
+		request.addHeader("content-type", "application/x-www-form-urlencoded");
+		if (otpMethodId != null) {
+			request.addHeader("OTP-Method-Id", otpMethodId);
+			request.addHeader("OTP-Token", otpToken);
+		}
+
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse response = httpClient.execute(request);
+
+		HttpEntity entity = response.getEntity();
+		String json = EntityUtils.toString(entity);
+
+		httpClient.close();
+		response.close();
+
+		JsonNode jsonNode = (new ObjectMapper()).readTree(json);
+		String accessToken = jsonNode.get("accessToken").asText();
+		return accessToken;
+	}
+	
+	public JsonNode getPersonalAccessTokens(String personalAccessToken) throws ParseException, IOException {
+
+
+		String uri = null;
+		if (walletEnvironment == WalletEnvironment.SANDBOX_TEST) {
+			uri = "https://api-sandbox.uphold.com/v0/me/tokens";
+		} else {
+			uri = "https://api.uphold.com/v0/me/tokens";
+		}
+
+		HttpGet request = new HttpGet(uri);
+
+		request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + personalAccessToken);
+		
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse response = httpClient.execute(request);
+
+		HttpEntity entity = response.getEntity();
+		String json = EntityUtils.toString(entity);
+
+		httpClient.close();
+		response.close();
+
+		JsonNode jsonNode = (new ObjectMapper()).readTree(json);
+//		String accessToken = jsonNode.get("access_token").asText();
+		return jsonNode;
 	}
 }
