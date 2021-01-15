@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
@@ -37,6 +39,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.vaultage.wallet.WalletException;
 import org.vaultage.wallet.uphold.UpholdUtil;
 import org.vaultage.wallet.uphold.UpholdWallet;
 
@@ -46,7 +49,7 @@ public class UpholdTest {
 
 	private String clientAId = "4b383af8566eba361aebb7b2940ca6e038fd3772";
 	private String clientASecret = "c67408e73c9ff6d2ac732f2632d77e65ef7d1705";
-	
+
 	private String usernameA = "alfa.yohannis@gmail.com";
 	private String passwordA = "Lolol3x!";
 
@@ -67,7 +70,8 @@ public class UpholdTest {
 	}
 
 	@Test
-	public void testWebApplicationFlow() throws ClientProtocolException, IOException, URISyntaxException {
+	public void testWebApplicationFlow()
+			throws ClientProtocolException, IOException, URISyntaxException, WalletException {
 
 		String scope = "user:read";
 		String state = UpholdUtil.randomBytes();
@@ -81,7 +85,8 @@ public class UpholdTest {
 	}
 
 	@Test
-	public void testClientCredentialFlow() throws ClientProtocolException, IOException, URISyntaxException {
+	public void testClientCredentialFlow()
+			throws ClientProtocolException, IOException, URISyntaxException, WalletException {
 
 		UpholdWallet wallet = new UpholdWallet();
 
@@ -95,14 +100,15 @@ public class UpholdTest {
 		JsonNode jsonNode = wallet.getUserInfo(accessToken);
 
 		String firstName = jsonNode.get("firstName").asText();
-		
+
 		System.out.println(firstName);
 		assertEquals("Alfa", firstName);
 
 	}
 
 	@Test
-	public void testPersonalAccessToken() throws ClientProtocolException, IOException, URISyntaxException {
+	public void testPersonalAccessToken()
+			throws ClientProtocolException, IOException, URISyntaxException, ParseException, WalletException {
 
 		// OTP = One-Time Password
 		String otpMethodId = null;
@@ -124,15 +130,77 @@ public class UpholdTest {
 
 		// get all personal access tokens
 		JsonNode personalAccessTokens = wallet.getPersonalAccessTokens(personalAccessToken);
-		Iterator<JsonNode> iterator = personalAccessTokens.elements(); 
+		Iterator<JsonNode> iterator = personalAccessTokens.elements();
 		boolean exist = false;
 		while (iterator.hasNext()) {
 			JsonNode element = iterator.next();
-			if (element.get("description").asText().equals(tokenDescription)){
+			if (element.get("description").asText().equals(tokenDescription)) {
 				exist = true;
 			}
 		}
-		
-		assertEquals(true,exist);
+
+		assertEquals(true, exist);
 	}
+
+	@Test
+	public void testTransferValueBetweenCards()
+			throws ClientProtocolException, IOException, URISyntaxException, WalletException {
+
+		UpholdWallet wallet = new UpholdWallet();
+
+		// get access token
+		String accessToken = wallet.getAccessToken(clientAId, clientASecret);
+		System.out.println(accessToken);
+
+		// get available accounts
+		JsonNode accounts = wallet.getCards(accessToken);
+
+		// get found an account with, at least, 0.01 USD and also the destination card
+		String originCardId = null;
+		String destinationCardId = null;
+
+		Iterator<JsonNode> iterator1 = accounts.elements();
+		int count = 0;
+		int originIndex = 0;
+		while (iterator1.hasNext()) {
+			JsonNode element = iterator1.next();
+			JsonNode n = element.get("normalized");
+			Iterator<JsonNode> iterator2 = n.elements();
+			while (iterator2.hasNext()) {
+				JsonNode e = iterator2.next();
+				if (originCardId == null && element.get("currency").asText().equals("BTC")
+						&& e.get("available").asDouble() >= 0.01 && e.get("currency").asText().equals("USD")) {
+					originCardId = element.get("id").asText();
+					System.out.println("Transfer from: " + element.get("currency") + " " + element.get("id"));
+					originIndex = count;
+					break;
+				}
+			}
+			count++;
+		}
+
+		int destionationIndex = (new Random()).nextInt(count);
+		int i = 0;
+		iterator1 = accounts.elements();
+		while (iterator1.hasNext()) {
+			JsonNode element = iterator1.next();
+			if (i == originIndex || element.get("currency").asText().equals("GBP")
+					|| element.get("currency").asText().equals("EUR")) {
+				i++;
+				continue;
+			}
+			if (i == destionationIndex) {
+				destinationCardId = element.get("id").asText();
+				System.out.println("Transfer to: " + element.get("currency") + " " + element.get("id"));
+				break;
+			}
+			i++;
+		}
+
+		JsonNode transaction = wallet.transfer(originCardId, destinationCardId, "USD", 0.01, accessToken);
+
+		assertEquals(true, accounts != null);
+
+	}
+
 }

@@ -10,7 +10,7 @@ public interface Wallet {
 	
 	public enum WalletEnvironment {
 		PRODUCTION,
-		SANDBOX_TEST
+		SANDBOX
 	}
 	
 	/***
@@ -23,8 +23,9 @@ public interface Wallet {
 	 * @throws URISyntaxException
 	 * @throws IOException
 	 * @throws ClientProtocolException
+	 * @throws WalletException 
 	 */
-	public String authorise(String clientId, String scope, String state) throws URISyntaxException, IOException, ClientProtocolException;
+	public String authorise(String clientId, String scope, String state) throws URISyntaxException, IOException, ClientProtocolException, WalletException;
 	
 	/***
 	 * Get an access token to be used for further operation or transaction.
@@ -36,7 +37,8 @@ public interface Wallet {
 	 * @throws UnsupportedEncodingException
 	 * @throws IOException
 	 * @throws ClientProtocolException
+	 * @throws WalletException 
 	 */
 	public String getAccessToken(String clientId, String clientSecret)
-			throws URISyntaxException, UnsupportedEncodingException, IOException, ClientProtocolException;
+			throws URISyntaxException, UnsupportedEncodingException, IOException, ClientProtocolException, WalletException;
 }
