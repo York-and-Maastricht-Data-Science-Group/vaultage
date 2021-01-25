@@ -20,7 +20,7 @@
 	</build>
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
-		<dependency>
+		<dependency> 
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.1</version>

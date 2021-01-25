@@ -1,12 +1,9 @@
 package org.vaultage.wallet.uphold;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -83,27 +80,29 @@ public class UpholdWallet implements Wallet {
 		HttpPost request = new HttpPost(uri);
 		CloseableHttpResponse response = httpClient.execute(request);
 
-		if (response.getStatusLine().getStatusCode() != 200) {
-			throw new WalletException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-		}
-		
 		HttpEntity entity = response.getEntity();
-		String result = EntityUtils.toString(entity);
+		String json = EntityUtils.toString(entity);
+
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new WalletException(response.getStatusLine().getStatusCode() + " "
+					+ response.getStatusLine().getReasonPhrase() + " " + json);
+		}
 
 		httpClient.close();
 		response.close();
 
-		return result;
+		return json;
 	}
 
 	/***
 	 * Get an access token to be used for further operation or transaction.
-	 * @throws IOException 
-	 * @throws ClientProtocolException 
-	 * @throws WalletException 
+	 * 
+	 * @throws IOException
+	 * @throws ClientProtocolException
+	 * @throws WalletException
 	 */
-	public String getAccessToken(String clientId, String clientSecret) throws ClientProtocolException, IOException, WalletException
-	{ 
+	public String getAccessToken(String clientId, String clientSecret)
+			throws ClientProtocolException, IOException, WalletException {
 		String auth = UpholdUtil.credential(clientId, clientSecret);
 
 		String uri = "https://" + host + "/oauth2/token";
@@ -120,12 +119,13 @@ public class UpholdWallet implements Wallet {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = httpClient.execute(request);
 
-		if (response.getStatusLine().getStatusCode() != 200) {
-			throw new WalletException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-		}
-		
 		HttpEntity entity = response.getEntity();
 		String json = EntityUtils.toString(entity);
+
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new WalletException(response.getStatusLine().getStatusCode() + " "
+					+ response.getStatusLine().getReasonPhrase() + " " + json);
+		}
 
 		httpClient.close();
 		response.close();
@@ -146,12 +146,13 @@ public class UpholdWallet implements Wallet {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = httpClient.execute(request);
 
-		if (response.getStatusLine().getStatusCode() != 200) {
-			throw new WalletException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-		}
-		
 		HttpEntity entity = response.getEntity();
 		String json = EntityUtils.toString(entity);
+
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new WalletException(response.getStatusLine().getStatusCode() + " "
+					+ response.getStatusLine().getReasonPhrase() + " " + json);
+		}
 
 		httpClient.close();
 		response.close();
@@ -175,13 +176,14 @@ public class UpholdWallet implements Wallet {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = httpClient.execute(request);
 
-		if (response.getStatusLine().getStatusCode() != 200) {
-			throw new WalletException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-		}
-		
 		HttpEntity entity = response.getEntity();
 		String json = EntityUtils.toString(entity);
 
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new WalletException(response.getStatusLine().getStatusCode() + " "
+					+ response.getStatusLine().getReasonPhrase() + " " + json);
+		}
+		
 		httpClient.close();
 		response.close();
 
@@ -217,12 +219,13 @@ public class UpholdWallet implements Wallet {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = httpClient.execute(request);
 
-		if (response.getStatusLine().getStatusCode() != 200) {
-			throw new WalletException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-		}
-		
 		HttpEntity entity = response.getEntity();
 		String json = EntityUtils.toString(entity);
+
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new WalletException(response.getStatusLine().getStatusCode() + " "
+					+ response.getStatusLine().getReasonPhrase() + " " + json);
+		}
 
 		httpClient.close();
 		response.close();
@@ -232,7 +235,7 @@ public class UpholdWallet implements Wallet {
 		return accessToken;
 	}
 
-	public JsonNode getPersonalAccessTokens(String personalAccessToken) throws ParseException, IOException {
+	public JsonNode getPersonalAccessTokens(String personalAccessToken) throws ParseException, IOException, WalletException {
 
 		String uri = "https://" + host + "/v0/me/tokens";
 
@@ -245,6 +248,11 @@ public class UpholdWallet implements Wallet {
 
 		HttpEntity entity = response.getEntity();
 		String json = EntityUtils.toString(entity);
+
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new WalletException(response.getStatusLine().getStatusCode() + " "
+					+ response.getStatusLine().getReasonPhrase() + " " + json);
+		}
 
 		httpClient.close();
 		response.close();
@@ -265,12 +273,13 @@ public class UpholdWallet implements Wallet {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = httpClient.execute(request);
 
-		if (response.getStatusLine().getStatusCode() != 200) {
-			throw new WalletException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-		}
-		
 		HttpEntity entity = response.getEntity();
 		String json = EntityUtils.toString(entity);
+
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new WalletException(response.getStatusLine().getStatusCode() + " "
+					+ response.getStatusLine().getReasonPhrase() + " " + json);
+		}
 
 		httpClient.close();
 		response.close();
@@ -281,7 +290,7 @@ public class UpholdWallet implements Wallet {
 	}
 
 	public JsonNode transfer(String originCardId, String destinationCardId, String currency, double amount,
-			String accessToken) throws WalletException, IOException   {
+			String accessToken) throws WalletException, IOException {
 
 		String uri = "https://" + host + "/v0/me/cards/" + originCardId + "/transactions?commit=true";
 		System.out.println(uri);
@@ -303,16 +312,18 @@ public class UpholdWallet implements Wallet {
 //		request.addHeader("Accept", "application/json");
 		request.addHeader("content-type", "application/json");
 //		request.addHeader("content-type", "application/x-www-form-urlencoded");
+//		request.addHeader("OTP-Token", "000000");
 
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = httpClient.execute(request);
 
-		if (response.getStatusLine().getStatusCode() != 200) {
-			throw new WalletException(response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
-		}
-		
 		HttpEntity entity = response.getEntity();
 		String json = EntityUtils.toString(entity);
+
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new WalletException(response.getStatusLine().getStatusCode() + " "
+					+ response.getStatusLine().getReasonPhrase() + " " + json);
+		}
 
 		httpClient.close();
 		response.close();

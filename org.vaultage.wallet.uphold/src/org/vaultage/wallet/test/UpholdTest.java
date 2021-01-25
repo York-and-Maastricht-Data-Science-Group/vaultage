@@ -45,13 +45,27 @@ import org.vaultage.wallet.uphold.UpholdWallet;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/***
+ * A class for testing the Uphold wrapper.
+ * 
+ * @author Alfa Yohannis
+ */
 public class UpholdTest {
 
-	private String clientAId = "4b383af8566eba361aebb7b2940ca6e038fd3772";
-	private String clientASecret = "c67408e73c9ff6d2ac732f2632d77e65ef7d1705";
+	private String clientAId = "17c0b7f3f77755c4959248e10a2f0bf69dd56d5f";
+	private String clientASecret = "5b0ed8d9b3cc78d9535cea4756be44b24c5cc251";
 
-	private String usernameA = "alfa.yohannis@gmail.com";
+	private String usernameA = "ary506@york.ac.uk";
 	private String passwordA = "Lolol3x!";
+	private String clientPersonalAccessTokenA = "412b0a7ea69d1b785faed01e21c0fd533822b6eb";
+	private String destinationCardIdA = "mr1hnetSLCpP8iPSno121cYepWvaFYZaqA";
+	private String interledgerA = "$ilp-sandbox.uphold.com/bBLJYdjp9F9H";
+
+	private String usernameB = "alfa.yohannis@york.ac.uk";
+	private String passwordB = "Lolol3x!";
+	private String clientPersonalAccessTokenB = "fe082cb503dcc63365edb9a630a98ecf7f21f4b2";
+	private String destinationCardIdB = "mqyAoGRZX4xW8akQP2LEJdDAp12RyBUseT";
+	private String interledgerB = "$ilp-sandbox.uphold.com/NL3gFpy6KwbY";
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -69,6 +83,15 @@ public class UpholdTest {
 	public void tearDown() throws Exception {
 	}
 
+	/***
+	 * Test web application scenario .. more work to be done to simulate interaction
+	 * between users and the application.
+	 * 
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws WalletException
+	 */
 	@Test
 	public void testWebApplicationFlow()
 			throws ClientProtocolException, IOException, URISyntaxException, WalletException {
@@ -84,6 +107,14 @@ public class UpholdTest {
 		assertEquals(true, result.contains("</html>"));
 	}
 
+	/***
+	 * Test Client credential flow and getting access token. 
+	 * 
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws WalletException
+	 */
 	@Test
 	public void testClientCredentialFlow()
 			throws ClientProtocolException, IOException, URISyntaxException, WalletException {
@@ -106,6 +137,15 @@ public class UpholdTest {
 
 	}
 
+	/***
+	 * Test generating a personal access token and getting a list of personal access tokens.
+	 * 
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws ParseException
+	 * @throws WalletException
+	 */
 	@Test
 	public void testPersonalAccessToken()
 			throws ClientProtocolException, IOException, URISyntaxException, ParseException, WalletException {
@@ -118,14 +158,22 @@ public class UpholdTest {
 
 		// get available authentications
 		JsonNode authenticationMethods = wallet.getAuthenticationMethods(usernameA, passwordA);
+//		JsonNode authenticationMethods = wallet.getAuthenticationMethods(usernameB, passwordB);
 
-		JsonNode totpCheck = authenticationMethods.get("totp");
-		if (totpCheck != null) {
-			otpMethodId = totpCheck.get("id").asText();
+		if (authenticationMethods != null) {
+			for (JsonNode node : authenticationMethods) {
+				JsonNode totpCheck = node.get("type");
+				if (totpCheck != null) {
+					otpMethodId = node.get("id").asText();
+					break;
+				}
+			}
 		}
+
 		// create new personal access token
 		String tokenDescription = "Submitted at " + (new Date()).toString();
 		String personalAccessToken = wallet.createNewPersonalAccessToken(tokenDescription, usernameA, passwordA,
+//		String personalAccessToken = wallet.createNewPersonalAccessToken(tokenDescription, usernameB, passwordB,
 				otpMethodId, otpToken);
 
 		// get all personal access tokens
@@ -142,8 +190,16 @@ public class UpholdTest {
 		assertEquals(true, exist);
 	}
 
+	/***
+	 * Test money transfer between cards of a same owner.
+	 *  
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws WalletException
+	 */
 	@Test
-	public void testTransferValueBetweenCards()
+	public void testMoneyTransferBetweenCards()
 			throws ClientProtocolException, IOException, URISyntaxException, WalletException {
 
 		UpholdWallet wallet = new UpholdWallet();
@@ -199,8 +255,67 @@ public class UpholdTest {
 
 		JsonNode transaction = wallet.transfer(originCardId, destinationCardId, "USD", 0.01, accessToken);
 
+		System.out.println(transaction.toPrettyString());
+
 		assertEquals(true, accounts != null);
 
 	}
 
+	/***
+	 * Test money transfer between cards of different owners. 
+	 * 
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws WalletException
+	 */
+	@Test
+	public void testMoneyTransferToOtherUsersCard()
+			throws ClientProtocolException, IOException, URISyntaxException, WalletException {
+
+		UpholdWallet wallet = new UpholdWallet();
+
+		// get access token
+//		String accessToken = wallet.getAccessToken(clientAId, clientASecret);
+		String accessToken = clientPersonalAccessTokenB;
+//		String accessToken = clientPersonalAccessTokenA;
+
+		System.out.println(accessToken);
+
+		// get available accounts
+		JsonNode accounts = wallet.getCards(accessToken);
+//		System.out.println(accounts.toPrettyString());
+
+		// get found an BTC account with, at least, 0.01 USD
+		String originCardId = null;
+
+		Iterator<JsonNode> iterator1 = accounts.elements();
+		while (iterator1.hasNext()) {
+			JsonNode element = iterator1.next();
+			JsonNode n = element.get("normalized");
+			Iterator<JsonNode> iterator2 = n.elements();
+			while (iterator2.hasNext()) {
+				JsonNode e = iterator2.next();
+				if (originCardId == null && element.get("currency").asText().equals("BTC")
+						&& e.get("available").asDouble() >= 0.01 && e.get("currency").asText().equals("USD")) {
+					originCardId = element.get("id").asText();
+					System.out.println("Transfer from: " + element.get("currency") + " " + element.get("id"));
+					break;
+				}
+			}
+		}
+
+		// Other user's card id
+//		String destinationCardId = destinationCardIdB;
+//		String destinationCardId = destinationCardIdA;
+		String destinationCardId = usernameA;
+//		String destinationCardId = interledgerA;
+//		String destinationCardId = "BrWBxMiLXmJA";
+
+		JsonNode transaction = wallet.transfer(originCardId, destinationCardId, "USD", 0.03, accessToken);
+
+		System.out.println(transaction.toPrettyString());
+
+		assertEquals(true, accounts != null);
+	}
 }
