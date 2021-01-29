@@ -45,8 +45,9 @@ public abstract class [%=class.getBaseName()%] implements Vault {
  } %]
  	/*** For a message from a vault of the same type ***/
 [% for (eOperation in class.eOperations){ %]
-	protected [%=eOperation.getClassResponseHandlerName()%] [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];
-[% } %]	
+[% 	if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
+	protected [%=eOperation.getClassResponseHandlerName()%] [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];	
+[% 	} %][% } %]	
 
 	public [%=class.getBaseName()%]() throws Exception {
 		this.isListening = false;
@@ -134,6 +135,7 @@ public abstract class [%=class.getBaseName()%] implements Vault {
  } %]
  	/*** For a message from a vault of the same type ***/
 [% for (eOperation in class.eOperations){ %]
+[% if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
 	public void set[%=eOperation.getClassResponseHandlerName()%]([%=eOperation.getClassResponseHandlerName()%] handler) {
 		this.[%=eOperation.getClassResponseHandlerName().firstToLowerCase()%] = handler;
 	}
@@ -141,8 +143,7 @@ public abstract class [%=class.getBaseName()%] implements Vault {
 	public [%=eOperation.getClassResponseHandlerName()%] get[%=eOperation.getClassResponseHandlerName()%]() {
 		return [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];
 	}
-	
-[% } %]
+[% } %][% } %]
 
 	public boolean register(VaultageServer vaultageServer) throws Exception {
 		boolean isSuccess = vaultage.connect(vaultageServer.getAddress(), publicKey);

@@ -51,6 +51,18 @@ public class SocketDirectMessageClient implements DirectMessageClient {
 		socketAddress = new InetSocketAddress(serverName, port);
 		clientSocket.setKeepAlive(true);
 	}
+	
+	/***
+	 * The constructor of the direct message client with the direct message server's
+	 * op/hostname and port parameters.
+	 * 
+	 * @param serverAddress
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 */
+	public SocketDirectMessageClient(InetSocketAddress serverAddress) throws UnknownHostException, IOException {
+		this(serverAddress.getAddress().getHostAddress(), serverAddress.getPort());
+	}
 
 	/***
 	 * To connect to a direct message server using its ip/hostname and port.

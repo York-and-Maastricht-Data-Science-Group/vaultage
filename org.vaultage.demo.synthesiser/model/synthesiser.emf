@@ -5,4 +5,5 @@ package synthesiser;
 @vault
 class Worker {
 	op int increment(int number);
+	op int getTextSize(String text);
 }

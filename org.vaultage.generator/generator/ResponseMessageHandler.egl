@@ -55,6 +55,7 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
  } %]
 			/*** Responding to a message from a vault of the same type ***/
 [% for (eOperation in class.eOperations){ %]
+[% 		if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
 			case "[%=eOperation.name%]": {
 				Remote[%=class.name%] sender = new Remote[%=class.name%]([%=class.name.firstToLowerCase()%], senderPublicKey);
 				Type type = new TypeToken<[%=eOperation.getTypeImplementationWithSubtype()%]>(){}.getType();
@@ -62,6 +63,7 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 				[%=class.name.firstToLowerCase()%].get[%=eOperation.name.firstToUpperCase()%]ResponseHandler().run([%=class.name.firstToLowerCase()%], sender, message.getToken(), result);
 			}
 			break;
+[%		} %]
 [% } %]		default:
 				throw new Exception("Operation " + operation + " is not supported!");
 		}

@@ -27,6 +27,13 @@ hs_err_pid*
 *.genmodel
 *.key
 
+# R specific files
+*.RData
+*.Rhistory
+
+*.pdf
+
 /target/
 /bin/
 images/polling.graphml
+/analysis/

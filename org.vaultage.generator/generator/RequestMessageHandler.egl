@@ -33,7 +33,11 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 [% for (eParameter in eOperation.eParameters){ %]
 				[%=eParameter.getTypeName()%] [%=eParameter.name%] = Vaultage.deserialise(message.getValue("[%=eParameter.name%]"), [%=eParameter.getTypeImplementation()%].class);
 [% } %]
-				[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken[%= eOperation.getParamsWithoutTypes() %]);
+			[% if (eOperation.eParameters.size() > 0) { %]
+				[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, [%= eOperation.getParamsWithoutTypes() %]);
+			[% } else { %]
+				[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken);
+			[% } %]
 				}
 				break;
 [% } %]			default:

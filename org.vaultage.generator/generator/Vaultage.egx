@@ -100,7 +100,7 @@ rule RemoteVaultClass transform class : EClass {
  * To generate response method handler interface
 ***/
 rule ResponseOperationHandlerInterface transform eOperation : EOperation {
-	guard : eOperation.eContainer.hasVaultAnnotation()
+	guard : eOperation.eContainer.hasVaultAnnotation() and eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void"
 	parameters : Map {
 		"ePackage" = ePackage,
 		"packageName" = packageName,

@@ -30,6 +30,7 @@ import io.netty.util.ReferenceCountUtil;
  */
 public class NettyDirectMessageServer extends Thread implements DirectMessageServer {
 
+	private static final int BACKLOG_NUMBER = 128;
 	private EventLoopGroup bossGroup;
 	private EventLoopGroup workerGroup;
 	private ServerBootstrap serverBootstrap;
@@ -122,7 +123,7 @@ public class NettyDirectMessageServer extends Thread implements DirectMessageSer
 							ch.pipeline().addLast(new StringEncoder());
 							ch.pipeline().addLast(new NettyServerHandler());
 						}
-					}).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
+					}).option(ChannelOption.SO_BACKLOG, BACKLOG_NUMBER).childOption(ChannelOption.SO_KEEPALIVE, true);
 
 			channelFuture = serverBootstrap.bind(localAddress).sync();
 
@@ -174,16 +175,18 @@ public class NettyDirectMessageServer extends Thread implements DirectMessageSer
 //				}
 //				System.out.println(mergedMessage);
 
-				String senderPublicKey = mergedMessage.substring(0, VaultageEncryption.PUBLIC_KEY_LENGTH);
-				String encryptedMessage = mergedMessage.substring(VaultageEncryption.PUBLIC_KEY_LENGTH,
+				String encryptionFlag = mergedMessage.substring(0, 1);
+				String senderPublicKey = mergedMessage.substring(1, 1 + VaultageEncryption.PUBLIC_KEY_LENGTH);
+				String encryptedMessage = mergedMessage.substring(1 + VaultageEncryption.PUBLIC_KEY_LENGTH,
 						mergedMessage.length());
 
 //				System.out.println(senderPublicKey);
 //				System.out.println(encryptedMessage);
 
 				if (vaultage != null) {
-					String content = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
-							NettyDirectMessageServer.this.privateKey);
+					String content = (encryptionFlag.equals("1")) ? VaultageEncryption.doubleDecrypt(
+							encryptedMessage, senderPublicKey, NettyDirectMessageServer.this.privateKey) : encryptedMessage;
+
 
 					// System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
 

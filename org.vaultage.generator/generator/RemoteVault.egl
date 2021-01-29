@@ -23,11 +23,20 @@ public class [%=class.remoteName()%] {
 		this.localVault = localVault;
 		this.remotePublicKey = remotePublicKey;
 	}
-
 [% for (eOperation in class.eOperations) { %]
 
 	public String [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
-		
+	[% if ( eOperation.eParameters.size() > 0) { %]
+		return this.[%= eOperation.name %]([%=eOperation.getParamsWithoutTypes()%], true);
+	[% } else { %]
+		return this.[%= eOperation.name %](true);
+	[% } %]
+	}
+[% if ( eOperation.eParameters.size() > 0) { %]
+	public String [%= eOperation.name %]([%=eOperation.getParams()%], boolean isEncrypted) throws Exception {
+[% } else { %]
+	public String [%= eOperation.name %](boolean isEncrypted) throws Exception {
+[% } %]
 		VaultageMessage request = new VaultageMessage();
 		request.initToken();
 		request.setSenderId(localVault.getId());
@@ -41,14 +50,17 @@ public class [%=class.remoteName()%] {
 	[% } %]
 
 		localVault.getVaultage().sendMessage(request.getTo(), localVault.getPublicKey(),
-				localVault.getPrivateKey(), request);
+				localVault.getPrivateKey(), request, isEncrypted);
 
 		return request.getToken();
 	}
-	
-	[% if (eOperation.getReturnType() <> null) { %]
+	[% if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
 	
 	public void respondTo[%=eOperation.name.firstToUpperCase()%]([%=eOperation.getReturnType() %] result, String token) throws Exception {
+		this.respondTo[%=eOperation.name.firstToUpperCase()%](result, token, true);
+	}
+	
+	public void respondTo[%=eOperation.name.firstToUpperCase()%]([%=eOperation.getReturnType() %] result, String token, boolean isEncrypted) throws Exception {
 		
 		VaultageMessage response = new VaultageMessage();
 		response.setToken(token); // TODO: this token is not known by the vault
@@ -60,7 +72,7 @@ public class [%=class.remoteName()%] {
 		response.putValue("result", Vaultage.serialise(result));
 
 		localVault.getVaultage().sendMessage(response.getTo(), localVault.getPublicKey(),
-				localVault.getPrivateKey(), response);
+				localVault.getPrivateKey(), response, isEncrypted);
 	}
 	[% } %]
 [% } %]	

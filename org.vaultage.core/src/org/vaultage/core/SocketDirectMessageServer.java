@@ -27,6 +27,8 @@ import org.vaultage.util.VaultageEncryption;
  */
 public class SocketDirectMessageServer extends Thread implements DirectMessageServer {
 
+	private static final int BACKLOG_NUMBER = 128;
+	
 	private ServerSocket serverSocket;
 	private boolean isListening = false;
 	private static long counter = 0; // for naming the threads
@@ -61,8 +63,22 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 	 * @throws IOException
 	 */
 	public SocketDirectMessageServer(String address, int port, Vaultage vaultage) throws IOException {
+		this.setName(this.getClass().getSimpleName() + "-" + counter);
 		this.vaultage = vaultage;
-		serverSocket = new ServerSocket(port, 128, (new InetSocketAddress(address, port)).getAddress());
+		serverSocket = new ServerSocket(port, BACKLOG_NUMBER, (new InetSocketAddress(address, port)).getAddress());
+	}
+	
+	/***
+	 * Constructor of this implementation of direct message server.
+	 * 
+	 * @param address
+	 * @param vaultage
+	 * @throws IOException
+	 */
+	public SocketDirectMessageServer(InetSocketAddress address, Vaultage vaultage) throws IOException {
+		this.setName(this.getClass().getSimpleName() + "-" + counter);
+		this.vaultage = vaultage;
+		serverSocket = new ServerSocket(address.getPort(), BACKLOG_NUMBER, address.getAddress());
 	}
 
 	/***
@@ -90,11 +106,10 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 			try {
 				Socket socket = serverSocket.accept();
 				SocketServerHandler t = new SocketServerHandler(socket);
-				t.setName(this.getClass().getSimpleName() + "-" + counter);
 				t.start();
 				counter++;
 			} catch (SocketException se) {
-				System.out.println(se.getMessage());
+//				System.out.println(se.getMessage());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -122,8 +137,10 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 	public class SocketServerHandler extends Thread {
 
 		Socket socket;
+		int counter = 0;
 
 		public SocketServerHandler(Socket socket) {
+			this.setName(this.getClass().getSimpleName() + "-" + counter);
 			this.socket = socket;
 		}
 
@@ -133,46 +150,51 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 		@Override
 		public void run() {
 			try {
-				String incomingMessage = null;
+				String mergedMessage = "";
 				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 				while (true) {
-					incomingMessage = in.readLine();
-					if (incomingMessage == null) {
+					String temp = in.readLine();
+					if (temp == null) break;
+					mergedMessage = mergedMessage + temp;
+				}
+				
+				if (mergedMessage.equals("")) return;
+				
+//				System.out.println(socket.getRemoteSocketAddress() + ": " + incomingMessage);
+
+				String encryptionFlag = mergedMessage.substring(0, 1);
+				String senderPublicKey = mergedMessage.substring(1, 1 + VaultageEncryption.PUBLIC_KEY_LENGTH);
+				String encryptedMessage = mergedMessage.substring(1 + VaultageEncryption.PUBLIC_KEY_LENGTH,
+						mergedMessage.length());
+
+//				System.out.println(senderPublicKey);
+//				System.out.println(encryptedMessage);
+
+				if (vaultage != null) {
+					String content = (encryptionFlag.equals("1"))
+							? VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
+									SocketDirectMessageServer.this.privateKey)
+							: encryptedMessage;
+
+					// System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
+
+					VaultageMessage vaultageMessage = Vaultage.deserialise(content, VaultageMessage.class);
+					MessageType msgType = vaultageMessage.getMessageType();
+
+					vaultage.getPublicKeyToRemoteAddress().put(senderPublicKey, new InetSocketAddress(
+							vaultageMessage.getSenderAddress(), vaultageMessage.getSenderPort()));
+
+					switch (msgType) {
+					case REQUEST:
+						// calls the user vault method associated with the operation
+						vaultage.getRequestMessageHandler().process(vaultageMessage, senderPublicKey,
+								vaultage.getVault());
 						break;
-					}
-//					System.out.println(socket.getRemoteSocketAddress() + ": " + incomingMessage);
-
-					String senderPublicKey = incomingMessage.substring(0, VaultageEncryption.PUBLIC_KEY_LENGTH);
-					String encryptedMessage = incomingMessage.substring(VaultageEncryption.PUBLIC_KEY_LENGTH,
-							incomingMessage.length());
-
-//					System.out.println(senderPublicKey);
-//					System.out.println(encryptedMessage);
-
-					if (vaultage != null) {
-						String content = VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
-								SocketDirectMessageServer.this.privateKey);
-
-						// System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
-
-						VaultageMessage vaultageMessage = Vaultage.deserialise(content, VaultageMessage.class);
-						MessageType msgType = vaultageMessage.getMessageType();
-
-						vaultage.getPublicKeyToRemoteAddress().put(senderPublicKey, new InetSocketAddress(
-								vaultageMessage.getSenderAddress(), vaultageMessage.getSenderPort()));
-
-						switch (msgType) {
-						case REQUEST:
-							// calls the user vault method associated with the operation
-							vaultage.getRequestMessageHandler().process(vaultageMessage, senderPublicKey,
-									vaultage.getVault());
-							break;
-						case RESPONSE:
-							// calls the registered handler of the operation
-							vaultage.getResponseMessageHandler().process(vaultageMessage, senderPublicKey,
-									vaultage.getVault());
-						}
+					case RESPONSE:
+						// calls the registered handler of the operation
+						vaultage.getResponseMessageHandler().process(vaultageMessage, senderPublicKey,
+								vaultage.getVault());
 					}
 				}
 			} catch (IOException e) {

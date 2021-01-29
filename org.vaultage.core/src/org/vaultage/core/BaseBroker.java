@@ -17,4 +17,8 @@ public class BaseBroker {
 			broker.stop();
 		}
 	}
+	
+	public BrokerService getBroker() {
+		return broker;
+	}
 }

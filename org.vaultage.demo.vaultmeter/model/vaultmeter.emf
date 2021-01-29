@@ -1,0 +1,8 @@
+@GenModel(basePackage="org.vaultage.demo.vaultmeter")
+@namespace(uri="vaultmeter", prefix="vaultmeter")
+package vaultmeter;
+
+@vault
+class BrokerMeter {
+	op Boolean echo(String text);
+}
