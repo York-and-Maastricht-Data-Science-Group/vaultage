@@ -1,10 +1,9 @@
-package [%=packageName%];
-[% 	"B".println(); %]
+package org.vaultage.demo.monetisation;
 import java.util.Scanner;
 
 import org.vaultage.core.BaseBroker;
 
-public class [%=brokerName%] extends BaseBroker {
+public class MonetisationBroker extends BaseBroker {
 
 	public static final String BROKER_PORT = "61617";
 	public static final String BROKER_ADDRESS =
@@ -12,11 +11,11 @@ public class [%=brokerName%] extends BaseBroker {
 
 	public static void main(String[] args) throws Exception {
 		
-		[%=brokerName%] broker = new [%=brokerName%]();
+		MonetisationBroker broker = new MonetisationBroker();
 		broker.start(BROKER_ADDRESS);
 		
 		System.out.println(String.format(
-				"[%=brokerName%] service started in port %s. Press Enter to stop",
+				"MonetisationBroker service started in port %s. Press Enter to stop",
 				BROKER_PORT));
 
 		Scanner s = new Scanner(System.in);
@@ -24,7 +23,7 @@ public class [%=brokerName%] extends BaseBroker {
 		s.close();
 
 		broker.stop();
-		System.out.println("[%=brokerName%] stopped");
+		System.out.println("MonetisationBroker stopped");
 	}
 
 }

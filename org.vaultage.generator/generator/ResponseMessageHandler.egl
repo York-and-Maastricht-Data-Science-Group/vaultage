@@ -27,16 +27,23 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 
 		switch (operation) {
 			/*** Responding to a message from a vault of a different type ***/
-[% for (class2 in classes) { 
+[% 
+/*
+	Check other classes (class2) that the current class expect to receive a response.
+	If in the other classes the current class is registered as valid requester then
+	add a handler mechanism to the response send by the other classes.    
+*/
+for (class2 in classes) { 
  		if (class2.name <> class.name) { 
  			for (eOperation in class2.eOperations){ 
 				if (eOperation.eAnnotations.first().source == "vaultage") { 
 					var eAnnotation = eOperation.eAnnotations.first(); 
 					for (detail in eAnnotation.details) { 
 						if (detail.key = "requester") { 
-							var values = detail.value.split(",");  
+							var values = detail.value.split(",");
+													  
 							for (v in values) {  
-								var value = v.trim();  
+								var value = v.trim();
 								if (class.name = value) { %]
  			case "[%=eOperation.name%]": {
  				Remote[%=class2.name%] sender = new Remote[%=class2.name%]([%=class.name.firstToLowerCase()%], senderPublicKey);

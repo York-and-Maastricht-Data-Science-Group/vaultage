@@ -139,8 +139,7 @@ rule RequestMessageHandler {
 /***
  * To generate a vault response message handler
 ***/
-rule ResponseMessageHandler transform class : EClass {
-	guard : class.hasVaultAnnotation() 
+rule ResponseMessageHandler { 
 	parameters : Map {
   		"packageName" = packageName,    
     	"ePackage" = ePackage,

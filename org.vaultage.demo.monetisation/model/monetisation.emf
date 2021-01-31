@@ -1,0 +1,60 @@
+@GenModel(basePackage="org.vaultage.demo.monetisation")
+@namespace(uri="monetisation", prefix="monetisation")
+package monetisation;
+
+
+
+@vault
+class ContentCreator {
+	
+	@vaultage(requester="Consumer")
+	op Content[*] getContents();
+	
+	@vaultage(requester="Consumer", monetised="true")
+	op Content getMonetisedContent(String contentId);
+	
+	// contentId is optional, only to track 
+	// if the donation refers to a specific content
+	@vaultage(requester="Consumer", monetised="true")
+	op String receiveDonation(String contentId);
+}
+
+@vault
+class Consumer {
+	
+}
+
+/*** if the content is monetised, body is made null or filled with
+empty string, a message, etc. until the requester completes payment ***/ 
+class Content {
+	attr boolean isMonetised = false;
+	attr String type; // json, xml, plain text, etc. 
+	attr String body; // the content is presented in string
+}
+
+
+
+@vault
+class CityCouncil {
+	
+	@vaultage(requester="Respondent")
+	op Poll getPoll(String pollId);
+	
+	@vaultage(requester="Respondent", monetised="true")
+	op String submitPoll(Poll poll);
+}
+
+@vault
+class Respondent {
+	
+}
+
+class Poll {
+	attr String title;
+	attr String description;
+	attr String[*] questions;
+	attr String[*] answers;
+}
+
+
+
