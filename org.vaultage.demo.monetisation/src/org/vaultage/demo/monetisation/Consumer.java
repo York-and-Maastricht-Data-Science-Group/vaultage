@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.vaultage.wallet.PaymentInformation;
+
 // import org.vaultage.demo.monetisation.Content;
 // import org.vaultage.demo.monetisation.Poll;
 // import org.vaultage.demo.monetisation.ConsumerBase;

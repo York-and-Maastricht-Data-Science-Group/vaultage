@@ -7,6 +7,8 @@ import org.vaultage.core.Vault;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 import org.vaultage.core.VaultageMessage.MessageType;
+import org.vaultage.wallet.PaymentInformation;
+import org.vaultage.wallet.Wallet;
 
 public class [%=class.remoteName()%] {
 
@@ -48,7 +50,21 @@ public class [%=class.remoteName()%] {
 	[% for (eParamater in eOperation.eParameters) { %]
 		request.putValue("[%=eParamater.name%]", Vaultage.serialise([%=eParamater.name%]));
 	[% } %]
-
+	
+	[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
+	if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { %]
+		Wallet wallet = this.localVault.getVaultage().getDefaultWallet();
+		PaymentInformation paymentInformation = new PaymentInformation(); 
+		paymentInformation.setName(wallet.getName());
+		paymentInformation.setType(wallet.getType());
+		paymentInformation.setCurrency(wallet.getCurrency());
+		paymentInformation.setAccountNumber(wallet.getAccountNumber());
+		paymentInformation.setBank(wallet.getBank());
+		paymentInformation.setBankAddress(wallet.getBankAddress());
+		paymentInformation.setBillAddress(wallet.getBillAddress());
+		request.setPaymentInformation(paymentInformation);
+	[% } %]
+	
 		localVault.getVaultage().sendMessage(request.getTo(), localVault.getPublicKey(),
 				localVault.getPrivateKey(), request, isEncrypted);
 

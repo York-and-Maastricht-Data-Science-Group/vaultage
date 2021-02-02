@@ -13,6 +13,8 @@ import org.vaultage.core.Vault;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageServer;
 
+import org.vaultage.wallet.PaymentInformation;
+
 public abstract class [%=class.getBaseName()%] implements Vault {
 
 	protected String id = UUID.randomUUID().toString();
@@ -168,8 +170,7 @@ public abstract class [%=class.getBaseName()%] implements Vault {
 	public void startServer(String address, int port) {
 		this.vaultage.startServer(address, port);
 		this.vaultage.setPrivateKey(this.getPrivateKey());
-	}
-	
+	}	
 	/***
 	 * A method to stop the direct messaging server of this vault.
 	 * @throws IOException
@@ -181,6 +182,11 @@ public abstract class [%=class.getBaseName()%] implements Vault {
 	
 	// operations
 [% for (eOperation in class.eOperations){ %]
+	[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
+	if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { %]
+	public abstract void [%= eOperation.name %]([%=eOperation.getRequesterParams()%], PaymentInformation paymentInformation) throws Exception;
+	[% } else { %]
 	public abstract void [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception;
+	[% } %]
 [% } %]
 }

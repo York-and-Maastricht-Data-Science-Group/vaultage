@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.vaultage.wallet.PaymentInformation;
+
 // import org.vaultage.demo.monetisation.Content;
 // import org.vaultage.demo.monetisation.Poll;
 // import org.vaultage.demo.monetisation.ContentCreatorBase;
@@ -27,17 +29,17 @@ public class ContentCreator extends ContentCreatorBase {
 
 	// operations
 	
-	public void getContents(String requesterPublicKey, String requestToken) throws Exception {
+		public void getContents(String requesterPublicKey, String requestToken) throws Exception {
 		throw new Exception();
 	}
 	
 	
-	public void getMonetisedContent(String requesterPublicKey, String requestToken, String contentId) throws Exception {
+		public void getMonetisedContent(String requesterPublicKey, String requestToken, String contentId, PaymentInformation paymentInformation) throws Exception {
 		throw new Exception();
 	}
 	
 	
-	public void receiveDonation(String requesterPublicKey, String requestToken, String contentId) throws Exception {
+		public void receiveDonation(String requesterPublicKey, String requestToken, String contentId, PaymentInformation paymentInformation) throws Exception {
 		throw new Exception();
 	}
 	

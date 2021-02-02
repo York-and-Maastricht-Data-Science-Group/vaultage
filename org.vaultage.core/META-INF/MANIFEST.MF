@@ -9,4 +9,5 @@ Require-Bundle: org.eclipse.epsilon.egl.engine,
  org.eclipse.epsilon.emc.emf,
  org.eclipse.epsilon.eol.engine
 Export-Package: org.vaultage.core,
- org.vaultage.util
+ org.vaultage.util,
+ org.vaultage.wallet

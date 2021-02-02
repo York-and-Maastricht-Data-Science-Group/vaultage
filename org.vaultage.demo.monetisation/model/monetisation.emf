@@ -38,10 +38,10 @@ class Content {
 class CityCouncil {
 	
 	@vaultage(requester="Respondent")
-	op Poll getPoll(String pollId);
+	op Questionnaire getQuestionnaire(String pollId);
 	
 	@vaultage(requester="Respondent", monetised="true")
-	op String submitPoll(Poll poll);
+	op String submitQuestionnaire(Questionnaire questionnaire);
 }
 
 @vault
@@ -49,11 +49,13 @@ class Respondent {
 	
 }
 
-class Poll {
+class Questionnaire {
 	attr String title;
 	attr String description;
 	attr String[*] questions;
 	attr String[*] answers;
+	attr String instanceId;
+	attr double price;
 }
 
 

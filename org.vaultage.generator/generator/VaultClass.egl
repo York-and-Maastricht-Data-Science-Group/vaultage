@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.vaultage.wallet.PaymentInformation;
+
 [% for (eClass in EClass.allInstances){ %][% if (not eClass.hasVaultAnnotation()) { %]
 // import [%=packageName%].[%=eClass.name%];
 [% 	} %][% }%]
@@ -43,7 +45,12 @@ public class [%=class.name%] [%=parentClass%] {
 	// operations
 [% for (eOperation in class.eOperations){ %]
 	[%= eOperation.getOverride() %]
-	public void [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception {
+	[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
+	if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { %]
+		public void [%= eOperation.name %]([%=eOperation.getRequesterParams()%], PaymentInformation paymentInformation) throws Exception {
+	[% } else { %]
+		public void [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception {
+	[% } %]
 		throw new Exception();
 	}
 	

@@ -2,8 +2,8 @@ package org.vaultage.demo.monetisation;
 
 public class Respondent extends RespondentBase {
 
-	private Poll retrievedPoll;
-	
+	private Questionnaire retrievedQuestionnaire;
+
 	public Respondent() throws Exception {
 		super();
 	}
@@ -12,22 +12,22 @@ public class Respondent extends RespondentBase {
 		super(address, port);
 	}
 
-	public Poll getRetrievedPoll() {
-		return retrievedPoll;
+	public Questionnaire getRetrievedQuestionnaire() {
+		return retrievedQuestionnaire;
 	}
 
-	public void setRetrievedPoll(Poll retrievedPoll) {
-		this.retrievedPoll = retrievedPoll;
-	}
-	
-	public void getPollFromCouncil(String pollId, CityCouncil council) throws Exception {
-		RemoteCityCouncil requester = new RemoteCityCouncil(this, council.getPublicKey());
-		requester.getPoll(pollId);
+	public void setRetrievedQuestionnaire(Questionnaire retrievedQuestionnaire) {
+		this.retrievedQuestionnaire = retrievedQuestionnaire;
 	}
 
-	public void submitPoll(Poll poll, CityCouncil council) throws Exception {
+	public void getQuestionnaireFromCouncil(String pollId, CityCouncil council) throws Exception {
 		RemoteCityCouncil requester = new RemoteCityCouncil(this, council.getPublicKey());
-		requester.submitPoll(poll);	
+		requester.getQuestionnaire(pollId);
+	}
+
+	public void submitQuestionnaire(Questionnaire poll, CityCouncil council) throws Exception {
+		RemoteCityCouncil requester = new RemoteCityCouncil(this, council.getPublicKey());
+		requester.submitQuestionnaire(poll);
 	}
 
 }

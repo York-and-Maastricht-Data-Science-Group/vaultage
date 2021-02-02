@@ -1,0 +1,27 @@
+@startuml service-provider-to-consumer
+
+participant Respondent as r <<Vault>> order 1
+participant CityCouncil as cc <<Vault>> order 2
+participant Uphold as u <<Wallet>> order 3
+
+r -> cc : getQuestionnaire(String questionnaireId)
+r <-- cc : [questionnaire]
+
+group Monetisation
+  r -> cc : [answeredQuestionnaire] + [paymentInformation]
+  cc -> cc : check the validity
+  alt if answeredQuestionnaire and paymentInformation are OK
+    cc -> u : **send payment to respondent**
+    cc <-- u : [transaction record]
+  else 
+    r <-- cc : invalid questionnaire or paymentInformation
+  end
+
+r <-- cc : [transactionId]
+r -> u : getTransaction(transactionId)
+r <-- u: [transaction record]
+r -> r : check if the tranction correct
+end
+
+
+@enduml

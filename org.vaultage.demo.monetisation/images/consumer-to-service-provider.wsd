@@ -1,0 +1,22 @@
+@startuml consumer-to-service-provider
+
+participant Consumer as c <<Vault>> order 1
+participant "Content Creator" as cc <<Vault>> order 2
+participant Uphold as u <<Wallet>> order 3
+
+
+c -> cc : subscribe 
+c <-- cc : [paymentInformation]
+c -> u : **pay through wallet**
+c <-- u : [transaction record]
+c -> cc : [transactionId]
+cc -> u : getTransaction(transactionId)
+cc <-- u : [transaction record]
+alt valid?
+  c <-- cc : payment successful
+else 
+  c <-- cc : invalid payment
+end
+
+
+@enduml

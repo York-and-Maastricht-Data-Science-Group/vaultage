@@ -34,7 +34,14 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 				[%=eParameter.getTypeName()%] [%=eParameter.name%] = Vaultage.deserialise(message.getValue("[%=eParameter.name%]"), [%=eParameter.getTypeImplementation()%].class);
 [% } %]
 			[% if (eOperation.eParameters.size() > 0) { %]
-				[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, [%= eOperation.getParamsWithoutTypes() %]);
+				[%	
+				var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
+				if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { 
+				%]
+					[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, [%= eOperation.getParamsWithoutTypes() %], message.getPaymentInformation());
+				[% } else { %]
+					[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, [%= eOperation.getParamsWithoutTypes() %]);
+				[% } %]
 			[% } else { %]
 				[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken);
 			[% } %]

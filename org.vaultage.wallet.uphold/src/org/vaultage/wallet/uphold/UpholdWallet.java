@@ -38,6 +38,19 @@ public class UpholdWallet implements Wallet {
 	public static final String HOST_PRODUCTION = "uphold.com";
 	public static final String HOST_SANDBOX = "sandbox.uphold.com";
 
+	private String clientId;
+	private String clientSecret;
+	private String username;
+	private String password;
+
+	private String type = "Uphold";
+	private String name;
+	private String billAddress;
+	private String bank;
+	private String bankAddress;
+	private String currency = "USD";
+	private String accountNumber;
+
 	public UpholdWallet() {
 		walletEnvironment = WalletEnvironment.SANDBOX;
 		host = UpholdWallet.API_HOST_SANDBOX;
@@ -50,6 +63,38 @@ public class UpholdWallet implements Wallet {
 		} else {
 			host = UpholdWallet.API_HOST_PRODUCTION;
 		}
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+	public String getClientSecret() {
+		return clientSecret;
+	}
+
+	public void setClientSecret(String clientSecret) {
+		this.clientSecret = clientSecret;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	public String authorise(String clientId, String scope, String state)
@@ -102,7 +147,7 @@ public class UpholdWallet implements Wallet {
 	 * @throws WalletException
 	 */
 	public String getAccessToken(String clientId, String clientSecret)
-			throws ClientProtocolException, IOException, WalletException {
+			throws IOException, WalletException {
 		String auth = UpholdUtil.credential(clientId, clientSecret);
 
 		String uri = "https://" + host + "/oauth2/token";
@@ -183,7 +228,7 @@ public class UpholdWallet implements Wallet {
 			throw new WalletException(response.getStatusLine().getStatusCode() + " "
 					+ response.getStatusLine().getReasonPhrase() + " " + json);
 		}
-		
+
 		httpClient.close();
 		response.close();
 
@@ -235,7 +280,8 @@ public class UpholdWallet implements Wallet {
 		return accessToken;
 	}
 
-	public JsonNode getPersonalAccessTokens(String personalAccessToken) throws ParseException, IOException, WalletException {
+	public JsonNode getPersonalAccessTokens(String personalAccessToken)
+			throws ParseException, IOException, WalletException {
 
 		String uri = "https://" + host + "/v0/me/tokens";
 
@@ -262,7 +308,7 @@ public class UpholdWallet implements Wallet {
 		return jsonNode;
 	}
 
-	public JsonNode getCards(String accessToken) throws ClientProtocolException, IOException, WalletException {
+	public JsonNode getAccounts(String accessToken) throws ClientProtocolException, IOException, WalletException {
 
 		String uri = "https://" + host + "/v0/me/cards";
 
@@ -290,7 +336,7 @@ public class UpholdWallet implements Wallet {
 	}
 
 	public JsonNode transfer(String originCardId, String destinationCardId, String currency, double amount,
-			String accessToken) throws WalletException, IOException {
+			String accessToken, String message, String reference) throws WalletException, IOException {
 
 		String uri = "https://" + host + "/v0/me/cards/" + originCardId + "/transactions?commit=true";
 		System.out.println(uri);
@@ -303,7 +349,10 @@ public class UpholdWallet implements Wallet {
 //		request.setEntity(new UrlEncodedFormEntity(params));
 
 		String inputJson = "{ \"denomination\": " + "{ \"amount\": \"" + amount + "\"" + ", \"currency\": \"" + currency
-				+ "\"" + " }, \"destination\": \"" + destinationCardId + "\" }";
+				+ "\"" + " }, "
+						+ " \"message\": \"" + message + "\", "
+						+ " \"reference\": \"" + reference + "\", "
+						+ "\"destination\": \"" + destinationCardId + "\" }";
 		System.out.println(inputJson);
 		StringEntity stringEntity = new StringEntity(inputJson, ContentType.APPLICATION_JSON);
 		request.setEntity(stringEntity);
@@ -330,5 +379,57 @@ public class UpholdWallet implements Wallet {
 
 		JsonNode jsonNode = (new ObjectMapper()).readTree(json);
 		return jsonNode;
+	}
+
+	public String getBillAddress() {
+		return billAddress;
+	}
+
+	public void setBillAddress(String billAddress) {
+		this.billAddress = billAddress;
+	}
+
+	public String getBankAddress() {
+		return bankAddress;
+	}
+
+	public void setBankAddress(String bankAddress) {
+		this.bankAddress = bankAddress;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public String getBank() {
+		return bank;
+	}
+
+	public void setBank(String bank) {
+		this.bank = bank;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getAccountNumber() {
+		return accountNumber;
+	}
+
+	public void setAccountNumber(String accountNumber) {
+		this.accountNumber = accountNumber;
 	}
 }

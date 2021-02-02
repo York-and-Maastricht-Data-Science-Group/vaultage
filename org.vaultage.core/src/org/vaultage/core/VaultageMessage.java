@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.vaultage.wallet.PaymentInformation;
+
 public class VaultageMessage {
 
 	public enum MessageType {
@@ -19,6 +21,7 @@ public class VaultageMessage {
 	private String operation;
 	private Map<String, String> values = new HashMap<>();
 	private String token;
+	private PaymentInformation paymentInformation;
 
 	public VaultageMessage() {
 	}
@@ -97,5 +100,13 @@ public class VaultageMessage {
 
 	public void setSenderPort(int senderPort) {
 		this.senderPort = senderPort;
+	}
+
+	public PaymentInformation getPaymentInformation() {
+		return paymentInformation;
+	}
+
+	public void setPaymentInformation(PaymentInformation paymentInformation) {
+		this.paymentInformation = paymentInformation;
 	}
 }

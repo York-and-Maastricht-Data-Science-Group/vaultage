@@ -6,9 +6,11 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +31,7 @@ import org.apache.activemq.broker.BrokerFactory;
 import org.apache.activemq.broker.BrokerService;
 import org.vaultage.core.VaultageMessage.MessageType;
 import org.vaultage.util.VaultageEncryption;
-
+import org.vaultage.wallet.Wallet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -57,8 +59,8 @@ public class Vaultage {
 	public static final String DEFAULT_SERVER_ADDRESS = "localhost";
 	public static final int DEFAULT_SERVER_PORT = 50000;
 
-//	public static Gson Gson = new GsonBuilder().setPrettyPrinting().create();
-	public static Gson Gson = new GsonBuilder().create();
+	public static Gson Gson = new GsonBuilder().setPrettyPrinting().create();
+//	public static Gson Gson = new GsonBuilder().create();
 
 	private Object vault;
 	private String brokerAddress;
@@ -74,7 +76,11 @@ public class Vaultage {
 
 	private RequestMessageHandler requestMessageHandler;
 	private ResponseMessageHandler responseMessageHandler;
-
+	
+	private Set<Wallet> wallets = new HashSet<>();
+	private Wallet defaultWallet; 
+	
+	
 	/***
 	 * Test or demo this Vaultage class. No encryption is performed. These routines
 	 * are only to give some values to the parameters of the operations used in this
@@ -617,4 +623,35 @@ public class Vaultage {
 	public DirectMessageServer getDirectMessageServer() {
 		return directMessageServer;
 	}
+
+	
+	/***
+	 * Get all available wallets.
+	 * 
+	 * @return
+	 */
+	public Set<Wallet> getWallets() {
+		return wallets;
+	}
+
+	/***
+	 * Get the default wallet.
+	 * 
+	 * @return
+	 */
+	public Wallet getDefaultWallet() {
+		return defaultWallet;
+	}
+
+	/***
+	 * Set the default wallet and add the wallets collection if it doesn't exist.
+	 * 
+	 * @param defaultWallet
+	 */
+	public void setDefaultWallet(Wallet defaultWallet) {
+		this.defaultWallet = defaultWallet;
+		wallets.add(defaultWallet);
+	}
+	
+	
 }
