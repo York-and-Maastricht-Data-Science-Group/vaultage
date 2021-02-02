@@ -6,7 +6,7 @@ Respondents are paid after answering City Council's questionnaires.
 
 
 
-![monetisation](images\service-provider-to-consumer\service-provider-to-consumer.svg)
+![monetisation](images/service-provider-to-consumer/service-provider-to-consumer.svg)
 
 
 
@@ -14,7 +14,7 @@ Respondents are paid after answering City Council's questionnaires.
 
 Fans pay (or donate to) content creators for their contents.
 
-![monetisation](images\consumer-to-service-provider\consumer-to-service-provider.svg)
+![monetisation](images/consumer-to-service-provider/consumer-to-service-provider.svg)
 
 
 
