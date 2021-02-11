@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -59,36 +60,116 @@ public class CityCouncilTest {
 		BROKER = new MonetisationBroker();
 		BROKER.start(MonetisationBroker.BROKER_ADDRESS);
 
-		// initialise host vaulletServerAddress and port for vaullet
-		vaulletServerAddress = "http://localhost:" + port;
-		VaulletServer.main(new String[] { port });
-
-		// initialise users
-		VaulletServer.userDao.getUsers().addAll( //
-				Arrays.asList(new User(cityCouncilUsername, cityCouncilPassword, cityCouncilPersonalAccessToken), //
-						new User(respondentUsername, respondentPassword, respondentPersonalAccessToken) //
-				));
-
-		// initialise accounts
-		VaulletServer.accountDao.getAccounts() //
-				.addAll(Arrays.asList( //
-						new Card(cityCouncilCardId, cityCouncilUsername, Currency.GBP), //
-						new Card(respondentCardId, respondentUsername, Currency.GBP) //
-				));
-
-		// deposit 10 for every wallet account
-		for (Account account : VaulletServer.accountDao.getAccounts()) {
-			if (account instanceof Card) {
-				((Card) account).deposit(10);
-			}
-		}
+//		// initialise host vaulletServerAddress and port for vaullet
+//		vaulletServerAddress = "http://localhost:" + port;
+//		VaulletServer.main(new String[] { port });
+//
+//		// initialise users
+//		VaulletServer.userDao.getUsers().addAll( //
+//				Arrays.asList(new User(cityCouncilUsername, cityCouncilPassword, cityCouncilPersonalAccessToken), //
+//						new User(respondentUsername, respondentPassword, respondentPersonalAccessToken) //
+//				));
+//
+//		// initialise accounts
+//		VaulletServer.accountDao.getAccounts() //
+//				.addAll(Arrays.asList( //
+//						new Card(cityCouncilCardId, cityCouncilUsername, Currency.GBP), //
+//						new Card(respondentCardId, respondentUsername, Currency.GBP) //
+//				));
+//
+//		// deposit 10 for every wallet account
+//		for (Account account : VaulletServer.accountDao.getAccounts()) {
+//			if (account instanceof Card) {
+//				((Card) account).deposit(10);
+//			}
+//		}
 	}
 
 	@AfterClass
 	public static void stopBroker() throws Exception {
 		BROKER.stop();
 
-		VaulletServer.shutdown();
+//		VaulletServer.shutdown();
+	}
+	
+	
+	@Test
+	public void testGetQuestionnaire() throws Exception {
+		VaultageServer server = new VaultageServer(MonetisationBroker.BROKER_ADDRESS);
+
+		// create city council
+		CityCouncil council = new CityCouncil();
+		council.setId("Council");
+		council.register(server);
+
+		Wallet councilWallet = new UpholdWallet();
+//		Wallet councilWallet = new VaulletWallet(vaulletServerAddress);
+		councilWallet.setClientId(cityCouncilClientId);
+		councilWallet.setClientSecret(cityCouncilClientSecret);
+		councilWallet.setUsername(cityCouncilUsername);
+		councilWallet.setPassword(cityCouncilPassword);
+		councilWallet.setAccountNumber(cityCouncilCardId);
+		councilWallet.setName("York City Council");
+		council.getVaultage().setDefaultWallet(councilWallet);
+
+		// create the poll
+		Questionnaire poll = new Questionnaire();
+		poll.setTitle("York Lockdown " + (new Date()).toString());
+		poll.setDescription("Bla...bla...bla...!");
+		poll.setQuestions(new ArrayList<>());
+		poll.getQuestions().add("Question 01?");
+		poll.getQuestions().add("Question 02?");
+		poll.setPrice(0.01);
+		poll.setAnswers(new ArrayList<>());
+
+		// get the poll's id to be used later
+		// when retrieving it from a respondent
+		String pollId = poll.getId();
+
+		// set the poll as one of the city council's polls
+		council.getQuestionnaires().add(poll);
+
+		// create the respondent
+		Respondent respondent = new Respondent();
+		respondent.setId("respondent-01");
+		respondent.register(server);
+
+		Wallet respondentWallet = new UpholdWallet();
+//		Wallet respondentWallet = new VaulletWallet(vaulletServerAddress);
+		respondentWallet.setUsername(respondentUsername);
+		respondentWallet.setPassword(respondentPassword);
+		respondentWallet.setAccountNumber(respondentCardId);
+		respondentWallet.setName("Alfa Yohannis");
+
+		respondent.getVaultage().setDefaultWallet(respondentWallet);
+
+		// set get poll response handler
+		respondent.setGetQuestionnaireResponseHandler(new GetQuestionnaireResponseHandler() {
+			@Override
+			public void run(CityCouncil me, RemoteCityCouncil other, String responseToken, Questionnaire result)
+					throws Exception {
+			}
+
+			@Override
+			public void run(Respondent me, RemoteCityCouncil other, String responseToken, Questionnaire result)
+					throws Exception {
+				me.setRetrievedQuestionnaire(result);
+				synchronized (this) {
+					this.notify();
+				}
+			}
+		});
+
+		// retrieve the poll from the city council using the pollId
+		synchronized (respondent.getGetQuestionnaireResponseHandler()) {
+			respondent.getQuestionnaireFromCouncil(pollId, council);
+			respondent.getGetQuestionnaireResponseHandler().wait();
+		}
+
+		Questionnaire retrievedQuestionnaire = respondent.getRetrievedQuestionnaire();
+
+
+		assertEquals(true, retrievedQuestionnaire != null);
 	}
 
 	@Test
@@ -112,7 +193,7 @@ public class CityCouncilTest {
 
 		// create the poll
 		Questionnaire poll = new Questionnaire();
-		poll.setTitle("York Lockdown 2");
+		poll.setTitle("York Lockdown " + (new Date()).toString());
 		poll.setDescription("Bla...bla...bla...!");
 		poll.setQuestions(new ArrayList<>());
 		poll.getQuestions().add("Question 01?");
