@@ -222,7 +222,7 @@ public class VCommerceTest {
 		/**
 		 * Customer request a list of items and their quantities.
 		 */
-		final List<Item> availableItems = new ArrayList<>();
+		final List<Item> availableItems = new ArrayList<Item>();
 		customer.setGetItemsResponseHandler(new GetItemsResponseHandler() {
 			@Override
 			public void run(Customer localCustomer, RemoteShop other, String responseToken, List<Item> result)
@@ -256,12 +256,15 @@ public class VCommerceTest {
 		Basket basket = new Basket();
 		basket.setItems(new ArrayList<>());
 		Item itemToBuy1 = new Item();
+		
+		Item a = availableItems.get(0);
+		
 		itemToBuy1.setItemId(availableItems.get(0).getItemId());
 		itemToBuy1.setName(availableItems.get(0).getName());
 		itemToBuy1.setQuantity(2);
 		basket.getItems().add(itemToBuy1);
 
-		Item itemToBuy2 = new Item();
+		Item itemToBuy2 = new Item(); 
 		itemToBuy2.setItemId(availableItems.get(1).getItemId());
 		itemToBuy2.setName(availableItems.get(1).getName());
 		itemToBuy2.setQuantity(1);

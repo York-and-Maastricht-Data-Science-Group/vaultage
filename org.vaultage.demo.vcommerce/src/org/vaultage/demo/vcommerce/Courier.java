@@ -71,6 +71,7 @@ public class Courier extends CourierBase {
 	}
 
 	public void trackDelivery(String requesterPublicKey, String requestToken, String trackingId) throws Exception {
+		
 		RemoteCourier remoteCourier = new RemoteCourier(this, requesterPublicKey);
 		DeliveryStatus ds = new DeliveryStatus();
 		if (trackShippingOrders.get(trackingId) != null) {

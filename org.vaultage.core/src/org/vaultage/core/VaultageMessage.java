@@ -18,12 +18,30 @@ public class VaultageMessage {
 	private String from;
 	private String to;
 	private MessageType messageType;
+	private String remoteVaultType;
+	private String returnType;
 	private String operation;
 	private Map<String, String> values = new HashMap<>();
 	private String token;
 	private PaymentInformation paymentInformation;
 
 	public VaultageMessage() {
+	}
+
+	public String getRemoteVaultType() {
+		return remoteVaultType;
+	}
+
+	public void setRemoteVaultType(String remoteVaultType) {
+		this.remoteVaultType = remoteVaultType;
+	}
+
+	public String getReturnType() {
+		return returnType;
+	}
+
+	public void setReturnType(String returnType) {
+		this.returnType = returnType;
 	}
 
 	public void initToken() {
@@ -109,4 +127,6 @@ public class VaultageMessage {
 	public void setPaymentInformation(PaymentInformation paymentInformation) {
 		this.paymentInformation = paymentInformation;
 	}
+	
+	
 }

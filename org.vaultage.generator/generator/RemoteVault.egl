@@ -1,6 +1,9 @@
 [% import 'Util.eol'; %]
 package [%=packageName%];
 
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import org.vaultage.core.Vault;
@@ -84,6 +87,12 @@ public class [%=class.remoteName()%] {
 		response.setTo(remotePublicKey);
 		response.setOperation("[%=eOperation.name%]");
 		response.setMessageType(MessageType.RESPONSE);
+		response.setRemoteVaultType(this.getClass().getName());
+		
+		Method m = new Object(){}.getClass().getEnclosingMethod();
+		Type x = m.getGenericParameterTypes()[0];
+		String returnType = x.getTypeName();
+		response.setReturnType(returnType);
 
 		response.putValue("result", Vaultage.serialise(result));
 
