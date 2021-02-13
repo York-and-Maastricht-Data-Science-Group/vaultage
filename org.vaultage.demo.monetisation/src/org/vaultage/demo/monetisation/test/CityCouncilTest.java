@@ -11,6 +11,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.vaultage.core.Vault;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.monetisation.CityCouncil;
 import org.vaultage.demo.monetisation.GetQuestionnaireResponseHandler;
@@ -143,27 +144,27 @@ public class CityCouncilTest {
 
 		respondent.getVaultage().setDefaultWallet(respondentWallet);
 
-		// set get poll response handler
-		respondent.setGetQuestionnaireResponseHandler(new GetQuestionnaireResponseHandler() {
+		// set get poll response handler	
+		respondent.addResponseHandler(new GetQuestionnaireResponseHandler() {
 			@Override
 			public void run(CityCouncil me, RemoteCityCouncil other, String responseToken, Questionnaire result)
 					throws Exception {
 			}
 
 			@Override
-			public void run(Respondent me, RemoteCityCouncil other, String responseToken, Questionnaire result)
+			public void run(Vault me, RemoteCityCouncil other, String responseToken, Questionnaire result)
 					throws Exception {
-				me.setRetrievedQuestionnaire(result);
+				respondent.getClass().cast(me).setRetrievedQuestionnaire(result);
 				synchronized (this) {
 					this.notify();
 				}
 			}
 		});
-
+		
 		// retrieve the poll from the city council using the pollId
-		synchronized (respondent.getGetQuestionnaireResponseHandler()) {
+		synchronized (respondent.getResponseHandler(GetQuestionnaireResponseHandler.class)) {
 			respondent.getQuestionnaireFromCouncil(pollId, council);
-			respondent.getGetQuestionnaireResponseHandler().wait();
+			respondent.getResponseHandler(GetQuestionnaireResponseHandler.class).wait();
 		}
 
 		Questionnaire retrievedQuestionnaire = respondent.getRetrievedQuestionnaire();
@@ -223,16 +224,16 @@ public class CityCouncilTest {
 		respondent.getVaultage().setDefaultWallet(respondentWallet);
 
 		// set get poll response handler
-		respondent.setGetQuestionnaireResponseHandler(new GetQuestionnaireResponseHandler() {
+		respondent.addResponseHandler(new GetQuestionnaireResponseHandler() {
 			@Override
 			public void run(CityCouncil me, RemoteCityCouncil other, String responseToken, Questionnaire result)
 					throws Exception {
 			}
 
 			@Override
-			public void run(Respondent me, RemoteCityCouncil other, String responseToken, Questionnaire result)
+			public void run(Vault me, RemoteCityCouncil other, String responseToken, Questionnaire result)
 					throws Exception {
-				me.setRetrievedQuestionnaire(result);
+				respondent.getClass().cast(me).setRetrievedQuestionnaire(result);
 				synchronized (this) {
 					this.notify();
 				}
@@ -240,9 +241,9 @@ public class CityCouncilTest {
 		});
 
 		// retrieve the poll from the city council using the pollId
-		synchronized (respondent.getGetQuestionnaireResponseHandler()) {
+		synchronized (respondent.getResponseHandler(GetQuestionnaireResponseHandler.class)) {
 			respondent.getQuestionnaireFromCouncil(pollId, council);
-			respondent.getGetQuestionnaireResponseHandler().wait();
+			respondent.getResponseHandler(GetQuestionnaireResponseHandler.class).wait();
 		}
 
 		Questionnaire retrievedQuestionnaire = respondent.getRetrievedQuestionnaire();
@@ -253,14 +254,14 @@ public class CityCouncilTest {
 
 		// set setSubmitQuestionnaireResponseHandler
 		final String[] actualValue = { null };
-		respondent.setSubmitQuestionnaireResponseHandler(new SubmitQuestionnaireResponseHandler() {
+		respondent.addResponseHandler(new SubmitQuestionnaireResponseHandler() {
 			@Override
 			public void run(CityCouncil me, RemoteCityCouncil other, String responseToken, String result)
 					throws Exception {
 			}
 
 			@Override
-			public void run(Respondent me, RemoteCityCouncil other, String responseToken, String result)
+			public void run(Vault me, RemoteCityCouncil other, String responseToken, String result)
 					throws Exception {
 				actualValue[0] = result;
 				synchronized (this) {
@@ -270,9 +271,9 @@ public class CityCouncilTest {
 		});
 
 		// submit the poll back to the city council
-		synchronized (respondent.getSubmitQuestionnaireResponseHandler()) {
+		synchronized (respondent.getResponseHandler(SubmitQuestionnaireResponseHandler.class)) {
 			respondent.submitQuestionnaire(retrievedQuestionnaire, council);
-			respondent.getSubmitQuestionnaireResponseHandler().wait();
+			respondent.getResponseHandler(SubmitQuestionnaireResponseHandler.class).wait();
 		}
 
 		String instanceId = retrievedQuestionnaire.getInstanceId();

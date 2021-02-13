@@ -44,9 +44,9 @@ public class FairnetConsoleClientTest {
 		System.out.println("Connected to " + BROKER_ADDRESS + ": " + success);
 
 		// set handler for adding friend, getting post ids, and getting a post
-		user2.setAddFriendResponseHandler(new UnitTestAddFriendResponseHandler());
-		user2.setGetPostResponseHandler(new UnitTestGetPostResponseHandler());
-		user2.setGetPostsResponseHandler(new UnitTestGetPostsResponseHandler());
+		user2.addResponseHandler(new UnitTestAddFriendResponseHandler());
+		user2.addResponseHandler(new UnitTestGetPostResponseHandler());
+		user2.addResponseHandler(new UnitTestGetPostsResponseHandler());
 
 		// add user1's public key
 		System.out.print("Input other user's public key: ");
@@ -64,26 +64,26 @@ public class FairnetConsoleClientTest {
 		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(user2, user1publicKey);
 
 		// add user1 as user2's friend
-		synchronized (user2.getAddFriendResponseHandler()) {
+		synchronized (user2.getResponseHandler(UnitTestAddFriendResponseHandler.class)) {
 			remoteRequester.addFriend(user2.getName());
-			user2.getAddFriendResponseHandler().wait();
+			user2.getResponseHandler(UnitTestAddFriendResponseHandler.class).wait();
 		}
 
 		// retrieve all post ids of user1's posts
-		synchronized (user2.getGetPostsResponseHandler()) {
+		synchronized (user2.getResponseHandler(UnitTestGetPostsResponseHandler.class)) {
 			remoteRequester.getPosts();
-			user2.getGetPostsResponseHandler().wait();
+			user2.getResponseHandler(UnitTestGetPostsResponseHandler.class).wait();
 		}
-		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getGetPostsResponseHandler())
+		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getResponseHandler(UnitTestGetPostsResponseHandler.class))
 				.getResult();
 
 		// simulate request to user1's post contents for each post
 		for (String postId : retrievedUser1posts) {
-			synchronized (user2.getGetPostResponseHandler()) {
+			synchronized (user2.getResponseHandler(UnitTestGetPostResponseHandler.class)) {
 				remoteRequester.getPost(postId);
-				user2.getGetPostResponseHandler().wait();
+				user2.getResponseHandler(UnitTestGetPostResponseHandler.class).wait();
 			}
-			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getGetPostResponseHandler()).getResult();
+			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getResponseHandler(UnitTestGetPostResponseHandler.class)).getResult();
 			System.out.println(retrievedUser1post.getContent());
 		}
 

@@ -2,6 +2,7 @@ package org.vaultage.demo.fairnet.test;
 
 import java.util.List;
 
+import org.vaultage.core.Vault;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.GetPostsResponseHandler;
 import org.vaultage.demo.fairnet.Post;
@@ -26,6 +27,13 @@ public class UnitTestGetPostsResponseHandler implements GetPostsResponseHandler 
 
 	public List<String> getResult() {
 		return posts;
+	}
+
+	@Override
+	public void run(Vault localVault, RemoteFairnetVault remoteVault, String responseToken, List<String> result)
+			throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
 

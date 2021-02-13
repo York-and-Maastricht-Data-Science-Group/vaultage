@@ -203,15 +203,15 @@ public class FairnetTest {
 		user2.register(fairnet);
 		Thread.sleep(SLEEP_TIME);
 
-		user2.setAddFriendResponseHandler(new UnitTestAddFriendResponseHandler());
+		user2.addResponseHandler(new UnitTestAddFriendResponseHandler());
 
 		// user 2 adds user 1 as a friend
 		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(user2, user1.getPublicKey());
 
 		// simulate add user 2 by user 1
-		synchronized (user2.getAddFriendResponseHandler()) {
+		synchronized (user2.getResponseHandler(UnitTestAddFriendResponseHandler.class)) {
 			remoteRequester.addFriend(user2.getName());
-			user2.getAddFriendResponseHandler().wait();
+			user2.getResponseHandler(UnitTestAddFriendResponseHandler.class).wait();
 		}
 
 		assertEquals(true, user1.getFriends().stream().anyMatch(f -> f.getPublicKey().equals(user2.getPublicKey())));
@@ -241,7 +241,7 @@ public class FairnetTest {
 		user2.register(fairnet);
 		Thread.sleep(SLEEP_TIME);
 
-		user2.setGetPostsResponseHandler(new UnitTestGetPostsResponseHandler());
+		user2.addResponseHandler(new UnitTestGetPostsResponseHandler());
 
 		// exchange public keys
 		exchangePublicKeys(user1, user2);
@@ -249,12 +249,12 @@ public class FairnetTest {
 		// simulate request user1's post list by user 2
 		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(user2, user1.getPublicKey());
 
-		synchronized (user2.getGetPostsResponseHandler()) {
+		synchronized (user2.getResponseHandler(UnitTestGetPostsResponseHandler.class)) {
 			remoteRequester.getPosts();
-			user2.getGetPostsResponseHandler().wait();
+			user2.getResponseHandler(UnitTestGetPostsResponseHandler.class).wait();
 		}
 
-		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getGetPostsResponseHandler())
+		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getResponseHandler(UnitTestGetPostsResponseHandler.class))
 				.getResult();
 
 		assertEquals(true, retrievedUser1posts.contains(post1.getId()));
@@ -284,8 +284,8 @@ public class FairnetTest {
 		user2.register(fairnet);
 		Thread.sleep(SLEEP_TIME);
 
-		user2.setGetPostResponseHandler(new UnitTestGetPostResponseHandler());
-		user2.setGetPostsResponseHandler(new UnitTestGetPostsResponseHandler());
+		user2.addResponseHandler(new UnitTestGetPostResponseHandler());
+		user2.addResponseHandler(new UnitTestGetPostsResponseHandler());
 
 		// exchange public keys
 		exchangePublicKeys(user1, user2);
@@ -293,23 +293,23 @@ public class FairnetTest {
 		// simulate request user1's post list by user 2
 		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(user2, user1.getPublicKey());
 
-		synchronized (user2.getGetPostsResponseHandler()) {
+		synchronized (user2.getResponseHandler(UnitTestGetPostsResponseHandler.class)) {
 			remoteRequester.getPosts();
-			user2.getGetPostsResponseHandler().wait();
+			user2.getResponseHandler(UnitTestGetPostsResponseHandler.class).wait();
 		}
 
-		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getGetPostsResponseHandler())
+		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getResponseHandler(UnitTestGetPostsResponseHandler.class))
 				.getResult();
 
 		// simulate request user1's post contents per post
 		for (String postId : retrievedUser1posts) {
 			Post post = user1.getPostById(postId);
 
-			synchronized (user2.getGetPostResponseHandler()) {
+			synchronized (user2.getResponseHandler(UnitTestGetPostResponseHandler.class)) {
 				remoteRequester.getPost(postId);
-				user2.getGetPostResponseHandler().wait();
+				user2.getResponseHandler(UnitTestGetPostResponseHandler.class).wait();
 			}
-			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getGetPostResponseHandler()).getResult();
+			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getResponseHandler(UnitTestGetPostResponseHandler.class)).getResult();
 			assertEquals(post.getContent(), retrievedUser1post.getContent());
 		}
 
@@ -392,7 +392,7 @@ public class FairnetTest {
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
 		// user 1
-		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet, "192.168.56.1",
+		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet, "0.0.0.0",
 				Vaultage.DEFAULT_SERVER_PORT);
 		user1.register(fairnet);
 		Thread.sleep(SLEEP_TIME);
@@ -402,7 +402,7 @@ public class FairnetTest {
 		user1.createPost("Don't worry, be happy!", true);
 
 		// user 2
-		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet, "192.168.99.80",
+		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet, "127.0.0.1",
 				Vaultage.DEFAULT_SERVER_PORT + 1);
 		user2.register(fairnet);
 		Thread.sleep(SLEEP_TIME);
@@ -411,31 +411,31 @@ public class FairnetTest {
 		exchangeNetworkAddresses(user1, user2);
 
 		// set handler
-		user2.setGetPostResponseHandler(new UnitTestGetPostResponseHandler());
-		user2.setGetPostsResponseHandler(new UnitTestGetPostsResponseHandler());
+		user2.addResponseHandler(new UnitTestGetPostResponseHandler());
+		user2.addResponseHandler(new UnitTestGetPostsResponseHandler());
 
 		// exchange public keys
 		exchangePublicKeys(user1, user2);
 		// user 2 adds user 1 as a friend
 		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(user2, user1.getPublicKey());
 
-		synchronized (user2.getGetPostsResponseHandler()) {
+		synchronized (user2.getResponseHandler(UnitTestGetPostsResponseHandler.class)) {
 			remoteRequester.getPosts();
-			user2.getGetPostsResponseHandler().wait();
+			user2.getResponseHandler(UnitTestGetPostsResponseHandler.class).wait();
 		}
 
-		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getGetPostsResponseHandler())
+		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getResponseHandler(UnitTestGetPostsResponseHandler.class))
 				.getResult();
 
 		// simulate request user1's post contents per post
 		for (String postId : retrievedUser1posts) {
 			Post post = user1.getPostById(postId);
 
-			synchronized (user2.getGetPostResponseHandler()) {
+			synchronized (user2.getResponseHandler(UnitTestGetPostResponseHandler.class)) {
 				remoteRequester.getPost(postId);
-				user2.getGetPostResponseHandler().wait();
+				user2.getResponseHandler(UnitTestGetPostResponseHandler.class).wait();
 			}
-			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getGetPostResponseHandler()).getResult();
+			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getResponseHandler(UnitTestGetPostResponseHandler.class)).getResult();
 			assertEquals(post.getContent(), retrievedUser1post.getContent());
 		}
 

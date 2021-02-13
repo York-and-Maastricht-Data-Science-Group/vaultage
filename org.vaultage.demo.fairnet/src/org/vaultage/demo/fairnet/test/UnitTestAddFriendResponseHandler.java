@@ -1,5 +1,6 @@
 package org.vaultage.demo.fairnet.test;
 
+import org.vaultage.core.Vault;
 import org.vaultage.demo.fairnet.AddFriendResponseHandler;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
@@ -26,6 +27,13 @@ public class UnitTestAddFriendResponseHandler implements AddFriendResponseHandle
 
 	public boolean getResult() {
 		return isSuccess;
+	}
+
+	@Override
+	public void run(Vault localVault, RemoteFairnetVault remoteVault, String responseToken, Boolean result)
+			throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

@@ -5,10 +5,9 @@ package monetisation;
 @vault
 class CityCouncil {
 	
-	@vaultage(requester="Respondent")
 	op Questionnaire getQuestionnaire(String pollId);
 	
-	@vaultage(requester="Respondent", monetised="true")
+	@vaultage(monetised="true")
 	op String submitQuestionnaire(Questionnaire questionnaire);
 }
 

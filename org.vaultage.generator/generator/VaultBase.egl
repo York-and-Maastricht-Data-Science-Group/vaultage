@@ -2,6 +2,8 @@
 [% 	var classes = ePackage.getVaultClasses(); %]
 package [%=packageName%];
 
+import java.util.Iterator;
+import java.util.Set;
 import java.util.UUID;
 import java.io.IOException;
 
@@ -9,6 +11,7 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 
 import org.vaultage.util.VaultageEncryption;
+import org.vaultage.core.ResponseHandler;
 import org.vaultage.core.Vault;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageServer;
@@ -24,27 +27,6 @@ public abstract class [%=class.getBaseName()%] implements Vault {
 	protected Vaultage vaultage;
 	protected VaultageServer vaultageServer;
 
-	/*** For a message from a vault of a different type ***/
-[% for (class2 in classes) { 
- 		if (class2.name <> class.name) { 
- 			for (eOperation in class2.eOperations){ 
-				if (eOperation.eAnnotations.first().source == "vaultage") { 
-					var eAnnotation = eOperation.eAnnotations.first(); 
-					for (detail in eAnnotation.details) { 
-						if (detail.key = "requester") { 
-							var values = detail.value.split(",");  
-							for (v in values) {  
-								var value = v.trim();  
-								if (class.name = value) { %]
- 	protected [%=eOperation.getClassResponseHandlerName()%] [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];
-[%								} 
-							}
-						}
-					}
- 				}			
- 			}			
- 		}
- } %]
  	/*** For a message from a vault of the same type ***/
 [% for (eOperation in class.eOperations){ %]
 [% 	if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
@@ -107,46 +89,38 @@ public abstract class [%=class.getBaseName()%] implements Vault {
 		this.publicKey = publicKey;
 	}
 
-	/*** For a message from a vault of a different type ***/
-[% for (class2 in classes) { 
- 		if (class2.name <> class.name) { 
- 			for (eOperation in class2.eOperations){ 
-				if (eOperation.eAnnotations.first().source == "vaultage") { 
-					var eAnnotation = eOperation.eAnnotations.first(); 
-					for (detail in eAnnotation.details) { 
-						if (detail.key = "requester") { 
-							var values = detail.value.split(",");  
-							for (v in values) {  
-								var value = v.trim();  
-								if (class.name = value) { %]
- 	public void set[%=eOperation.getClassResponseHandlerName()%]([%=eOperation.getClassResponseHandlerName()%] handler) {
-		this.[%=eOperation.getClassResponseHandlerName().firstToLowerCase()%] = handler;
+	public void addResponseHandler(ResponseHandler responseHandler){
+		Set<ResponseHandler> responseHandlers = this.getVaultage().getResponseMessageHandler().getResponseHandlers();
+		Iterator<ResponseHandler> iterator = responseHandlers.iterator();
+		while(iterator.hasNext()) {
+			ResponseHandler handler = iterator.next();
+			if (handler.equals(responseHandler)) {
+				iterator.remove();
+			}
+			for (Class<?> i : handler.getClass().getInterfaces()) {
+				if (i.equals(responseHandler.getClass())) {
+					iterator.remove();
+					break;
+				}
+			}
+		}
+		responseHandlers.add(responseHandler);
 	}
 	
-	public [%=eOperation.getClassResponseHandlerName()%] get[%=eOperation.getClassResponseHandlerName()%]() {
-		return [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];
+	public ResponseHandler getResponseHandler(Class<?> interfaceOrClass){
+		for (ResponseHandler handler : this.getVaultage().getResponseMessageHandler().getResponseHandlers()) {
+			if (handler.getClass().equals(interfaceOrClass)) {
+				return handler;
+			}
+			for (Class<?> i : handler.getClass().getInterfaces()) {
+				if (i.equals(interfaceOrClass)) {
+					return handler;
+				}
+			}
+		}
+		return null;
 	}
 	
-[%								} 
-							}
-						}
-					}
- 				}			
- 			}			
- 		}
- } %]
- 	/*** For a message from a vault of the same type ***/
-[% for (eOperation in class.eOperations){ %]
-[% if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
-	public void set[%=eOperation.getClassResponseHandlerName()%]([%=eOperation.getClassResponseHandlerName()%] handler) {
-		this.[%=eOperation.getClassResponseHandlerName().firstToLowerCase()%] = handler;
-	}
-	
-	public [%=eOperation.getClassResponseHandlerName()%] get[%=eOperation.getClassResponseHandlerName()%]() {
-		return [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];
-	}
-[% } %][% } %]
-
 	public boolean register(VaultageServer vaultageServer) throws Exception {
 		boolean isSuccess = vaultage.connect(vaultageServer.getAddress(), publicKey);
 		this.vaultageServer = vaultageServer;
