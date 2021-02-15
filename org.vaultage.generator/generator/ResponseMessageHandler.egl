@@ -55,7 +55,7 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 		// 6. get the response handler of the operation called
 		String capitalisedOperation = operation.replaceFirst(operation.substring(0, 1),
 				operation.substring(0, 1).toUpperCase());
-		String packageName = this.getClass().getPackageName();
+		String packageName = this.getClass().getPackage().getName();
 		Class<?> responseHandlerType = Class.forName(packageName + "." + capitalisedOperation + "ResponseHandler");
 		Method getResponseHandlerMethod = vault.getClass().getMethod("getResponseHandler", Class.class);
 

@@ -95,7 +95,7 @@ public class FairnetVault extends FairnetVaultBase {
 
 	@Override
 	public void getPosts(String requesterPublicKey, String requestToken) throws Exception {
-		List<String> posts = null;
+		List<String> posts;
 		if (isFriend(requesterPublicKey)) {
 			posts = this.posts.stream().filter(p -> p.getIsPublic()).map(p -> p.getId())
 					.collect(Collectors.toCollection(ArrayList::new));
