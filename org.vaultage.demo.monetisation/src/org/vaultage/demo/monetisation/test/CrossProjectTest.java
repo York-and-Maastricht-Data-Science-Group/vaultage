@@ -68,23 +68,23 @@ public class CrossProjectTest {
 		CityCouncilAddFriendResponseHandler addFriendResponseHandler = new CityCouncilAddFriendResponseHandler();
 		CityCouncilGetPostResponseHandler getPostResponseHandler = new CityCouncilGetPostResponseHandler();
 		CityCouncilGetPostsResponseHandler getPostsResponseHandler = new CityCouncilGetPostsResponseHandler();
-		cityCouncil.addResponseHandler(addFriendResponseHandler);
-		cityCouncil.addResponseHandler(getPostResponseHandler);
-		cityCouncil.addResponseHandler(getPostsResponseHandler);
+		cityCouncil.addOperationResponseHandler(addFriendResponseHandler);
+		cityCouncil.addOperationResponseHandler(getPostResponseHandler);
+		cityCouncil.addOperationResponseHandler(getPostsResponseHandler);
 	
 		// simulate the City Council retrieves Bob's public posts 
 		RemoteFairnetVault remoteBobsFairnetVault = new RemoteFairnetVault(cityCouncil,
 				bobsFairnetVault.getPublicKey());
 
-		synchronized (cityCouncil.getResponseHandler(AddFriendResponseHandler.class)) {
+		synchronized (cityCouncil.getOperationResponseHandler(AddFriendResponseHandler.class)) {
 			remoteBobsFairnetVault.addFriend(cityCouncil.getId());
-			cityCouncil.getResponseHandler(AddFriendResponseHandler.class).wait();
+			cityCouncil.getOperationResponseHandler(AddFriendResponseHandler.class).wait();
 		}
 		assertEquals(true, addFriendResponseHandler.getResult());
 		
-		synchronized (cityCouncil.getResponseHandler(GetPostsResponseHandler.class)) {
+		synchronized (cityCouncil.getOperationResponseHandler(GetPostsResponseHandler.class)) {
 			remoteBobsFairnetVault.getPosts();
-			cityCouncil.getResponseHandler(GetPostsResponseHandler.class).wait();
+			cityCouncil.getOperationResponseHandler(GetPostsResponseHandler.class).wait();
 		}
 		List<String> bobsPostIds = getPostsResponseHandler.getPostIds(); 
 
@@ -92,9 +92,9 @@ public class CrossProjectTest {
 		for (String postId : bobsPostIds) {
 			Post declaredPost = bobsFairnetVault.getPostById(postId);
 
-			synchronized (cityCouncil.getResponseHandler(GetPostResponseHandler.class)) {
+			synchronized (cityCouncil.getOperationResponseHandler(GetPostResponseHandler.class)) {
 				remoteBobsFairnetVault.getPost(postId);
-				cityCouncil.getResponseHandler(GetPostResponseHandler.class).wait();
+				cityCouncil.getOperationResponseHandler(GetPostResponseHandler.class).wait();
 			}
 			Post retrievedPost = getPostResponseHandler.getPost();
 			assertEquals(declaredPost.getContent(), retrievedPost.getContent());

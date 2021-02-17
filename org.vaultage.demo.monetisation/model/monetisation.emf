@@ -7,7 +7,7 @@ class CityCouncil {
 	
 	op Questionnaire getQuestionnaire(String pollId);
 	
-	@vaultage(monetised="true")
+	@vaultage(charged="provider")
 	op String submitQuestionnaire(Questionnaire questionnaire);
 }
 
@@ -24,6 +24,48 @@ class Questionnaire {
 	attr String instanceId;
 	attr double price;
 }
+
+
+@vault
+class ContentCreator {
+	
+	@vaultage
+	op Content[*] getContents();
+	
+	// pay for certain length of time
+	// @vaultage(charged="consumer")
+	// op Content subscribe();
+	
+	// pay per item
+	@vaultage(charged="consumer")
+	op Content getMonetisedContent(String contentId);
+	
+	// pay per budle/items
+	//@vaultage(charged="consumer")
+	//op Content getMonetisedContents(String bundleId, String[*] contentIds);
+	
+	// pay per budle/items
+	//@vaultage(charged="consumer")
+	//op Content getMeteredContent(String bundleId);
+	
+	// contentId is optional, only to track 
+	// if the donation refers to a specific content
+	//@vaultage(charged="consumer")
+	//op String receiveDonation(String contentId);
+	
+}
+
+@vault
+class Consumer {
+	
+}
+
+class Content {
+	attr boolean isMonetised = false;
+	attr String type; // json, xml, plain text, etc. 
+	attr String body; // the content is presented in string
+}
+
 
 
 

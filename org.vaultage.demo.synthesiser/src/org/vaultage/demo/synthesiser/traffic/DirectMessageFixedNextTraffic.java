@@ -57,7 +57,7 @@ public class DirectMessageFixedNextTraffic {
 			workers[i] = new Worker();
 			workers[i].setId("" + i);
 			workers[i].setCompletedValue(numOperations);
-			workers[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
+			workers[i].addOperationResponseHandler(new SynchronisedIncrementResponseHandler());
 			workers[i].register(server);
 			workers[i].startServer("127.0.0.1", port++);
 		}

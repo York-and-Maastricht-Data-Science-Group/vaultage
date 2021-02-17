@@ -69,7 +69,7 @@ public class LargeMessageTraffic {
 		for (int i = 0; i < numWorkers; i++) {
 			workers[i] = new Worker();
 			workers[i].setId("" + i);
-			workers[i].setGetTextSizeResponseHandler(new SynchronisedGetTextSizeResponseHandler());
+			workers[i].addOperationResponseHandler(new SynchronisedGetTextSizeResponseHandler());
 			workers[i].register(server);
 		}
 

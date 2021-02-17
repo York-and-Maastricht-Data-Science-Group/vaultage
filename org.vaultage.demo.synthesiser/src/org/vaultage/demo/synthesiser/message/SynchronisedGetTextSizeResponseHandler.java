@@ -1,5 +1,6 @@
 package org.vaultage.demo.synthesiser.message;
 
+import org.vaultage.core.Vault;
 import org.vaultage.demo.synthesiser.GetTextSizeResponseHandler;
 import org.vaultage.demo.synthesiser.IncrementResponseHandler;
 import org.vaultage.demo.synthesiser.RemoteWorker;
@@ -19,6 +20,12 @@ public class SynchronisedGetTextSizeResponseHandler implements GetTextSizeRespon
 			this.textSize = result;
 			this.notify();
 		}
+	}
+
+	@Override
+	public void run(Vault localVault, RemoteWorker remoteVault, String responseToken, Integer result) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

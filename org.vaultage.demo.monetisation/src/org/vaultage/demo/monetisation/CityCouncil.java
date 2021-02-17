@@ -45,10 +45,10 @@ public class CityCouncil extends CityCouncilBase {
 			PaymentInformation paymentInformation) throws Exception {
 
 		// check if a local payment wallet, that has the same type as the respondent's type, exists
-		Wallet wallet = this.getVaultage().getDefaultWallet();
+		Wallet wallet = this.getDefaultWallet();
 		if (wallet == null || paymentInformation.getType() != wallet.getType()) {
 
-			wallet = this.getVaultage().getWallets().stream(). //
+			wallet = this.getWallets().stream(). //
 					filter(w -> w.getType().equals(paymentInformation.getType())). //
 					findFirst().orElse(null);
 

@@ -111,7 +111,7 @@ public class CityCouncilTest {
 		councilWallet.setPassword(cityCouncilPassword);
 		councilWallet.setAccountNumber(cityCouncilCardId);
 		councilWallet.setName("York City Council");
-		council.getVaultage().setDefaultWallet(councilWallet);
+		council.setDefaultWallet(councilWallet);
 
 		// create the poll
 		Questionnaire poll = new Questionnaire();
@@ -142,10 +142,10 @@ public class CityCouncilTest {
 		respondentWallet.setAccountNumber(respondentCardId);
 		respondentWallet.setName("Alfa Yohannis");
 
-		respondent.getVaultage().setDefaultWallet(respondentWallet);
+		respondent.setDefaultWallet(respondentWallet);
 
 		// set get poll response handler	
-		respondent.addResponseHandler(new GetQuestionnaireResponseHandler() {
+		respondent.addOperationResponseHandler(new GetQuestionnaireResponseHandler() {
 			@Override
 			public void run(CityCouncil me, RemoteCityCouncil other, String responseToken, Questionnaire result)
 					throws Exception {
@@ -162,9 +162,9 @@ public class CityCouncilTest {
 		});
 		
 		// retrieve the poll from the city council using the pollId
-		synchronized (respondent.getResponseHandler(GetQuestionnaireResponseHandler.class)) {
+		synchronized (respondent.getOperationResponseHandler(GetQuestionnaireResponseHandler.class)) {
 			respondent.getQuestionnaireFromCouncil(pollId, council);
-			respondent.getResponseHandler(GetQuestionnaireResponseHandler.class).wait();
+			respondent.getOperationResponseHandler(GetQuestionnaireResponseHandler.class).wait();
 		}
 
 		Questionnaire retrievedQuestionnaire = respondent.getRetrievedQuestionnaire();
@@ -190,7 +190,7 @@ public class CityCouncilTest {
 		councilWallet.setPassword(cityCouncilPassword);
 		councilWallet.setAccountNumber(cityCouncilCardId);
 		councilWallet.setName("York City Council");
-		council.getVaultage().setDefaultWallet(councilWallet);
+		council.setDefaultWallet(councilWallet);
 
 		// create the poll
 		Questionnaire poll = new Questionnaire();
@@ -221,10 +221,10 @@ public class CityCouncilTest {
 		respondentWallet.setAccountNumber(respondentCardId);
 		respondentWallet.setName("Alfa Yohannis");
 
-		respondent.getVaultage().setDefaultWallet(respondentWallet);
+		respondent.setDefaultWallet(respondentWallet);
 
 		// set get poll response handler
-		respondent.addResponseHandler(new GetQuestionnaireResponseHandler() {
+		respondent.addOperationResponseHandler(new GetQuestionnaireResponseHandler() {
 			@Override
 			public void run(CityCouncil me, RemoteCityCouncil other, String responseToken, Questionnaire result)
 					throws Exception {
@@ -241,9 +241,9 @@ public class CityCouncilTest {
 		});
 
 		// retrieve the poll from the city council using the pollId
-		synchronized (respondent.getResponseHandler(GetQuestionnaireResponseHandler.class)) {
+		synchronized (respondent.getOperationResponseHandler(GetQuestionnaireResponseHandler.class)) {
 			respondent.getQuestionnaireFromCouncil(pollId, council);
-			respondent.getResponseHandler(GetQuestionnaireResponseHandler.class).wait();
+			respondent.getOperationResponseHandler(GetQuestionnaireResponseHandler.class).wait();
 		}
 
 		Questionnaire retrievedQuestionnaire = respondent.getRetrievedQuestionnaire();
@@ -254,7 +254,7 @@ public class CityCouncilTest {
 
 		// set setSubmitQuestionnaireResponseHandler
 		final String[] actualValue = { null };
-		respondent.addResponseHandler(new SubmitQuestionnaireResponseHandler() {
+		respondent.addOperationResponseHandler(new SubmitQuestionnaireResponseHandler() {
 			@Override
 			public void run(CityCouncil me, RemoteCityCouncil other, String responseToken, String result)
 					throws Exception {
@@ -271,9 +271,9 @@ public class CityCouncilTest {
 		});
 
 		// submit the poll back to the city council
-		synchronized (respondent.getResponseHandler(SubmitQuestionnaireResponseHandler.class)) {
+		synchronized (respondent.getOperationResponseHandler(SubmitQuestionnaireResponseHandler.class)) {
 			respondent.submitQuestionnaire(retrievedQuestionnaire, council);
-			respondent.getResponseHandler(SubmitQuestionnaireResponseHandler.class).wait();
+			respondent.getOperationResponseHandler(SubmitQuestionnaireResponseHandler.class).wait();
 		}
 
 		String instanceId = retrievedQuestionnaire.getInstanceId();

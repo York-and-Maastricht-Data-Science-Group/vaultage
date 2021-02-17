@@ -9,11 +9,8 @@ class Customer {
 	val BillingAddress billingAddress;
 	val ShippingAddress shippingAddress;
 	
-	
-	@vaultage(requester="Shop")
 	op BillingAddress getBillingAddress();
 	
-	@vaultage(requester="Courier")
 	op ShippingAddress getShippingAddress();
 }
 
@@ -21,10 +18,8 @@ class Customer {
 class Shop {
 	attr String name;
 	
-	@vaultage(requester="Customer")
 	op Item[*] getItems();
 	
-	@vaultage(requester="Customer")
 	op CustomerOrder createOrder(Basket basket);
 }
 
@@ -32,16 +27,12 @@ class Shop {
 class Warehouse {
 	attr String name;
 	
-	@vaultage(requester="Shop")
 	op int getItemQuantity(String itemId);
 	
-	@vaultage(requester="Shop")
 	op GoodsReceiptConfirmation receiveGoods(GoodsReceiptOrder goodsReceiptOrder);
 	
-	@vaultage(requester="Shop")
 	op GoodsIssueConfirmation issueGoods(GoodsIssueOrder goodsIssueOrder);
 	
-	@vaultage(requester="Courier")
 	op OutboundAddress getOutboundAddress();
 }
 
@@ -49,10 +40,8 @@ class Warehouse {
 class Courier {
 	attr String name;
 	
-	@vaultage(requester="Shop")
 	op String deliverGoods(ShippingOrder shippingOrder);
 	
-	@vaultage(requester="Customer, Shop")
 	op DeliveryStatus trackDelivery(String trackingId);
 }
 

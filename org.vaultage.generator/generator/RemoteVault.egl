@@ -56,7 +56,7 @@ public class [%=class.remoteName()%] {
 	
 	[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
 	if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { %]
-		Wallet wallet = this.localVault.getVaultage().getDefaultWallet();
+		Wallet wallet = this.localVault.getDefaultWallet();
 		PaymentInformation paymentInformation = new PaymentInformation(); 
 		paymentInformation.setName(wallet.getName());
 		paymentInformation.setType(wallet.getType());

@@ -1,5 +1,4 @@
 package org.vaultage.demo.spreadcut;
-
 import java.util.Scanner;
 
 import org.vaultage.core.BaseBroker;

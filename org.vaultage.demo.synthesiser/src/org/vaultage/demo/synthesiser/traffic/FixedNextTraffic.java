@@ -54,7 +54,7 @@ public class FixedNextTraffic {
 			workers[i] = new Worker();
 			workers[i].setId("" + i);
 			workers[i].setCompletedValue(numOperations);
-			workers[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
+			workers[i].addOperationResponseHandler(new SynchronisedIncrementResponseHandler());
 			workers[i].register(server);
 		}
 		

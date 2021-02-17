@@ -76,14 +76,14 @@ public class ManyToOneConcurrentTraffic {
 		worker = new Worker();
 		worker.setId("Worker-" + numRequester);
 		worker.setCompletedValue(numOperations);
-		worker.setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
+		worker.addOperationResponseHandler(new SynchronisedIncrementResponseHandler());
 		worker.register(server);
 
 		for (int i = 0; i < numRequester; i++) {
 			requesters[i] = new Worker();
 			requesters[i].setId("Requester-" + i);
 			requesters[i].setCompletedValue(numOperations);
-			requesters[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
+			requesters[i].addOperationResponseHandler(new SynchronisedIncrementResponseHandler());
 			requesters[i].register(server);
 		}
 
@@ -139,14 +139,14 @@ public class ManyToOneConcurrentTraffic {
 		worker = new Worker();
 		worker.setId("Worker-" + numRequester);
 		worker.setCompletedValue(numOperations);
-		worker.setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
+		worker.addOperationResponseHandler(new SynchronisedIncrementResponseHandler());
 		worker.startServer("127.0.0.1", port++);
 
 		for (int i = 0; i < numRequester; i++) {
 			requesters[i] = new Worker();
 			requesters[i].setId("Requester-" + i);
 			requesters[i].setCompletedValue(numOperations);
-			requesters[i].setIncrementResponseHandler(new SynchronisedIncrementResponseHandler());
+			requesters[i].addOperationResponseHandler(new SynchronisedIncrementResponseHandler());
 			requesters[i].startServer("127.0.0.1", port++);
 		}
 

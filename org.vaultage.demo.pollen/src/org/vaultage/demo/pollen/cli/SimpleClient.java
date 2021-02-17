@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import org.vaultage.core.Vault;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.pollen.NumberPoll;
 import org.vaultage.demo.pollen.PollenBroker;
@@ -50,7 +51,7 @@ public class SimpleClient {
 		user.register(pollenServer);
 
 		// set sendNumberPollResponseHandler
-		user.setSendNumberPollResponseHandler(new SendNumberPollResponseHandler() {
+		user.addOperationResponseHandler(new SendNumberPollResponseHandler() {
 
 			@Override
 			public void run(User me, RemoteUser other, String responseToken, java.lang.Double result) throws Exception {
@@ -73,15 +74,22 @@ public class SimpleClient {
 				else {
 					poll = me.getInitiatedNumberPoll(responseToken);
 					if (poll != null) {
-						synchronized (me.getSendNumberPollResponseHandler()) {
+						synchronized (me.getOperationResponseHandler(SendNumberPollResponseHandler.class)) {
 							me.addNumberPollAnswer(poll.getId(), result);
-							me.getSendNumberPollResponseHandler().notify();
+							me.getOperationResponseHandler(SendNumberPollResponseHandler.class).notify();
 						}
 					}
 					else {
 						throw new RuntimeException("I should be either originator or participant of the poll!");
 					}
 				}
+			}
+
+			@Override
+			public void run(Vault localVault, RemoteUser remoteVault, String responseToken, Double result)
+					throws Exception {
+				// TODO Auto-generated method stub
+				
 			}
 		});
 
@@ -118,10 +126,10 @@ public class SimpleClient {
 		if (participants.size() > 0) {
 			String firstParticipant = participants.get(0);
 			RemoteUser remoteUser = new RemoteUser(localUser, firstParticipant);
-			synchronized (localUser.getSendNumberPollResponseHandler()) {
+			synchronized (localUser.getOperationResponseHandler(SendNumberPollResponseHandler.class)) {
 				String token = remoteUser.sendNumberPoll(newPoll);
 				localUser.addInitiatedNumberPoll(newPoll, token);
-				localUser.getSendNumberPollResponseHandler().wait();
+				localUser.getOperationResponseHandler(SendNumberPollResponseHandler.class).wait();
 			}
 			double totalResult = localUser.getNumberPollAnswer(newPoll.getId());
 			System.out.println("Total result (including fake value) = " + totalResult);

@@ -17,9 +17,9 @@ public class Worker extends WorkerBase {
 	}
 	public void sendOperation(String workerPublicKey, boolean isEncrypted) throws Exception {
 		RemoteWorker worker = new RemoteWorker(this, workerPublicKey);
-		synchronized (this.getIncrementResponseHandler()) {
+		synchronized (this.getOperationResponseHandler(IncrementResponseHandler.class)) {
 			worker.increment(currentValue, isEncrypted);
-			this.getIncrementResponseHandler().wait();
+			this.getOperationResponseHandler(IncrementResponseHandler.class).wait();
 		}
 	}
 
@@ -47,11 +47,11 @@ public class Worker extends WorkerBase {
 
 	public int getTextSize(String workerPublicKey, String text, boolean isEncrypted) throws Exception {
 		RemoteWorker worker = new RemoteWorker(this, workerPublicKey);
-		synchronized (this.getGetTextSizeResponseHandler()) {
+		synchronized (this.getOperationResponseHandler(GetTextSizeResponseHandler.class)) {
 			worker.getTextSize(text, isEncrypted);
-			this.getTextSizeResponseHandler.wait();
+			this.getOperationResponseHandler(GetTextSizeResponseHandler.class).wait();
 		}
-		return ((SynchronisedGetTextSizeResponseHandler) this.getTextSizeResponseHandler).getTextSize();
+		return ((SynchronisedGetTextSizeResponseHandler) this.getOperationResponseHandler(GetTextSizeResponseHandler.class)).getTextSize();
 	}
 
 	@Override

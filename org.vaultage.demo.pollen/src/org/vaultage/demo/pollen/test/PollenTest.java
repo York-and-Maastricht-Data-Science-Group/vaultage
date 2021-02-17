@@ -57,14 +57,21 @@ public class PollenTest {
 			} else {
 				poll = me.getInitiatedNumberPoll(responseToken);
 				if (poll != null) {
-					synchronized (me.getSendNumberPollResponseHandler()) {
+					synchronized (me.getOperationResponseHandler(SendNumberPollResponseHandler.class)) {
 						me.addNumberPollAnswer(poll.getId(), result);
-						me.getSendNumberPollResponseHandler().notify();
+						me.getOperationResponseHandler(SendNumberPollResponseHandler.class).notify();
 					}
 				} else {
 					throw new RuntimeException("I should be either originator or participant of the poll!");
 				}
 			}
+		}
+
+		@Override
+		public void run(Vault localVault, RemoteUser remoteVault, String responseToken, Double result)
+				throws Exception {
+			// TODO Auto-generated method stub
+			
 		}
 	}
 
@@ -166,10 +173,10 @@ public class PollenTest {
 		dan.setId("Dan");
 		dan.setName("Dan");
 
-		alice.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
-		bob.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
-		charlie.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
-		dan.setSendNumberPollResponseHandler(new UnitTestNumberPollResponseHandler());
+		alice.addOperationResponseHandler(new UnitTestNumberPollResponseHandler());
+		bob.addOperationResponseHandler(new UnitTestNumberPollResponseHandler());
+		charlie.addOperationResponseHandler(new UnitTestNumberPollResponseHandler());
+		dan.addOperationResponseHandler(new UnitTestNumberPollResponseHandler());
 
 		alice.register(server);
 		bob.register(server);
@@ -186,10 +193,10 @@ public class PollenTest {
 		salaryPoll.setParticipants(participants);
 
 		RemoteUser firstParticipant = new RemoteUser(alice, participants.get(0));
-		synchronized (alice.getSendNumberPollResponseHandler()) {
+		synchronized (alice.getOperationResponseHandler(SendNumberPollResponseHandler.class)) {
 			String token = firstParticipant.sendNumberPoll(salaryPoll);
 			alice.addInitiatedNumberPoll(salaryPoll, token);
-			alice.getSendNumberPollResponseHandler().wait(); // wait for the response
+			alice.getOperationResponseHandler(SendNumberPollResponseHandler.class).wait(); // wait for the response
 		}
 		return salaryPoll;
 	}

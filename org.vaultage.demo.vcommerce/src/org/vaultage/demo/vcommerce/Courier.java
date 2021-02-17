@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.vaultage.core.Vault;
+
 public class Courier extends CourierBase {
 	private String name = new String();
 	private Map<String, ShippingOrder> trackShippingOrders = new HashMap<>();
@@ -35,43 +37,45 @@ public class Courier extends CourierBase {
 		String customerPK = shippingOrder.getCustomerPublicKey();
 		RemoteCustomer remoteCustomer = new RemoteCustomer(this, customerPK);
 
-		this.setGetShippingAddressResponseHandler(new GetShippingAddressResponseHandler() {
+		this.addOperationResponseHandler(new GetShippingAddressResponseHandler() {
 			@Override
 			public void run(Customer me, RemoteCustomer other, String responseToken, ShippingAddress result)
 					throws Exception {
 			}
 
 			@Override
-			public void run(Courier me, RemoteCustomer other, String responseToken, ShippingAddress result)
+			public void run(Vault localVault, RemoteCustomer remoteVault, String responseToken, ShippingAddress result)
 					throws Exception {
 				/** get the out-bound address directly from the warehouse **/
 				String warehousePK = shippingOrder.getWarehousePulicKey();
 				RemoteWarehouse remoteWarehouse = new RemoteWarehouse(Courier.this, warehousePK);
 
-				Courier.this.setGetOutboundAddressResponseHandler(new GetOutboundAddressResponseHandler() {
+				Courier.this.addOperationResponseHandler(new GetOutboundAddressResponseHandler() {
 					@Override
 					public void run(Warehouse me, RemoteWarehouse other, String responseToken, OutboundAddress result)
 							throws Exception {
 					}
 
 					@Override
-					public void run(Courier me, RemoteWarehouse other, String responseToken, OutboundAddress result)
-							throws Exception {
+					public void run(Vault localVault, RemoteWarehouse remoteVault, String responseToken,
+							OutboundAddress result) throws Exception {
 						// send the trackingId back to shop
 						RemoteCourier remoteCourier = new RemoteCourier(Courier.this, requesterPublicKey);
 						String trackingId = UUID.randomUUID().toString();
 						trackShippingOrders.put(trackingId, shippingOrder);
 						remoteCourier.respondToDeliverGoods(trackingId, requestToken);
 					}
+
 				});
 				remoteWarehouse.getOutboundAddress();
+
 			}
 		});
 		remoteCustomer.getShippingAddress();
 	}
 
 	public void trackDelivery(String requesterPublicKey, String requestToken, String trackingId) throws Exception {
-		
+
 		RemoteCourier remoteCourier = new RemoteCourier(this, requesterPublicKey);
 		DeliveryStatus ds = new DeliveryStatus();
 		if (trackShippingOrders.get(trackingId) != null) {

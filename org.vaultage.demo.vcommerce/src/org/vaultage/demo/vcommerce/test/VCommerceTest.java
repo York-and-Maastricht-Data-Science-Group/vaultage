@@ -3,8 +3,6 @@ package org.vaultage.demo.vcommerce.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -112,7 +110,7 @@ public class VCommerceTest {
 				}
 			}
 		}
-		
+
 		Thread.sleep(SLEEP_TIME);
 
 		runSequentialScenario(server, customer, shop, warehouse, courier, dsCustomer, dsShop);
@@ -190,10 +188,11 @@ public class VCommerceTest {
 
 		// set what how the shop should respond to when a warehouse has responded to a
 		// GoodsReceiptOrder
-		shop.setReceiveGoodsResponseHandler(new ReceiveGoodsResponseHandler() {
+		shop.addOperationResponseHandler(new ReceiveGoodsResponseHandler() {
 			@Override
-			public void run(Shop localShop, RemoteWarehouse other, String responseToken,
+			public void run(Vault localVault, RemoteWarehouse other, String responseToken,
 					GoodsReceiptConfirmation result) throws Exception {
+				Shop localShop = (Shop) localVault;
 				for (Item receivedItem : result.getItems()) {
 					Item item = localShop.getItems().stream().filter(i -> i.getItemId().equals(receivedItem.getItemId())
 							|| i.getName().equals(receivedItem.getName())).findFirst().orElse(null);
@@ -203,8 +202,8 @@ public class VCommerceTest {
 						item.setQuantity(item.getQuantity() + receivedItem.getQuantity());
 					}
 				}
-				synchronized (localShop.getReceiveGoodsResponseHandler()) {
-					localShop.getReceiveGoodsResponseHandler().notify();
+				synchronized (localShop.getOperationResponseHandler(ReceiveGoodsResponseHandler.class)) {
+					localShop.getOperationResponseHandler(ReceiveGoodsResponseHandler.class).notify();
 				}
 			}
 
@@ -214,23 +213,24 @@ public class VCommerceTest {
 			}
 		});
 		// put the order
-		synchronized (shop.getReceiveGoodsResponseHandler()) {
+		synchronized (shop.getOperationResponseHandler(ReceiveGoodsResponseHandler.class)) {
 			shop.createGoodsReceiptOrder(goodsReceiptOrder);
-			shop.getReceiveGoodsResponseHandler().wait();
+			shop.getOperationResponseHandler(ReceiveGoodsResponseHandler.class).wait();
 		}
 
 		/**
 		 * Customer request a list of items and their quantities.
 		 */
 		final List<Item> availableItems = new ArrayList<Item>();
-		customer.setGetItemsResponseHandler(new GetItemsResponseHandler() {
+		customer.addOperationResponseHandler(new GetItemsResponseHandler() {
 			@Override
-			public void run(Customer localCustomer, RemoteShop other, String responseToken, List<Item> result)
+			public void run(Vault localVault, RemoteShop other, String responseToken, List<Item> result)
 					throws Exception {
+				Customer localCustomer = (Customer) localVault;
 				availableItems.clear();
 				availableItems.addAll(result);
-				synchronized (localCustomer.getGetItemsResponseHandler()) {
-					localCustomer.getGetItemsResponseHandler().notify();
+				synchronized (localCustomer.getOperationResponseHandler(GetItemsResponseHandler.class)) {
+					localCustomer.getOperationResponseHandler(GetItemsResponseHandler.class).notify();
 				}
 			}
 
@@ -240,9 +240,9 @@ public class VCommerceTest {
 			}
 		});
 
-		synchronized (customer.getGetItemsResponseHandler()) {
+		synchronized (customer.getOperationResponseHandler(GetItemsResponseHandler.class)) {
 			customer.getItems(shop);
-			customer.getGetItemsResponseHandler().wait();
+			customer.getOperationResponseHandler(GetItemsResponseHandler.class).wait();
 		}
 //		// display of all available items
 //		for (Item item : availableItems) {
@@ -256,94 +256,89 @@ public class VCommerceTest {
 		Basket basket = new Basket();
 		basket.setItems(new ArrayList<>());
 		Item itemToBuy1 = new Item();
-		
-		Item a = availableItems.get(0);
-		
+
 		itemToBuy1.setItemId(availableItems.get(0).getItemId());
 		itemToBuy1.setName(availableItems.get(0).getName());
 		itemToBuy1.setQuantity(2);
 		basket.getItems().add(itemToBuy1);
 
-		Item itemToBuy2 = new Item(); 
+		Item itemToBuy2 = new Item();
 		itemToBuy2.setItemId(availableItems.get(1).getItemId());
 		itemToBuy2.setName(availableItems.get(1).getName());
 		itemToBuy2.setQuantity(1);
 		basket.getItems().add(itemToBuy2);
 
 		CustomerOrder[] customerOrders = new CustomerOrder[1];
-		customer.setCreateOrderResponseHandler(new CreateOrderResponseHandler() {
+		customer.addOperationResponseHandler(new CreateOrderResponseHandler() {
 			@Override
 			public void run(Shop me, RemoteShop other, String responseToken, CustomerOrder result) throws Exception {
 			}
 
 			@Override
-			public void run(Customer me, RemoteShop other, String responseToken, CustomerOrder result)
+			public void run(Vault localVault, RemoteShop other, String responseToken, CustomerOrder result)
 					throws Exception {
-				synchronized (me.getCreateOrderResponseHandler()) {
+				Customer me = (Customer) localVault;
+				synchronized (me.getOperationResponseHandler(CreateOrderResponseHandler.class)) {
 					customerOrders[0] = result;
-					me.getCreateOrderResponseHandler().notify();
+					me.getOperationResponseHandler(CreateOrderResponseHandler.class).notify();
 				}
 			}
 		});
-		synchronized (customer.getCreateOrderResponseHandler()) {
+		synchronized (customer.getOperationResponseHandler(CreateOrderResponseHandler.class)) {
 			customer.putOrder(shop, basket);
-			customer.getCreateOrderResponseHandler().wait();
+			customer.getOperationResponseHandler(CreateOrderResponseHandler.class).wait();
 		}
 
 		// Customer tracks the delivery
 		String trackingId = customerOrders[0].getTrackingId();
 
-		customer.setTrackDeliveryResponseHandler(new TrackDeliveryResponseHandler() {
+		customer.addOperationResponseHandler(new TrackDeliveryResponseHandler() {
 			@Override
 			public void run(Courier me, RemoteCourier other, String responseToken, DeliveryStatus result)
 					throws Exception {
 			}
 
 			@Override
-			public void run(Shop me, RemoteCourier other, String responseToken, DeliveryStatus result)
+			public void run(Vault localVault, RemoteCourier other, String responseToken, DeliveryStatus result)
 					throws Exception {
-			}
-
-			@Override
-			public void run(Customer me, RemoteCourier other, String responseToken, DeliveryStatus result)
-					throws Exception {
-				synchronized (me.getTrackDeliveryResponseHandler()) {
-					dsCustomer[0] = result;
-					me.getTrackDeliveryResponseHandler().notify();
+				if (localVault instanceof Customer) {
+					Customer me = (Customer) localVault;
+					synchronized (me.getOperationResponseHandler(TrackDeliveryResponseHandler.class)) {
+						dsCustomer[0] = result;
+						me.getOperationResponseHandler(TrackDeliveryResponseHandler.class).notify();
+					}
 				}
 			}
 		});
-		synchronized (customer.getTrackDeliveryResponseHandler()) {
+		synchronized (customer.getOperationResponseHandler(TrackDeliveryResponseHandler.class)) {
 			customer.trackDelivery(trackingId, courier);
-			customer.getTrackDeliveryResponseHandler().wait();
+			customer.getOperationResponseHandler(TrackDeliveryResponseHandler.class).wait();
 		}
 
 		// Shop tracks the delivery
 
-		shop.setTrackDeliveryResponseHandler(new TrackDeliveryResponseHandler() {
+		shop.addOperationResponseHandler(new TrackDeliveryResponseHandler() {
 			@Override
 			public void run(Courier me, RemoteCourier other, String responseToken, DeliveryStatus result)
 					throws Exception {
 			}
 
 			@Override
-			public void run(Shop me, RemoteCourier other, String responseToken, DeliveryStatus result)
+			public void run(Vault localVault, RemoteCourier other, String responseToken, DeliveryStatus result)
 					throws Exception {
-				synchronized (me.getTrackDeliveryResponseHandler()) {
-					dsShop[0] = result;
-					me.getTrackDeliveryResponseHandler().notify();
+				if (localVault instanceof Shop) {
+					Shop me = (Shop) localVault;
+					synchronized (me.getOperationResponseHandler(TrackDeliveryResponseHandler.class)) {
+						dsShop[0] = result;
+						me.getOperationResponseHandler(TrackDeliveryResponseHandler.class).notify();
+					}
 				}
 			}
 
-			@Override
-			public void run(Customer me, RemoteCourier other, String responseToken, DeliveryStatus result)
-					throws Exception {
-
-			}
 		});
-		synchronized (shop.getTrackDeliveryResponseHandler()) {
+		synchronized (shop.getOperationResponseHandler(TrackDeliveryResponseHandler.class)) {
 			shop.trackDelivery(trackingId, courier);
-			shop.getTrackDeliveryResponseHandler().wait();
+			shop.getOperationResponseHandler(TrackDeliveryResponseHandler.class).wait();
 		}
 	}
 

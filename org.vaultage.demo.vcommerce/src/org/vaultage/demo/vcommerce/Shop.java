@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.vaultage.core.Vault;
+
 public class Shop extends ShopBase {
 	private String name = new String();
 	private List<Item> masterItems = new ArrayList<>();
@@ -63,14 +65,14 @@ public class Shop extends ShopBase {
 			int[] itemCount = { 0 };
 			Map<String, Item> tokenItem = new HashMap<>();
 			for (Item masterItem : masterItems) {
-				this.setGetItemQuantityResponseHandler(new GetItemQuantityResponseHandler() {
+				this.addOperationResponseHandler(new GetItemQuantityResponseHandler() {
 					@Override
 					public void run(Warehouse me, RemoteWarehouse other, String responseToken, Integer result)
 							throws Exception {
 					}
 
 					@Override
-					public void run(Shop me, RemoteWarehouse other, String responseToken, Integer result)
+					public void run(Vault me, RemoteWarehouse other, String responseToken, Integer result)
 							throws Exception {
 						synchronized (masterItem) {
 							Item item = tokenItem.get(responseToken);
@@ -103,7 +105,7 @@ public class Shop extends ShopBase {
 		int[] itemCount = { 0 };
 		Map<String, Item> tokenItem = new HashMap<>();
 		for (Item basketItem : basket.getItems()) {
-			this.setGetItemQuantityResponseHandler(new GetItemQuantityResponseHandler() {
+			this.addOperationResponseHandler(new GetItemQuantityResponseHandler() {
 
 				@Override
 				public void run(Warehouse me, RemoteWarehouse other, String responseToken, Integer result)
@@ -111,7 +113,7 @@ public class Shop extends ShopBase {
 				}
 
 				@Override
-				public void run(Shop localShop, RemoteWarehouse remoteWarehouse, String responseToken, Integer stockQty)
+				public void run(Vault localShop, RemoteWarehouse remoteWarehouse, String responseToken, Integer stockQty)
 						throws Exception {
 					synchronized (basketItem) {
 
@@ -135,14 +137,14 @@ public class Shop extends ShopBase {
 								goodsIssueOrder.getItems().add(i);
 							}
 
-							Shop.this.setIssueGoodsResponseHandler(new IssueGoodsResponseHandler() {
+							Shop.this.addOperationResponseHandler(new IssueGoodsResponseHandler() {
 								@Override
 								public void run(Warehouse me, RemoteWarehouse other, String responseToken,
 										GoodsIssueConfirmation result) throws Exception {
 								}
 
 								@Override
-								public void run(Shop me, RemoteWarehouse other, String responseToken,
+								public void run(Vault me, RemoteWarehouse other, String responseToken,
 										GoodsIssueConfirmation result) throws Exception {
 
 									// tell the courier to pick up goods and deliver them
@@ -151,14 +153,14 @@ public class Shop extends ShopBase {
 									shippingOrder.setCustomerPublicKey(requesterPublicKey);
 									shippingOrder.setWarehousePulicKey(warehouse.getPublicKey());
 
-									Shop.this.setDeliverGoodsResponseHandler(new DeliverGoodsResponseHandler() {
+									Shop.this.addOperationResponseHandler(new DeliverGoodsResponseHandler() {
 										@Override
 										public void run(Courier me, RemoteCourier other, String responseToken,
 												String result) throws Exception {
 										}
 
 										@Override
-										public void run(Shop me, RemoteCourier other, String responseToken,
+										public void run(Vault me, RemoteCourier other, String responseToken,
 												String trackingId) throws Exception {
 
 											// send the order back to customer as a sign that the order has been agreed

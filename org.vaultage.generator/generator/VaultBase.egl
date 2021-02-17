@@ -2,158 +2,27 @@
 [% 	var classes = ePackage.getVaultClasses(); %]
 package [%=packageName%];
 
-import java.util.Iterator;
-import java.util.Set;
-import java.util.UUID;
-import java.io.IOException;
-
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
-import org.vaultage.util.VaultageEncryption;
-import org.vaultage.core.ResponseHandler;
 import org.vaultage.core.Vault;
-import org.vaultage.core.Vaultage;
-import org.vaultage.core.VaultageServer;
-
 import org.vaultage.wallet.PaymentInformation;
 
-public abstract class [%=class.getBaseName()%] implements Vault {
-
-	protected String id = UUID.randomUUID().toString();
-	protected String privateKey;
-	protected String publicKey;
-	protected boolean isListening;
-	protected Vaultage vaultage;
-	protected VaultageServer vaultageServer;
-
- 	/*** For a message from a vault of the same type ***/
-[% for (eOperation in class.eOperations){ %]
-[% 	if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
-	protected [%=eOperation.getClassResponseHandlerName()%] [%=eOperation.getClassResponseHandlerName().firstToLowerCase()%];	
-[% 	} %][% } %]	
+public abstract class [%=class.getBaseName()%] extends Vault {
 
 	public [%=class.getBaseName()%]() throws Exception {
-		this.isListening = false;
-		this.vaultage = new Vaultage(this);
-		initialise();
+		super();
 	}
 	
 	public [%=class.getBaseName()%](String address, int port) throws Exception {
-		this.isListening = false;
-		this.vaultage = new Vaultage(this, address, port);
-		initialise();
+		super(address, port);
 	}
 	
-	private void initialise() throws NoSuchAlgorithmException {
+	protected void initialiseMessageHandlers() throws NoSuchAlgorithmException {
 		vaultage.setRequestMessageHandler(new [%=appName%]RequestMessageHandler());
 		vaultage.setResponseMessageHandler(new [%=appName%]ResponseMessageHandler());
-		KeyPair keyPair = VaultageEncryption.generateKeys();
-		this.publicKey = VaultageEncryption.getPublicKey(keyPair);
-		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
 	}
-	
-	public VaultageServer getVaultageServer(){
-		return this.vaultageServer;
-	}
-	
-	public String getId(){
-		return this.id;
-	}
-	
-	public void setId(String id){
-		this.id = id;
-	}
-	
-	public Vaultage getVaultage() {
-		return vaultage;
-	}
-
-	public void setVaultage(Vaultage vaultage) {
-		this.vaultage = vaultage;
-	}
-	
-	public String getPrivateKey() {
-		return privateKey;
-	}
-
-	public void setPrivateKey(String privateKey) {
-		this.privateKey = privateKey;
-	}
-
-	public String getPublicKey() {
-		return publicKey;
-	}
-
-	public void setPublicKey(String publicKey) {
-		this.publicKey = publicKey;
-	}
-
-	public void addResponseHandler(ResponseHandler responseHandler){
-		Set<ResponseHandler> responseHandlers = this.getVaultage().getResponseMessageHandler().getResponseHandlers();
-		Iterator<ResponseHandler> iterator = responseHandlers.iterator();
-		while(iterator.hasNext()) {
-			ResponseHandler handler = iterator.next();
-			if (handler.equals(responseHandler)) {
-				iterator.remove();
-			}
-			for (Class<?> i : handler.getClass().getInterfaces()) {
-				if (i.equals(responseHandler.getClass())) {
-					iterator.remove();
-					break;
-				}
-			}
-		}
-		responseHandlers.add(responseHandler);
-	}
-	
-	public ResponseHandler getResponseHandler(Class<?> interfaceOrClass){
-		for (ResponseHandler handler : this.getVaultage().getResponseMessageHandler().getResponseHandlers()) {
-			if (handler.getClass().equals(interfaceOrClass)) {
-				return handler;
-			}
-			for (Class<?> i : handler.getClass().getInterfaces()) {
-				if (i.equals(interfaceOrClass)) {
-					return handler;
-				}
-			}
-		}
-		return null;
-	}
-	
-	public boolean register(VaultageServer vaultageServer) throws Exception {
-		boolean isSuccess = vaultage.connect(vaultageServer.getAddress(), publicKey);
-		this.vaultageServer = vaultageServer;
-		if (isSuccess) {
-			vaultage.subscribe(publicKey, privateKey);
-			return true;
-		}
-		return false;
-	}
-
-	public void unregister() throws Exception {
-		vaultage.disconnect();
-	}
-	
-	/***
-	 * A method to start the direct messaging server of this vault.
-	 * 
-	 * @param address
-	 * @param port
-	 */
-	public void startServer(String address, int port) {
-		this.vaultage.startServer(address, port);
-		this.vaultage.setPrivateKey(this.getPrivateKey());
-	}	
-	/***
-	 * A method to stop the direct messaging server of this vault.
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
-	public void shutdownServer() throws IOException, InterruptedException {
-		vaultage.shutdownServer();
-	}
-	
+		
 	// operations
 [% for (eOperation in class.eOperations){ %]
 	[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
