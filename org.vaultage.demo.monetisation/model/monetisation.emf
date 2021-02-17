@@ -7,7 +7,7 @@ class CityCouncil {
 	
 	op Questionnaire getQuestionnaire(String pollId);
 	
-	@vaultage(charged="provider")
+	@vaultage(monetised="true")
 	op String submitQuestionnaire(Questionnaire questionnaire);
 }
 
@@ -37,7 +37,7 @@ class ContentCreator {
 	// op Content subscribe();
 	
 	// pay per item
-	@vaultage(charged="consumer")
+	@vaultage(monetised="true")
 	op Content getMonetisedContent(String contentId);
 	
 	// pay per budle/items

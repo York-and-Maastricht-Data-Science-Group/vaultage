@@ -6,7 +6,9 @@ package vcommerce;
 @vault
 class Customer {
 	attr String name;
+	
 	val BillingAddress billingAddress;
+	
 	val ShippingAddress shippingAddress;
 	
 	op BillingAddress getBillingAddress();
