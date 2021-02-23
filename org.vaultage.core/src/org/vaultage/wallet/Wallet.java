@@ -15,6 +15,10 @@ public interface Wallet {
 		PRODUCTION, SANDBOX
 	}
 
+	public String getWalletName();
+	
+	public String getWalletId(); 
+	
 	public String getClientId();
 
 	public void setClientId(String clientId);

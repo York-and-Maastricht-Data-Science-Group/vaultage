@@ -19,6 +19,7 @@
 		</plugins>
 	</build>
 	<dependencies>
+		
 		<!-- https://mvnrepository.com/artifact/io.javalin/javalin -->
 		<dependency>
 			<groupId>io.javalin</groupId>

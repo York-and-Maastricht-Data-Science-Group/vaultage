@@ -7,10 +7,10 @@ package [%=packageName%];
 
 import java.util.List;
 
-import org.vaultage.core.ResponseHandler;
+import org.vaultage.core.OperationResponseHandler;
 import org.vaultage.core.Vault;
 
-public interface [%=eOperation.getClassResponseHandlerName()%] extends ResponseHandler {
+public interface [%=eOperation.getClassResponseHandlerName()%] extends OperationResponseHandler {
 
 [% if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
 	/* local vault's type is different from the remote vault's type */

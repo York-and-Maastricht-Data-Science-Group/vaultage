@@ -3,6 +3,7 @@ package org.vaultage.wallet.vaullet;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.util.UUID;
 
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
@@ -19,6 +20,7 @@ import kong.unirest.Unirest;
 
 public class VaulletWallet implements Wallet {
 
+	public final String WALLET_NAME = "Vaullet";
 	private final String host;
 
 	private String clientId;
@@ -33,9 +35,11 @@ public class VaulletWallet implements Wallet {
 	private String bankAddress;
 	private String currency;
 	private String accountNumber;
+	private String walletId;
 	
 	public VaulletWallet(String walletServerAddress) {
 		this.host = walletServerAddress;
+		this.walletId = UUID.randomUUID().toString();
 	}
 
 	public String getClientId() {
@@ -197,6 +201,16 @@ public class VaulletWallet implements Wallet {
 
 	public String getHost() {
 		return host;
+	}
+
+	@Override
+	public String getWalletId() {
+		return this.walletId;
+	}
+
+	@Override
+	public String getWalletName() {
+		return this.WALLET_NAME;
 	}
 
 	

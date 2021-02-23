@@ -5,5 +5,3 @@ Bundle-SymbolicName: org.vaultage.demo.fairnet.desktop
 Bundle-Version: 1.0.0.qualifier
 Export-Package: org.vaultage.demo.fairnet.desktop,
  org.vaultage.demo.fairnet.images
-Require-Bundle: org.vaultage.demo.fairnet,
- org.vaultage.core

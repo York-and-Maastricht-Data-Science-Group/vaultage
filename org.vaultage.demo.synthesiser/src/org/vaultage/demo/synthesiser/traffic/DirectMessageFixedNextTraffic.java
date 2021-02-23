@@ -25,7 +25,7 @@ public class DirectMessageFixedNextTraffic {
 		int numWorkers = 3;
 		int[] numOperations = { 25, 50, 100, 150, 200 };
 
-		PrintStream profilingStream = new PrintStream(new File("fixedNetResults.csv"));
+		PrintStream profilingStream = new PrintStream(new File("directFixedNetResults.csv"));
 		profilingStream.println("NumTasks,TotalTimeMillis");
 
 		for (int numOp : numOperations) {
@@ -47,9 +47,10 @@ public class DirectMessageFixedNextTraffic {
 	public void run() throws Exception {
 		Worker[] workers = new Worker[numWorkers];
 
-		SynthesiserBroker broker = new SynthesiserBroker();
-		broker.start(SynthesiserBroker.BROKER_ADDRESS);
-		VaultageServer server = new VaultageServer(SynthesiserBroker.BROKER_ADDRESS);
+//		SynthesiserBroker broker = new SynthesiserBroker();
+//		broker.start(SynthesiserBroker.BROKER_ADDRESS);
+//		VaultageServer server = new VaultageServer(SynthesiserBroker.BROKER_ADDRESS);
+		VaultageServer server = new VaultageServer("tcp://localhost:61616");
 
 		int port = Vaultage.DEFAULT_SERVER_PORT;
 		
@@ -97,7 +98,7 @@ public class DirectMessageFixedNextTraffic {
 			workers[i].unregister();
 			workers[i].shutdownServer();
 		}
-		broker.stop();
+//		broker.stop();
 	}
 
 	public int getNumOperations() {
@@ -119,7 +120,8 @@ public class DirectMessageFixedNextTraffic {
 			public void run() {
 				while (!worker.isWorkComplete()) {
 					try {
-						worker.sendOperation(remoteWorkerKey);
+//						worker.sendOperation(remoteWorkerKey);
+						worker.sendOperation(remoteWorkerKey, false);
 					}
 					catch (Exception e) {
 						e.printStackTrace();

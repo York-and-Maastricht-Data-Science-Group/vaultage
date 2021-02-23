@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -30,7 +31,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class UpholdWallet implements Wallet {
 
-	WalletEnvironment walletEnvironment;
+	public final String WALLET_NAME = "Uphold";
+	private WalletEnvironment walletEnvironment;
 	private final String host;
 	private final String sandboxOtpToken = "000000";
 	public static final String API_HOST_PRODUCTION = "api.uphold.com";
@@ -50,10 +52,12 @@ public class UpholdWallet implements Wallet {
 	private String bankAddress;
 	private String currency = "USD";
 	private String accountNumber;
+	private String walletId;
 
 	public UpholdWallet() {
 		walletEnvironment = WalletEnvironment.SANDBOX;
 		host = UpholdWallet.API_HOST_SANDBOX;
+		this.walletId = UUID.randomUUID().toString();
 	}
 
 	public UpholdWallet(WalletEnvironment walletEnvironment) {
@@ -63,6 +67,7 @@ public class UpholdWallet implements Wallet {
 		} else {
 			host = UpholdWallet.API_HOST_PRODUCTION;
 		}
+		this.walletId = UUID.randomUUID().toString();
 	}
 
 	public String getClientId() {
@@ -431,5 +436,15 @@ public class UpholdWallet implements Wallet {
 
 	public void setAccountNumber(String accountNumber) {
 		this.accountNumber = accountNumber;
+	}
+
+	@Override
+	public String getWalletName() {
+		return this.WALLET_NAME;
+	}
+
+	@Override
+	public String getWalletId() {
+		return this.walletId;
 	}
 }

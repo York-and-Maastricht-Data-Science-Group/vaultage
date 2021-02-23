@@ -62,6 +62,8 @@ class Consumer {
 
 class Content {
 	attr boolean isMonetised = false;
+	attr String title;
+	attr String description;
 	attr String type; // json, xml, plain text, etc. 
 	attr String body; // the content is presented in string
 }

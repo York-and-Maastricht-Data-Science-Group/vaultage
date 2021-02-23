@@ -1,5 +1,14 @@
 package org.vaultage.core;
 
 public abstract class RequestMessageHandler {
-	public abstract void process(VaultageMessage message, String senderPublicKey, Object vault) throws Exception;
+
+	public void process(VaultageMessage message, String senderPublicKey, Object vault) throws Exception {
+		switch (message.getOperation()) {
+
+		case "getPaymentWallets": {
+			((Vault) vault).getPaymentWallets(senderPublicKey, message.getToken());
+		}
+
+		}
+	}
 }

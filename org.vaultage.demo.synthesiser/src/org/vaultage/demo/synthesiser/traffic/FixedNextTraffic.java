@@ -46,9 +46,10 @@ public class FixedNextTraffic {
 	public void run() throws Exception {
 		Worker[] workers = new Worker[numWorkers];
 
-		SynthesiserBroker broker = new SynthesiserBroker();
-		broker.start(SynthesiserBroker.BROKER_ADDRESS);
-		VaultageServer server = new VaultageServer(SynthesiserBroker.BROKER_ADDRESS);
+//		SynthesiserBroker broker = new SynthesiserBroker();
+//		broker.start(SynthesiserBroker.BROKER_ADDRESS);
+//		VaultageServer server = new VaultageServer(SynthesiserBroker.BROKER_ADDRESS);
+		VaultageServer server = new VaultageServer("tcp://localhost:61616");
 
 		for (int i = 0; i < numWorkers; i++) {
 			workers[i] = new Worker();
@@ -80,7 +81,7 @@ public class FixedNextTraffic {
 		for (int i = 0; i < numWorkers; i++) {
 			workers[i].unregister();
 		}
-		broker.stop();
+//		broker.stop();
 	}
 
 	public int getNumOperations() {
@@ -102,7 +103,8 @@ public class FixedNextTraffic {
 			public void run() {
 				while (!worker.isWorkComplete()) {
 					try {
-						worker.sendOperation(remoteWorkerKey);
+//						worker.sendOperation(remoteWorkerKey);
+						worker.sendOperation(remoteWorkerKey, false);
 					}
 					catch (Exception e) {
 						e.printStackTrace();

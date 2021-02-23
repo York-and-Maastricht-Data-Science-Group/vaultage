@@ -14,6 +14,7 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 	@Override
 	public void process(VaultageMessage message, String senderPublicKey, Object vault) throws Exception {
 [% var count = 1; %]	
+	super.process(message, senderPublicKey, vault);
 [% for (class in classes) { %]
 	[% if (count > 1) { %] 
 	else 
@@ -23,10 +24,8 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 		// [%=class.name%] requester = new [%=class.name%]();
 		// requester.setPublicKey(senderPublicKey);
 		String requester = senderPublicKey;
-		
 		String operation = message.getOperation();
 		String messageToken = message.getToken();
-
 		switch (operation) {
 [% for (eOperation in class.eOperations){ %]
 			case "[%=eOperation.name%]": {

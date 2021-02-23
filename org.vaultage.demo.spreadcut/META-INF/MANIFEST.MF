@@ -5,4 +5,3 @@ Bundle-SymbolicName: org.vaultage.demo.spreadcut
 Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: org.vaultage.demo.spreadcut
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.vaultage.core

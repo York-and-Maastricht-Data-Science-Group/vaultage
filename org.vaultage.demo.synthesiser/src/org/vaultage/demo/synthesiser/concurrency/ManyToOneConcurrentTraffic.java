@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.text.MessageFormat;
 
 import org.vaultage.core.VaultageServer;
+import org.vaultage.demo.synthesiser.SynthesiserBroker;
 import org.vaultage.demo.synthesiser.Worker;
 import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandler;
 
@@ -22,7 +23,9 @@ public class ManyToOneConcurrentTraffic {
 
 	public static void main(String[] args) throws Exception {
 
+//		int numReps = 1;
 		int numReps = 10;
+//		int[] numRequesters = { 1 };
 		int[] numRequesters = { 1, 20, 30, 50 };
 		int numOperations = 1;
 

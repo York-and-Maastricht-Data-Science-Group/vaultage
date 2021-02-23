@@ -19,12 +19,12 @@ public abstract class Vault {
 	protected boolean isListening;
 	protected Vaultage vaultage;
 	protected VaultageServer vaultageServer;
-	
-	protected Set<ResponseHandler> responseHandlers = new HashSet<>();
-	
+
+	protected Set<OperationResponseHandler> operationResponseHandlers = new HashSet<>();
+
 	protected Set<Wallet> wallets = new HashSet<>();
 	protected Wallet defaultWallet;
-	
+
 	public Vault() throws Exception {
 		this.isListening = false;
 		this.vaultage = new Vaultage(this);
@@ -33,7 +33,7 @@ public abstract class Vault {
 		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
 		initialiseMessageHandlers();
 	}
-	
+
 	public Vault(String address, int port) throws Exception {
 		this.isListening = false;
 		this.vaultage = new Vaultage(this, address, port);
@@ -42,50 +42,50 @@ public abstract class Vault {
 		this.privateKey = VaultageEncryption.getPrivateKey(keyPair);
 		initialiseMessageHandlers();
 	}
-	
+
 	protected abstract void initialiseMessageHandlers() throws NoSuchAlgorithmException;
-	
-	public VaultageServer getVaultageServer(){
+
+	public VaultageServer getVaultageServer() {
 		return this.vaultageServer;
 	}
-	
-	public String getId(){
+
+	public String getId() {
 		return this.id;
 	}
-	
-	public void setId(String id){
+
+	public void setId(String id) {
 		this.id = id;
 	}
-	
+
 	public Vaultage getVaultage() {
 		return vaultage;
 	}
-	
+
 	public void setVaultage(Vaultage vaultage) {
 		this.vaultage = vaultage;
 	}
-	
+
 	public String getPrivateKey() {
 		return privateKey;
 	}
-	
+
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
-	
+
 	public String getPublicKey() {
 		return publicKey;
 	}
-	
+
 	public void setPublicKey(String publicKey) {
 		this.publicKey = publicKey;
 	}
-	
-	public void addOperationResponseHandler(ResponseHandler responseHandler){
-		Set<ResponseHandler> responseHandlers = this.getResponseHandlers();
-		Iterator<ResponseHandler> iterator = responseHandlers.iterator();
-		while(iterator.hasNext()) {
-			ResponseHandler handler = iterator.next();
+
+	public void addOperationResponseHandler(OperationResponseHandler responseHandler) {
+		Set<OperationResponseHandler> responseHandlers = this.operationResponseHandlers;
+		Iterator<OperationResponseHandler> iterator = responseHandlers.iterator();
+		while (iterator.hasNext()) {
+			OperationResponseHandler handler = iterator.next();
 			if (handler.equals(responseHandler)) {
 				iterator.remove();
 			}
@@ -98,9 +98,9 @@ public abstract class Vault {
 		}
 		responseHandlers.add(responseHandler);
 	}
-	
-	public ResponseHandler getOperationResponseHandler(Class<?> interfaceOrClass){
-		for (ResponseHandler handler : this.getResponseHandlers()) {
+
+	public OperationResponseHandler getOperationResponseHandler(Class<?> interfaceOrClass) {
+		for (OperationResponseHandler handler : this.operationResponseHandlers) {
 			if (handler.getClass().equals(interfaceOrClass)) {
 				return handler;
 			}
@@ -112,7 +112,7 @@ public abstract class Vault {
 		}
 		return null;
 	}
-	
+
 	public boolean register(VaultageServer vaultageServer) throws Exception {
 		boolean isSuccess = vaultage.connect(vaultageServer.getAddress(), publicKey);
 		this.vaultageServer = vaultageServer;
@@ -122,30 +122,32 @@ public abstract class Vault {
 		}
 		return false;
 	}
-	
+
 	public void unregister() throws Exception {
 		vaultage.disconnect();
 	}
-	
+
 	/***
-	* A method to start the direct messaging server of this vault.
-	* 
-	* @param address
-	* @param port
-	*/
+	 * A method to start the direct messaging server of this vault.
+	 * 
+	 * @param address
+	 * @param port
+	 */
 	public void startServer(String address, int port) {
 		this.vaultage.startServer(address, port);
 		this.vaultage.setPrivateKey(this.getPrivateKey());
-	}	
+	}
+
 	/***
-	* A method to stop the direct messaging server of this vault.
-	* @throws IOException
-	* @throws InterruptedException
-	*/
+	 * A method to stop the direct messaging server of this vault.
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public void shutdownServer() throws IOException, InterruptedException {
 		vaultage.shutdownServer();
 	}
-	
+
 	/***
 	 * Get all available wallets.
 	 * 
@@ -173,12 +175,18 @@ public abstract class Vault {
 		this.defaultWallet = defaultWallet;
 		wallets.add(defaultWallet);
 	}
-	
+
 	/***
-	 * Get a set of response handlers
-	 * @return
+	 * Send available local vault's wallets to the requester so that it can choose
+	 * which wallet is the destination wallet for payment
+	 * 
+	 * @param requesterPublicKey
+	 * @param requestToken
+	 * @throws Exception
 	 */
-	public Set<ResponseHandler> getResponseHandlers() {
-		return responseHandlers;
+	public void getPaymentWallets(String requesterPublicKey, String requestToken) throws Exception {
+		RemoteVault responder = new RemoteVault(this, requesterPublicKey);
+		Set<Wallet> w = getWallets();
+		responder.respondToGetPaymentWallets(w, requestToken);
 	}
 }

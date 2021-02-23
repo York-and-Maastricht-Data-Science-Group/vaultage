@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import org.vaultage.core.RemoteVault;
 import org.vaultage.core.Vault;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
@@ -13,20 +14,13 @@ import org.vaultage.core.VaultageMessage.MessageType;
 import org.vaultage.wallet.PaymentInformation;
 import org.vaultage.wallet.Wallet;
 
-public class [%=class.remoteName()%] {
+public class [%=class.remoteName()%] extends RemoteVault {
 
 	//protected [%=class.name%] localVault;
-	protected Vault localVault;
-	protected String remotePublicKey;
-
-	public String getRemotePublicKey() {
-		return remotePublicKey;
-	}
 
 	//public [%=class.remoteName()%]([%=class.name%] localVault, String remotePublicKey) {
 	public [%=class.remoteName()%](Vault localVault, String remotePublicKey) {
-		this.localVault = localVault;
-		this.remotePublicKey = remotePublicKey;
+		super(localVault, remotePublicKey);
 	}
 [% for (eOperation in class.eOperations) { %]
 
