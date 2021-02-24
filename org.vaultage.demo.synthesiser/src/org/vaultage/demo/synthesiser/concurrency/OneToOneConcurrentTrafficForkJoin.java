@@ -54,7 +54,7 @@ public class OneToOneConcurrentTrafficForkJoin {
 		// direct messaging
 		System.out.println("==DIRECT==");
 //		for (int numRequester : numRequesters) {
-		for (int numRequester = 1; numRequester < NUM_OF_PROCESSORS; numRequester++) {
+		for (int numRequester = 1; numRequester <= NUM_OF_PROCESSORS; numRequester++) {
 			OneToOneConcurrentTrafficForkJoin directTrafficSimulation = new OneToOneConcurrentTrafficForkJoin(numRequester,
 					numOperations);
 			for (int rep = 0; rep < numReps; rep++) {
