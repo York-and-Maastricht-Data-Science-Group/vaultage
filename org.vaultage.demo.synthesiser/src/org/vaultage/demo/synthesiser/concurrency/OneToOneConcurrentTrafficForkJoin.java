@@ -20,7 +20,7 @@ import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandle
  */
 public class OneToOneConcurrentTrafficForkJoin {
 
-	private static final int NUM_OF_PROCESSORS = 3;
+	private static final int NUM_OF_PROCESSORS = 30;
 	protected long latestWaitTime;
 	protected int numRequester;
 	protected int numOperations;
@@ -28,31 +28,33 @@ public class OneToOneConcurrentTrafficForkJoin {
 
 	public static void main(String[] args) throws Exception {
 
-		int numReps = 10;
+		int numReps = 5;
 //		int numReps = 3;
-		int[] numRequesters = { 1, 2, 3, 4 };
+//		int[] numRequesters = { 1, 2, 3, 4 };
 //		int[] numRequesters = {4};
-		int numOperations = 100;
+		int numOperations = 1;
 
 		PrintStream profilingStream = new PrintStream(new File("oneToOneConcurrentTrafficResults.csv"));
-		profilingStream.println("Mode,NumRequesters,TotalTimeMillis");
+		profilingStream.println("Mode,NumRequesters,TimePerPair,TotalTimeMillis");
 
 		// brokered messaging
 		System.out.println("==brokered==");
-		for (int numRequester : numRequesters) {
+//		for (int numRequester : numRequesters) {
+		for (int numRequester = 1; numRequester <= NUM_OF_PROCESSORS; numRequester++) {
 			OneToOneConcurrentTrafficForkJoin brokeredTrafficSimulation = new OneToOneConcurrentTrafficForkJoin(numRequester,
 					numOperations);
 			for (int rep = 0; rep < numReps; rep++) {
 				brokeredTrafficSimulation.runBrokeredMessaging();
 				System.out.println(brokeredTrafficSimulation.getLatestRunDetails());
-				profilingStream.println(String.format("%s,%s,%d,d%", "brokered", numRequester,
+				profilingStream.println(String.format("%s,%s,%d,%d", "brokered", numRequester,
 						brokeredTrafficSimulation.getLatestWaitTime(), brokeredTrafficSimulation.getTotalTime()));
 			}
 		}
 
 		// direct messaging
 		System.out.println("==DIRECT==");
-		for (int numRequester : numRequesters) {
+//		for (int numRequester : numRequesters) {
+		for (int numRequester = 1; numRequester < NUM_OF_PROCESSORS; numRequester++) {
 			OneToOneConcurrentTrafficForkJoin directTrafficSimulation = new OneToOneConcurrentTrafficForkJoin(numRequester,
 					numOperations);
 			for (int rep = 0; rep < numReps; rep++) {
@@ -100,12 +102,12 @@ public class OneToOneConcurrentTrafficForkJoin {
 			requesters[i].register(server);
 		}
 
-		// initialise all threads first
-		Thread threads[] = new Thread[numRequester];
-		for (int i = 0; i < numRequester; i++) {
-			String remoteWorkerKey = workers[i].getPublicKey();
-			threads[i] = initThread(requesters[i], remoteWorkerKey);
-		}
+//		// initialise all threads first
+//		Thread threads[] = new Thread[numRequester];
+//		for (int i = 0; i < numRequester; i++) {
+//			String remoteWorkerKey = workers[i].getPublicKey();
+//			threads[i] = initThread(requesters[i], remoteWorkerKey);
+//		}
 
 		
 		ForkRequest forkRequest = new ForkRequest(requesters, workers, 0, numRequester - 1);
@@ -254,11 +256,11 @@ public class OneToOneConcurrentTrafficForkJoin {
 				numOperations, latestWaitTime, totalTime);
 	}
 
-	private static Thread initThread(Worker worker, String remoteWorkerKey) {
-		Thread t = new SendOperationThread(worker, remoteWorkerKey);
-//		t.start();
-		return t;
-	}
+//	private static Thread initThread(Worker worker, String remoteWorkerKey) {
+//		Thread t = new SendOperationThread(worker, remoteWorkerKey);
+////		t.start();
+//		return t;
+//	}
 
 	public class ForkRequest extends RecursiveTask<Long> {
 
@@ -289,7 +291,8 @@ public class OneToOneConcurrentTrafficForkJoin {
 			left.fork();
 			long rightResult = right.compute();
 			long leftResult = left.join();
-			return (leftResult > rightResult) ? leftResult : rightResult;
+//			return (leftResult > rightResult) ? leftResult : rightResult;
+			return (leftResult + rightResult) / 2;
 		}
 
 		public long sendRequest(Worker requester, Worker worker) {
@@ -310,36 +313,36 @@ public class OneToOneConcurrentTrafficForkJoin {
 
 	}
 
-	public static class SendOperationThread extends Thread {
-		private final Worker worker;
-		private final String remoteWorkerKey;
-		private long executionTime;
-
-		public SendOperationThread(Worker worker, String remoteWorkerKey) {
-			this.setName(worker.getId());
-			this.executionTime = 0;
-			this.worker = worker;
-			this.remoteWorkerKey = remoteWorkerKey;
-		}
-
-		public void run() {
-//			System.out.println("Requester " + worker.getId() + " start...");
-			long start = System.currentTimeMillis();
-//			while (!worker.isWorkComplete()) {
-				try {
-					worker.sendOperation(remoteWorkerKey, false);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-//			}
-			long end = System.currentTimeMillis();
-			executionTime = end - start;
-//			System.out.println("Requester " + worker.getId() + " ended = " + executionTime);
-		}
-
-		public long getExecutionTime() {
-			return executionTime;
-		}
-	}
+//	public static class SendOperationThread extends Thread {
+//		private final Worker worker;
+//		private final String remoteWorkerKey;
+//		private long executionTime;
+//
+//		public SendOperationThread(Worker worker, String remoteWorkerKey) {
+//			this.setName(worker.getId());
+//			this.executionTime = 0;
+//			this.worker = worker;
+//			this.remoteWorkerKey = remoteWorkerKey;
+//		}
+//
+//		public void run() {
+////			System.out.println("Requester " + worker.getId() + " start...");
+//			long start = System.currentTimeMillis();
+////			while (!worker.isWorkComplete()) {
+//				try {
+//					worker.sendOperation(remoteWorkerKey, false);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+////			}
+//			long end = System.currentTimeMillis();
+//			executionTime = end - start;
+////			System.out.println("Requester " + worker.getId() + " ended = " + executionTime);
+//		}
+//
+//		public long getExecutionTime() {
+//			return executionTime;
+//		}
+//	}
 
 }
