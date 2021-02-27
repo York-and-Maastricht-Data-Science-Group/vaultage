@@ -49,7 +49,8 @@ public class FixedNextTraffic {
 //		SynthesiserBroker broker = new SynthesiserBroker();
 //		broker.start(SynthesiserBroker.BROKER_ADDRESS);
 //		VaultageServer server = new VaultageServer(SynthesiserBroker.BROKER_ADDRESS);
-		VaultageServer server = new VaultageServer("tcp://localhost:61616");
+//		VaultageServer server = new VaultageServer("tcp://localhost:61616");
+		VaultageServer server = new VaultageServer("tcp://139.162.228.32:61616");
 
 		for (int i = 0; i < numWorkers; i++) {
 			workers[i] = new Worker();

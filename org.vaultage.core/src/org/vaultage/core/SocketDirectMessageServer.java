@@ -182,8 +182,10 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 					VaultageMessage vaultageMessage = Vaultage.deserialise(content, VaultageMessage.class);
 					MessageType msgType = vaultageMessage.getMessageType();
 
+					if (vaultageMessage.getSenderAddress() != null && vaultageMessage.getSenderPort() >= 0) {
 					vaultage.getPublicKeyToRemoteAddress().put(senderPublicKey, new InetSocketAddress(
 							vaultageMessage.getSenderAddress(), vaultageMessage.getSenderPort()));
+					}
 
 					switch (msgType) {
 					case REQUEST:

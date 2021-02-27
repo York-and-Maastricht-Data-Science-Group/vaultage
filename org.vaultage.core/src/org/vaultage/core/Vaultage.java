@@ -75,6 +75,8 @@ public class Vaultage {
 	private RequestMessageHandler requestMessageHandler;
 	private ResponseMessageHandler responseMessageHandler;
 	
+	private boolean isForcedBrokeredMessaging = true;
+	
 	/***
 	 * Test or demo this Vaultage class. No encryption is performed. These routines
 	 * are only to give some values to the parameters of the operations used in this
@@ -323,7 +325,7 @@ public class Vaultage {
 			// get the receiver's ip address and port from the topic id or public key
 			InetSocketAddress remoteServer = publicKeyToRemoteAddress.get(topicId);
 			boolean remoteServerAvailable = false;
-			if (remoteServer != null) {
+			if (remoteServer != null && isForcedBrokeredMessaging) {
 
 //				try {
 //					Socket socket = new Socket(remoteServer.getAddress(), remoteServer.getPort());
@@ -361,7 +363,7 @@ public class Vaultage {
 				MessageProducer producer = session.createProducer(destination);
 
 				// set the delivery mode
-				producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+				producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
 				// create the message
 				TextMessage m = session.createTextMessage(concatenatedMessage);
@@ -431,7 +433,7 @@ public class Vaultage {
 						MessageType msgType = vaultageMessage.getMessageType();
 
 						// save sender's ip and port to public key and address map
-						if (vaultageMessage.getSenderAddress() != null && vaultageMessage.getSenderPort() >= 0)
+						if (vaultageMessage.getSenderAddress() != null && vaultageMessage.getSenderPort() >= 0 && isForcedBrokeredMessaging)
 							Vaultage.this.getPublicKeyToRemoteAddress().put(senderPublicKey, new InetSocketAddress(
 									vaultageMessage.getSenderAddress(), vaultageMessage.getSenderPort()));
 
@@ -616,5 +618,17 @@ public class Vaultage {
 	 */
 	public DirectMessageServer getDirectMessageServer() {
 		return directMessageServer;
+	}
+
+	/***
+	 * Use direct messaging if it's possible/available
+	 * @return
+	 */
+	public boolean isForcedBrokeredMessaging() {
+		return isForcedBrokeredMessaging;
+	}
+
+	public void forceBrokeredMessaging(boolean isForced) {
+		this.isForcedBrokeredMessaging = isForced;
 	}	
 }

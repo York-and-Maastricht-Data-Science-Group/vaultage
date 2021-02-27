@@ -34,7 +34,7 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 		Object senderObject = constructor.newInstance(parameterValues);
 
 		// 4. Get the class and type of the return value using its class/type above
-		String[] types = returnValueClassName.split("<|>|,\s");
+		String[] types = returnValueClassName.split("<|>|,\\s");
 		Class<?> returnClass;
 		Type returnType;
 		if (types.length > 1) {
