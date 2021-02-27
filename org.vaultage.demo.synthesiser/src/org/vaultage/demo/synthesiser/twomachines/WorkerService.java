@@ -17,6 +17,7 @@ import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandle
  */
 public class WorkerService {
 
+	private static final String WORKER_DIRECTORY = "Z:\\workers\\";
 	private static final String LOCAL_IP = "192.168.0.2";
 	private static final int NUM_WORKERS = 3;
 
@@ -37,7 +38,7 @@ public class WorkerService {
 			workers[i].addOperationResponseHandler(new SynchronisedIncrementResponseHandler());
 			workers[i].register(server);
 			workers[i].startServer(LOCAL_IP, port++);
-			Files.write(Paths.get("Z:\\workers\\" + workers[i].getId() + ".txt"), workers[i].getPublicKey().getBytes(),
+			Files.write(Paths.get(WORKER_DIRECTORY + workers[i].getId() + ".txt"), workers[i].getPublicKey().getBytes(),
 					StandardOpenOption.CREATE);
 			System.out.println(workers[i].getId() + " created");
 		}

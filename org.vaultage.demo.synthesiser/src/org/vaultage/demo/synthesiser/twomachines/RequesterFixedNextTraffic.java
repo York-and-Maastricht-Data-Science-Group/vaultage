@@ -20,6 +20,8 @@ import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandle
  */
 public class RequesterFixedNextTraffic {
 
+	private static final String REQUESTER_DIRECTORY = "Z:\\requesters\\";
+	private static final String WORKER_DIRECTORY = "Z:\\workers\\";
 	private static final String LOCAL_IP = "192.168.0.2";
 	protected long latestRunTime;
 	protected boolean brokered;
@@ -99,7 +101,7 @@ public class RequesterFixedNextTraffic {
 
 		// loading workers public keys
 		String[] workerPKs = new String[numWorkers];
-		File directoryPath = new File("Z:\\workers\\");
+		File directoryPath = new File(WORKER_DIRECTORY);
 		File[] files = directoryPath.listFiles();
 		for (int i = 0; i < files.length; i++) {
 			String workerPK = new String(Files.readAllBytes(Paths.get(files[i].getAbsolutePath())));
@@ -118,7 +120,7 @@ public class RequesterFixedNextTraffic {
 			} else {
 				requesters[i].getVaultage().forceBrokeredMessaging(false);
 			}
-			Files.write(Paths.get("Z:\\requesters\\" + requesters[i].getId() + ".txt"),
+			Files.write(Paths.get(REQUESTER_DIRECTORY + requesters[i].getId() + ".txt"),
 					requesters[i].getPublicKey().getBytes(), StandardOpenOption.CREATE);
 //			System.out.println(requesters[i].getId() + " created");
 		}
