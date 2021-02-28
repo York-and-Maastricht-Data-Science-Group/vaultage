@@ -2,10 +2,12 @@ package org.vaultage.demo.synthesiser.twomachines;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Random;
 
 import org.vaultage.core.Vaultage;
@@ -15,15 +17,15 @@ import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandle
 
 /**
  * Stress-testing for Vaultage. Run worker service first to prepare the workers
- * before running this class. 
+ * before running this class.
  *
  * @author Alfonso de la Vega, Alfa Yohannis
  */
 public class FixedNextTrafficRequester {
 
-	private static final String SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
-	private static final String SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
-	private static final String LOCAL_IP = "192.168.0.2";
+	private static String SHARED_REQUESTER_DIRECTORY;
+	private static String SHARED_WORKER_DIRECTORY;
+	private static String LOCAL_IP;
 	protected long latestRunTime;
 	protected boolean brokered;
 	protected boolean encrypted;
@@ -32,10 +34,22 @@ public class FixedNextTrafficRequester {
 	private Random random = new Random();
 
 	public static void main(String[] args) throws Exception {
+
+		String hostname = InetAddress.getLocalHost().getHostName();
+		if (hostname.equals("DESKTOP-S9QN639")) {
+			SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
+			SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
+			LOCAL_IP = "192.168.0.2";
+		} else if (hostname.equals("wv9011")) {
+			SHARED_REQUESTER_DIRECTORY = "/home/ryan/share/requesters/";
+			SHARED_WORKER_DIRECTORY = "/home/ryan/share/workers/";
+			LOCAL_IP = "192.168.0.4";
+		}
+		
 		int numReps = 5;
 		int numWorkers = 3;
 //		int[] numOperations = { 10 };
-		int[] numOperations = { 5, 10, 15, 20, 25 };
+		int[] numOperations = { 4, 5, 10, 15, 20, 25 };
 
 		PrintStream profilingStream = new PrintStream(new File("fixedNetResults.csv"));
 		profilingStream.println("Mode,Encryption,NumTasks,TotalTimeMillis");
@@ -106,6 +120,7 @@ public class FixedNextTrafficRequester {
 		String[] workerPKs = new String[numWorkers];
 		File directoryPath = new File(SHARED_WORKER_DIRECTORY);
 		File[] files = directoryPath.listFiles();
+		Arrays.sort(files);
 		for (int i = 0; i < files.length; i++) {
 			String workerPK = new String(Files.readAllBytes(Paths.get(files[i].getAbsolutePath())));
 			workerPKs[i] = workerPK;
@@ -137,12 +152,12 @@ public class FixedNextTrafficRequester {
 		}
 
 		long start = System.currentTimeMillis();
-		
+
 		// start all threads
 		for (int i = 0; i < numWorkers; i++) {
 			threads[i].start();
 		}
-		
+
 		// wait for workers to finish
 		for (int i = 0; i < numWorkers; i++) {
 			threads[i].join();

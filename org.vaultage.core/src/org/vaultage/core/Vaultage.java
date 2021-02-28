@@ -411,11 +411,11 @@ public class Vaultage {
 				@Override
 				public void onMessage(Message message) {
 					try {
-//						Thread t = new Thread() {
-//
-//							@Override
-//							public void run() {
-//								try {
+						Thread t = new Thread() {
+
+							@Override
+							public void run() {
+								try {
 						TextMessage textMessage = (TextMessage) message;
 
 						String mergedMessage = textMessage.getText();
@@ -446,12 +446,12 @@ public class Vaultage {
 							// calls the registered handler of the operation
 							responseMessageHandler.process(vaultageMessage, senderPublicKey, vault);
 						}
-//								} catch (Exception e) {
-//									e.printStackTrace();
-//								}
-//							}
-//						};
-//						t.start();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						};
+						t.start();
 
 					} catch (Exception e) {
 						e.printStackTrace();

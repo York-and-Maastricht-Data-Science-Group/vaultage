@@ -2,11 +2,13 @@ package org.vaultage.demo.synthesiser.twomachines;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageServer;
@@ -21,10 +23,10 @@ import org.vaultage.demo.synthesiser.message.SynchronisedGetTextSizeResponseHand
  */
 public class LargeMessageTrafficRequester {
 
-	private static final String SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
-	private static final String SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
-	private static final String LOCAL_IP = "192.168.0.2";
-	private static final String REMOTE_IP = "192.168.0.2";
+	private static String SHARED_REQUESTER_DIRECTORY;
+	private static String SHARED_WORKER_DIRECTORY;
+	private static String LOCAL_IP;
+	private static String REMOTE_IP;
 
 	protected boolean isEncrypted;
 	protected long latestRunTime;
@@ -34,6 +36,20 @@ public class LargeMessageTrafficRequester {
 	protected int numOfBytes;
 
 	public static void main(String[] args) throws Exception {
+
+		String hostname = InetAddress.getLocalHost().getHostName();
+		if (hostname.equals("DESKTOP-S9QN639")) {
+			SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
+			SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
+			LOCAL_IP = "192.168.0.2";
+			REMOTE_IP = "192.168.0.4";
+		} else if (hostname.equals("wv9011")) {
+			SHARED_REQUESTER_DIRECTORY = "/home/ryan/share/requesters/";
+			SHARED_WORKER_DIRECTORY = "/home/ryan/share/workers/";
+			LOCAL_IP = "192.168.0.4";
+			REMOTE_IP = "192.168.0.2";
+		}
+
 		int numReps = 5;
 		// Only one requester and worker are required for this test. The worker is
 		// created by WorkerService. That's why I only put one worker here: the
@@ -113,6 +129,7 @@ public class LargeMessageTrafficRequester {
 		String[] workerPKs = new String[numWorkers];
 		File directoryPath = new File(SHARED_WORKER_DIRECTORY);
 		File[] files = directoryPath.listFiles();
+		Arrays.sort(files);
 //		for (int i = 0; i < files.length; i++) {
 		String workerPK = new String(Files.readAllBytes(Paths.get(files[0].getAbsolutePath())));
 		workerPKs[0] = workerPK;

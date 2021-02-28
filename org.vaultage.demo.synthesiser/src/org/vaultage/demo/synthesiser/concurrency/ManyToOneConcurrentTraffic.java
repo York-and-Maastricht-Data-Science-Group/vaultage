@@ -26,7 +26,7 @@ public class ManyToOneConcurrentTraffic {
 //		int numReps = 1;
 		int numReps = 10;
 //		int[] numRequesters = { 1 };
-		int[] numRequesters = { 1, 20, 30, 50 };
+		int[] numRequesters = { 1, 10, 20, 30, 40, 50 };
 		int numOperations = 1;
 
 		PrintStream profilingStream = new PrintStream(new File("manyToOneConcurrentTrafficResults.csv"));
