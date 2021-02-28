@@ -14,14 +14,15 @@ import org.vaultage.demo.synthesiser.Worker;
 import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandler;
 
 /**
- * FixedNext: All work operations to the same worker: the next in the list
+ * Stress-testing for Vaultage. Run worker service first to prepare the workers
+ * before running this class. 
  *
  * @author Alfonso de la Vega, Alfa Yohannis
  */
-public class RequesterFixedNextTraffic {
+public class FixedNextTrafficRequester {
 
-	private static final String REQUESTER_DIRECTORY = "Z:\\requesters\\";
-	private static final String WORKER_DIRECTORY = "Z:\\workers\\";
+	private static final String SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
+	private static final String SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
 	private static final String LOCAL_IP = "192.168.0.2";
 	protected long latestRunTime;
 	protected boolean brokered;
@@ -39,31 +40,31 @@ public class RequesterFixedNextTraffic {
 		PrintStream profilingStream = new PrintStream(new File("fixedNetResults.csv"));
 		profilingStream.println("Mode,Encryption,NumTasks,TotalTimeMillis");
 
-//		// brokered and encrypted
-//		for (int numOp : numOperations) {
-//			RequesterFixedNextTraffic trafficSimulation = new RequesterFixedNextTraffic(numWorkers, numOp, true, true);
-//			for (int rep = 0; rep < numReps; rep++) {
-//				trafficSimulation.run();
-//				System.out.println(trafficSimulation.getLatestRunDetails());
-//				profilingStream.println(String.format("%s,%s,%s,%d", "brokered", "encrypted", numOp,
-//						trafficSimulation.getLatestRunTime()));
-//			}
-//		}
-//
-//		// direct and encrypted
-//		for (int numOp : numOperations) {
-//			RequesterFixedNextTraffic trafficSimulation = new RequesterFixedNextTraffic(numWorkers, numOp, false, true);
-//			for (int rep = 0; rep < numReps; rep++) {
-//				trafficSimulation.run();
-//				System.out.println(trafficSimulation.getLatestRunDetails());
-//				profilingStream.println(String.format("%s,%s,%s,%d", "direct", "encrypted", numOp,
-//						trafficSimulation.getLatestRunTime()));
-//			}
-//		}
+		// brokered and encrypted
+		for (int numOp : numOperations) {
+			FixedNextTrafficRequester trafficSimulation = new FixedNextTrafficRequester(numWorkers, numOp, true, true);
+			for (int rep = 0; rep < numReps; rep++) {
+				trafficSimulation.run();
+				System.out.println(trafficSimulation.getLatestRunDetails());
+				profilingStream.println(String.format("%s,%s,%s,%d", "brokered", "encrypted", numOp,
+						trafficSimulation.getLatestRunTime()));
+			}
+		}
+
+		// direct and encrypted
+		for (int numOp : numOperations) {
+			FixedNextTrafficRequester trafficSimulation = new FixedNextTrafficRequester(numWorkers, numOp, false, true);
+			for (int rep = 0; rep < numReps; rep++) {
+				trafficSimulation.run();
+				System.out.println(trafficSimulation.getLatestRunDetails());
+				profilingStream.println(String.format("%s,%s,%s,%d", "direct", "encrypted", numOp,
+						trafficSimulation.getLatestRunTime()));
+			}
+		}
 
 		// brokered and un-encrypted
 		for (int numOp : numOperations) {
-			RequesterFixedNextTraffic trafficSimulation = new RequesterFixedNextTraffic(numWorkers, numOp, true, false);
+			FixedNextTrafficRequester trafficSimulation = new FixedNextTrafficRequester(numWorkers, numOp, true, false);
 			for (int rep = 0; rep < numReps; rep++) {
 				trafficSimulation.run();
 				System.out.println(trafficSimulation.getLatestRunDetails());
@@ -74,7 +75,7 @@ public class RequesterFixedNextTraffic {
 
 		// direct and un-encrypted
 		for (int numOp : numOperations) {
-			RequesterFixedNextTraffic trafficSimulation = new RequesterFixedNextTraffic(numWorkers, numOp, false,
+			FixedNextTrafficRequester trafficSimulation = new FixedNextTrafficRequester(numWorkers, numOp, false,
 					false);
 			for (int rep = 0; rep < numReps; rep++) {
 				trafficSimulation.run();
@@ -84,9 +85,11 @@ public class RequesterFixedNextTraffic {
 			}
 		}
 		profilingStream.close();
+		System.out.println("Finished!");
+		System.exit(0);
 	}
 
-	public RequesterFixedNextTraffic(int numWorkers, int numOperations, boolean brokered, boolean encrypted) {
+	public FixedNextTrafficRequester(int numWorkers, int numOperations, boolean brokered, boolean encrypted) {
 		this.numWorkers = numWorkers;
 		this.numOperations = numOperations;
 		this.brokered = brokered;
@@ -101,7 +104,7 @@ public class RequesterFixedNextTraffic {
 
 		// loading workers public keys
 		String[] workerPKs = new String[numWorkers];
-		File directoryPath = new File(WORKER_DIRECTORY);
+		File directoryPath = new File(SHARED_WORKER_DIRECTORY);
 		File[] files = directoryPath.listFiles();
 		for (int i = 0; i < files.length; i++) {
 			String workerPK = new String(Files.readAllBytes(Paths.get(files[i].getAbsolutePath())));
@@ -120,12 +123,10 @@ public class RequesterFixedNextTraffic {
 			} else {
 				requesters[i].getVaultage().forceBrokeredMessaging(false);
 			}
-			Files.write(Paths.get(REQUESTER_DIRECTORY + requesters[i].getId() + ".txt"),
+			Files.write(Paths.get(SHARED_REQUESTER_DIRECTORY + requesters[i].getId() + ".txt"),
 					requesters[i].getPublicKey().getBytes(), StandardOpenOption.CREATE);
 //			System.out.println(requesters[i].getId() + " created");
 		}
-
-		long start = System.currentTimeMillis();
 
 		Thread threads[] = new Thread[numWorkers];
 		for (int i = 0; i < numWorkers; i++) {
@@ -135,6 +136,13 @@ public class RequesterFixedNextTraffic {
 			threads[i] = startWork(requesters[i], remoteWorkerKey, encrypted);
 		}
 
+		long start = System.currentTimeMillis();
+		
+		// start all threads
+		for (int i = 0; i < numWorkers; i++) {
+			threads[i].start();
+		}
+		
 		// wait for workers to finish
 		for (int i = 0; i < numWorkers; i++) {
 			threads[i].join();
@@ -178,7 +186,7 @@ public class RequesterFixedNextTraffic {
 				}
 			}
 		};
-		t.start();
+//		t.start();
 		return t;
 	}
 

@@ -339,8 +339,8 @@ public class Vaultage {
 				// if the remote receiver is available, send message otherwise use broker
 //				DirectMessageClient directMessageClient = new NettyDirectMessageClient(remoteServer);
 				DirectMessageClient directMessageClient = new SocketDirectMessageClient(remoteServer);
-				directMessageClient.connect();
 				try {
+					directMessageClient.connect();
 					remoteServerAvailable = directMessageClient.isActive();
 				} catch (Exception e) {
 					e.printStackTrace();
