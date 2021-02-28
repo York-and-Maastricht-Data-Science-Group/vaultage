@@ -23,7 +23,7 @@ import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandle
  *
  * @author Alfonso de la Vega, Alfa Yohannis
  */
-public class ManyToOneConcurrentTrafficRequest {
+public class ManyToManyConcurrentTrafficRequest {
 
 	private static String SHARED_REQUESTER_DIRECTORY;
 	private static String SHARED_WORKER_DIRECTORY;
@@ -57,24 +57,24 @@ public class ManyToOneConcurrentTrafficRequest {
 		int numOperations = 1;
 		int[] numRequesters = { 9, 10, 15, 20, 25, 30 };
 
-		PrintStream profilingStream = new PrintStream(new File("ManyToOneConcurrentNetResults.csv"));
+		PrintStream profilingStream = new PrintStream(new File("ManyToManyConcurrentNetResults.csv"));
 		profilingStream.println("Mode,Encryption,NumTasks,WaitTimeMillis");
 
-		// brokered and encrypted
-		for (int numReq : numRequesters) {
-			ManyToOneConcurrentTrafficRequest trafficSimulation = new ManyToOneConcurrentTrafficRequest(numReq,
-					numOperations, true, true);
-			for (int rep = 0; rep < numReps; rep++) {
-				trafficSimulation.run();
-				System.out.println(trafficSimulation.getLatestRunDetails());
-				profilingStream.println(String.format("%s,%s,%s,%d", "brokered", "encrypted", numReq,
-						trafficSimulation.getLatestWaitTime()));
-			}
-		}
+//		// brokered and encrypted
+//		for (int numReq : numRequesters) {
+//			ManyToManyConcurrentTrafficRequest trafficSimulation = new ManyToManyConcurrentTrafficRequest(numReq,
+//					numOperations, true, true);
+//			for (int rep = 0; rep < numReps; rep++) {
+//				trafficSimulation.run();
+//				System.out.println(trafficSimulation.getLatestRunDetails());
+//				profilingStream.println(String.format("%s,%s,%s,%d", "brokered", "encrypted", numReq,
+//						trafficSimulation.getLatestWaitTime()));
+//			}
+//		}
 
 		// direct and encrypted
 		for (int numReq : numRequesters) {
-			ManyToOneConcurrentTrafficRequest trafficSimulation = new ManyToOneConcurrentTrafficRequest(numReq,
+			ManyToManyConcurrentTrafficRequest trafficSimulation = new ManyToManyConcurrentTrafficRequest(numReq,
 					numOperations, false, true);
 			for (int rep = 0; rep < numReps; rep++) {
 				trafficSimulation.run();
@@ -86,7 +86,7 @@ public class ManyToOneConcurrentTrafficRequest {
 
 		// brokered and un-encrypted
 		for (int nReq : numRequesters) {
-			ManyToOneConcurrentTrafficRequest trafficSimulation = new ManyToOneConcurrentTrafficRequest(nReq,
+			ManyToManyConcurrentTrafficRequest trafficSimulation = new ManyToManyConcurrentTrafficRequest(nReq,
 					numOperations, true, false);
 			for (int rep = 0; rep < numReps; rep++) {
 				trafficSimulation.run();
@@ -98,7 +98,7 @@ public class ManyToOneConcurrentTrafficRequest {
 
 		// direct and un-encrypted
 		for (int numReq : numRequesters) {
-			ManyToOneConcurrentTrafficRequest trafficSimulation = new ManyToOneConcurrentTrafficRequest(numReq,
+			ManyToManyConcurrentTrafficRequest trafficSimulation = new ManyToManyConcurrentTrafficRequest(numReq,
 					numOperations, false, false);
 			for (int rep = 0; rep < numReps; rep++) {
 				trafficSimulation.run();
@@ -112,7 +112,7 @@ public class ManyToOneConcurrentTrafficRequest {
 		System.exit(0);
 	}
 
-	public ManyToOneConcurrentTrafficRequest(int numRequesters, int numOperations, boolean brokered,
+	public ManyToManyConcurrentTrafficRequest(int numRequesters, int numOperations, boolean brokered,
 			boolean encrypted) {
 		this.numRequesters = numRequesters;
 		this.brokered = brokered;
@@ -127,16 +127,17 @@ public class ManyToOneConcurrentTrafficRequest {
 		VaultageServer server = new VaultageServer("tcp://139.162.228.32:61616");
 
 		// loading workers public keys
-		String[] workerPKs = new String[1];
 		File directoryPath = new File(SHARED_WORKER_DIRECTORY);
 		File[] files = directoryPath.listFiles();
 		Arrays.sort(files);
-//		for (int i = 0; i < files.length; i++) {
-		String workerPK = new String(Files.readAllBytes(Paths.get(files[0].getAbsolutePath())));
-		workerPKs[0] = workerPK;
-//		}
+		String[] workerPKs = new String[files.length];
+		for (int i = 0; i < files.length; i++) {
+			String workerPK = new String(Files.readAllBytes(Paths.get(files[i].getAbsolutePath())));
+			workerPKs[i] = workerPK;
+		}
 
 		int port = Vaultage.DEFAULT_SERVER_PORT + 200;
+		int remotePort = Vaultage.DEFAULT_SERVER_PORT + 100;
 		for (int i = 0; i < numRequesters; i++) {
 			requesters[i] = new Worker();
 			requesters[i].setId("Requester-" + i);
@@ -145,8 +146,8 @@ public class ManyToOneConcurrentTrafficRequest {
 			requesters[i].register(server);
 			if (!brokered) {
 				requesters[i].startServer(LOCAL_IP, port++);
-				requesters[i].getVaultage().getPublicKeyToRemoteAddress().put(workerPKs[0],
-						new InetSocketAddress(REMOTE_IP, Vaultage.DEFAULT_SERVER_PORT + 100));
+				requesters[i].getVaultage().getPublicKeyToRemoteAddress().put(workerPKs[i],
+						new InetSocketAddress(REMOTE_IP, remotePort++));
 			} else {
 				requesters[i].getVaultage().forceBrokeredMessaging(false);
 			}
@@ -157,7 +158,7 @@ public class ManyToOneConcurrentTrafficRequest {
 
 		Thread threads[] = new Thread[numRequesters];
 		for (int i = 0; i < numRequesters; i++) {
-			String remoteWorkerKey = workerPKs[0];
+			String remoteWorkerKey = workerPKs[i];
 			threads[i] = initThread(requesters[i], remoteWorkerKey, encrypted);
 		}
 
@@ -177,15 +178,15 @@ public class ManyToOneConcurrentTrafficRequest {
 
 		// get average waiting time
 		long average = 0;
-		for (int i = 0; i < numRequesters; i++) {	
-				average = average + ((SendOperationThread) threads[i]).getExecutionTime();
+		for (int i = 0; i < numRequesters; i++) {
+			average = average + ((SendOperationThread) threads[i]).getExecutionTime();
 		}
 		average = average / numRequesters;
 		latestWaitTime = average;
 
-		//total time 
+		// total time
 		latestTotalTime = end - start;
-		
+
 		if (!brokered) {
 			for (Worker requester : requesters) {
 				requester.shutdownServer();

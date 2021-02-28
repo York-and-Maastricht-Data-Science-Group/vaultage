@@ -496,7 +496,7 @@ public class Vaultage {
 	 * @throws Exception
 	 */
 	public void disconnect() throws Exception {
-		if (session == null)
+		if (session != null)
 		session.close();
 		connection.stop();
 		connection.close();

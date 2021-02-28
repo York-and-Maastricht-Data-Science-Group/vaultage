@@ -44,7 +44,9 @@ public class WorkerService {
 
 		for (int i = 0; i < NUM_WORKERS; i++) {
 			workers[i] = new Worker();
-			workers[i].setId("Worker-" + i);
+			// I added 100 so that the key files can be ordered perfectly when
+			// listing the files
+			workers[i].setId("Worker-" + (100 + i));
 			workers[i].addOperationResponseHandler(new SynchronisedIncrementResponseHandler());
 			workers[i].register(server);
 			workers[i].startServer(LOCAL_IP, port++);

@@ -179,6 +179,9 @@ public class LargeMessageTrafficRequester {
 				requesters[i].shutdownServer();
 			}
 		}
+		for (Worker requester : requesters) {
+			requester.unregister();
+		}
 	}
 
 	public int getNumOfBytes() {

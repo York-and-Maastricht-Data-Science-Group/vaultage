@@ -172,6 +172,9 @@ public class FixedNextTrafficRequester {
 				requester.shutdownServer();
 			}
 		}
+		for (Worker requester : requesters) {
+			requester.unregister();
+		}
 
 	}
 
