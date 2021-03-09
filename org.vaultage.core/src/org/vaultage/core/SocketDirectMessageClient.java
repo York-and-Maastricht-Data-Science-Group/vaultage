@@ -146,7 +146,8 @@ public class SocketDirectMessageClient implements DirectMessageClient {
 	 */
 	public void sendMessage(String message) throws IOException {
 		OutputStream outputStream = clientSocket.getOutputStream();
-		outputStream.write((message + System.lineSeparator()).getBytes());
+		outputStream.write(message.getBytes());
+		outputStream.write(System.lineSeparator().getBytes());
 	}
 
 	/***

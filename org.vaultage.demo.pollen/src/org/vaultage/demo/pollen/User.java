@@ -32,8 +32,6 @@ public class User extends UserBase {
 	private Map<String, Double> numberPollFakeValues = new HashMap<>();
 	private Map<String, Double> numberPollAnswers = new HashMap<>();
 
-	private OnPollReceivedListener onPollReceivedListener;
-
 	public User() throws Exception {
 		super();
 	}
@@ -131,13 +129,5 @@ public class User extends UserBase {
 
 	public double getNumberPollAnswer(String pollId) {
 		return numberPollAnswers.get(pollId);
-	}
-
-	public OnPollReceivedListener getOnPollReceivedListener() {
-		return onPollReceivedListener;
-	}
-
-	public void setOnPollReceivedListener(OnPollReceivedListener onPollReceivedListener) {
-		this.onPollReceivedListener = onPollReceivedListener;
 	}
 }

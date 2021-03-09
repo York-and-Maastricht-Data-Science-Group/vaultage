@@ -44,6 +44,11 @@ public class FixedNextTrafficRequester {
 			SHARED_REQUESTER_DIRECTORY = "/home/ryan/share/requesters/";
 			SHARED_WORKER_DIRECTORY = "/home/ryan/share/workers/";
 			LOCAL_IP = "192.168.0.4";
+		} else if (hostname.equals("research1")) {
+			SHARED_WORKER_DIRECTORY = "/tmp/ary506/workers/";
+			SHARED_REQUESTER_DIRECTORY = "/tmp/ary506/requesters/";
+//			LOCAL_IP = "144.32.196.129";
+			LOCAL_IP = "127.0.0.1";
 		}
 		
 		int numReps = 5;
@@ -167,13 +172,9 @@ public class FixedNextTrafficRequester {
 
 		latestRunTime = end - start;
 
-		if (!brokered) {
-			for (Worker requester : requesters) {
-				requester.shutdownServer();
-			}
-		}
 		for (Worker requester : requesters) {
 			requester.unregister();
+			requester.shutdownServer();
 		}
 
 	}

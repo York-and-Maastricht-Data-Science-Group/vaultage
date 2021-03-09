@@ -29,20 +29,20 @@ public class FairnetTest {
 	// change this to a bigger value if your machine if slower than the machine I
 	// used for testing
 	private static final int SLEEP_TIME = 50;
-	private static final String BROKER_ADDRESS = "tcp://localhost:61616";
-//	private static final String BROKER_ADDRESS = "tcp://178.79.178.61:61616"; test using Linode
+//	private static final String BROKER_ADDRESS = "tcp://localhost:61616";
+	private static final String BROKER_ADDRESS = "tcp://139.162.228.32:61616"; /////test using Linode
 	private static FairnetBroker BROKER = null;
 
-	@BeforeClass
-	public static void startBroker() throws Exception {
-		BROKER = new FairnetBroker();
-		BROKER.start(BROKER_ADDRESS);
-	}
-
-	@AfterClass
-	public static void stopBroker() throws Exception {
-		BROKER.stop();
-	}
+//	@BeforeClass
+//	public static void startBroker() throws Exception {
+//		BROKER = new FairnetBroker();
+//		BROKER.start(BROKER_ADDRESS);
+//	}
+//
+//	@AfterClass
+//	public static void stopBroker() throws Exception {
+//		BROKER.stop();
+//	}
 
 	@Test
 	public void testRegistration() throws Exception {

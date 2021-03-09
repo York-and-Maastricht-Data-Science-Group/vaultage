@@ -5,6 +5,6 @@ import java.util.Set;
 
 public abstract class ResponseMessageHandler {
 	
-	public abstract void process(VaultageMessage message, String senderPublicKey, Object vault) throws Exception;
+	public abstract void process(VaultageMessage message, String senderPublicKey, Vault vault) throws Exception;
 
 }

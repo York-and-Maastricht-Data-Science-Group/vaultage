@@ -17,7 +17,7 @@ import com.google.gson.reflect.TypeToken;
 public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 
 	@Override
-	public void process(VaultageMessage message, String senderPublicKey, Object vault) throws Exception {
+	public void process(VaultageMessage message, String senderPublicKey, Vault vault) throws Exception {
 		
 		// 1. get the remote operation called
 		String operation = message.getOperation();

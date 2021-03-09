@@ -60,7 +60,7 @@ public class Vaultage {
 	public static Gson Gson = new GsonBuilder().setPrettyPrinting().create();
 //	public static Gson Gson = new GsonBuilder().create();
 
-	private Object vault;
+	private Vault vault;
 	private String brokerAddress;
 	private ActiveMQConnectionFactory connectionFactory;
 	private Connection connection;
@@ -74,9 +74,9 @@ public class Vaultage {
 
 	private RequestMessageHandler requestMessageHandler;
 	private ResponseMessageHandler responseMessageHandler;
-	
+
 	private boolean isForcedBrokeredMessaging = true;
-	
+
 	/***
 	 * Test or demo this Vaultage class. No encryption is performed. These routines
 	 * are only to give some values to the parameters of the operations used in this
@@ -173,7 +173,7 @@ public class Vaultage {
 	 * 
 	 * @param vault a reference to the object of the vault that uses Vaultage
 	 */
-	public Vaultage(Object vault) {
+	public Vaultage(Vault vault) {
 		this.vault = vault;
 	}
 
@@ -185,7 +185,7 @@ public class Vaultage {
 	 * @param address the ip or hostname of direct message server
 	 * @param the     port of direct message server
 	 */
-	public Vaultage(Object vault, String address, int port) {
+	public Vaultage(Vault vault, String address, int port) {
 		this.vault = vault;
 		this.startServer(address, port);
 	}
@@ -318,26 +318,15 @@ public class Vaultage {
 
 			String concatenatedMessage = encryptionFlag + senderPublicKey + encryptedMessage;
 
-//			System.out.println(senderPublicKey);
-//			System.out.println(encryptedMessage);			
-
 			/** Make a direct connection to the receiver **/
 			// get the receiver's ip address and port from the topic id or public key
 			InetSocketAddress remoteServer = publicKeyToRemoteAddress.get(topicId);
 			boolean remoteServerAvailable = false;
-			if (remoteServer != null && isForcedBrokeredMessaging) {
+			if (remoteServer != null && !isForcedBrokeredMessaging) {
 
-//				try {
-//					Socket socket = new Socket(remoteServer.getAddress(), remoteServer.getPort());
-//					remoteServerAvailable = socket.isConnected();
-//					socket.close();
-//				} catch (Exception e) {
-//					remoteServerAvailable = false;
-//				}
-
-				// Create a direct message client
-				// if the remote receiver is available, send message otherwise use broker
-//				DirectMessageClient directMessageClient = new NettyDirectMessageClient(remoteServer);
+				/***
+				 * Optimise this since a new connection has to be made when sending a message
+				 */
 				DirectMessageClient directMessageClient = new SocketDirectMessageClient(remoteServer);
 				try {
 					directMessageClient.connect();
@@ -346,8 +335,6 @@ public class Vaultage {
 					e.printStackTrace();
 				}
 				if (remoteServerAvailable) {
-//					System.out.println("Send a direct message from " + directMessageClient.getLocalAddress().toString()
-//							+ " to " + directMessageClient.getRemoteAddress().toString());
 					directMessageClient.sendMessage(concatenatedMessage);
 					directMessageClient.shutdown();
 				}
@@ -416,36 +403,40 @@ public class Vaultage {
 							@Override
 							public void run() {
 								try {
-						TextMessage textMessage = (TextMessage) message;
+									TextMessage textMessage = (TextMessage) message;
 
-						String mergedMessage = textMessage.getText();
-						String encryptionFlag = mergedMessage.substring(0, 1);
-						String senderPublicKey = mergedMessage.substring(1, 1 + VaultageEncryption.PUBLIC_KEY_LENGTH);
-						String encryptedMessage = mergedMessage.substring(1 + VaultageEncryption.PUBLIC_KEY_LENGTH,
-								mergedMessage.length());
+									String mergedMessage = textMessage.getText();
+									String encryptionFlag = mergedMessage.substring(0, 1);
+									String senderPublicKey = mergedMessage.substring(1,
+											1 + VaultageEncryption.PUBLIC_KEY_LENGTH);
+									String encryptedMessage = mergedMessage.substring(
+											1 + VaultageEncryption.PUBLIC_KEY_LENGTH, mergedMessage.length());
 
-						String content = (encryptionFlag.equals("1")) ? VaultageEncryption.doubleDecrypt(
-								encryptedMessage, senderPublicKey, receiverPrivateKey) : encryptedMessage;
+									String content = (encryptionFlag.equals("1")) ? VaultageEncryption.doubleDecrypt(
+											encryptedMessage, senderPublicKey, receiverPrivateKey) : encryptedMessage;
 
 //							 System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
 
-						VaultageMessage vaultageMessage = Vaultage.deserialise(content, VaultageMessage.class);
-						MessageType msgType = vaultageMessage.getMessageType();
+									VaultageMessage vaultageMessage = Vaultage.deserialise(content,
+											VaultageMessage.class);
+									MessageType msgType = vaultageMessage.getMessageType();
 
-						// save sender's ip and port to public key and address map
-						if (vaultageMessage.getSenderAddress() != null && vaultageMessage.getSenderPort() >= 0 && isForcedBrokeredMessaging)
-							Vaultage.this.getPublicKeyToRemoteAddress().put(senderPublicKey, new InetSocketAddress(
-									vaultageMessage.getSenderAddress(), vaultageMessage.getSenderPort()));
+									// save sender's ip and port to public key and address map
+									if (vaultageMessage.getSenderAddress() != null
+											&& vaultageMessage.getSenderPort() >= 0 && isForcedBrokeredMessaging)
+										Vaultage.this.getPublicKeyToRemoteAddress().put(senderPublicKey,
+												new InetSocketAddress(vaultageMessage.getSenderAddress(),
+														vaultageMessage.getSenderPort()));
 
-						switch (msgType) {
-						case REQUEST:
-							// calls the user vault method associated with the operation
-							requestMessageHandler.process(vaultageMessage, senderPublicKey, vault);
-							break;
-						case RESPONSE:
-							// calls the registered handler of the operation
-							responseMessageHandler.process(vaultageMessage, senderPublicKey, vault);
-						}
+									switch (msgType) {
+									case REQUEST:
+										// calls the user vault method associated with the operation
+										requestMessageHandler.process(vaultageMessage, senderPublicKey, vault);
+										break;
+									case RESPONSE:
+										// calls the registered handler of the operation
+										responseMessageHandler.process(vaultageMessage, senderPublicKey, vault);
+									}
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
@@ -458,10 +449,6 @@ public class Vaultage {
 					}
 				}
 			});
-
-//			 System.out.println("Listening to: " + topicId);
-//			// Wait for a message, 0 means listen forever
-//			Message message = consumer.receive(0);
 
 		} catch (JMSException e) {
 			e.printStackTrace();
@@ -497,7 +484,7 @@ public class Vaultage {
 	 */
 	public void disconnect() throws Exception {
 		if (session != null)
-		session.close();
+			session.close();
 		connection.stop();
 		connection.close();
 	}
@@ -527,7 +514,8 @@ public class Vaultage {
 	 * @throws InterruptedException
 	 */
 	public void shutdownServer() throws IOException, InterruptedException {
-		this.directMessageServer.shutdown();
+		if (this.directMessageServer != null)
+			this.directMessageServer.shutdown();
 	}
 
 	/***
@@ -544,7 +532,7 @@ public class Vaultage {
 	 * 
 	 * @return
 	 */
-	public Object getVault() {
+	public Vault getVault() {
 		return vault;
 	}
 
@@ -622,6 +610,7 @@ public class Vaultage {
 
 	/***
 	 * Use direct messaging if it's possible/available
+	 * 
 	 * @return
 	 */
 	public boolean isForcedBrokeredMessaging() {
@@ -630,5 +619,5 @@ public class Vaultage {
 
 	public void forceBrokeredMessaging(boolean isForced) {
 		this.isForcedBrokeredMessaging = isForced;
-	}	
+	}
 }

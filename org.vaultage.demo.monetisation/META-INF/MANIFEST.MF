@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Monetisation
-Bundle-SymbolicName: org.vaultage.demo.monetisation
-Bundle-Version: 1.0.0.qualifier
-Export-Package: org.vaultage.demo.monetisation

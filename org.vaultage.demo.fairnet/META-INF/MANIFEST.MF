@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Fairnet
-Bundle-SymbolicName: org.vaultage.demo.fairnet
-Bundle-Version: 1.0.0.qualifier
-Automatic-Module-Name: org.vaultage.demo.fairnet
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: org.vaultage.demo.fairnet

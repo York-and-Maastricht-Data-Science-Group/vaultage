@@ -24,7 +24,8 @@ import org.vaultage.demo.monetisation.CityCouncil;
 
 public class CrossProjectTest {
 
-	private static final String BROKER_ADDRESS = "tcp://localhost:61616";
+//	private static final String BROKER_ADDRESS = "tcp://localhost:61616";
+	private static final String BROKER_ADDRESS = "tcp://139.162.228.32:61616";
 	private static FairnetBroker BROKER = null;
 
 	@BeforeClass

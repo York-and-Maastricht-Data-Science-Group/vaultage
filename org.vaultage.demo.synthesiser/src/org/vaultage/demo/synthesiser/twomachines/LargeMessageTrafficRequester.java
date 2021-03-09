@@ -48,41 +48,47 @@ public class LargeMessageTrafficRequester {
 			SHARED_WORKER_DIRECTORY = "/home/ryan/share/workers/";
 			LOCAL_IP = "192.168.0.4";
 			REMOTE_IP = "192.168.0.2";
+		} else if (hostname.equals("research1")) {
+			SHARED_WORKER_DIRECTORY = "/tmp/ary506/workers/";
+			SHARED_REQUESTER_DIRECTORY = "/tmp/ary506/requesters/";
+//			LOCAL_IP = "144.32.196.129";
+			LOCAL_IP = "127.0.0.1";
+			REMOTE_IP = "127.0.0.1";
 		}
 
-		int numReps = 5;
+		int numReps = 4;
 		// Only one requester and worker are required for this test. The worker is
 		// created by WorkerService. That's why I only put one worker here: the
 		// requester.
 		int numWorkers = 1;
-		int[] numOfBytes = { 9000, 10000, 20000, 30000, 40000, 50000 };
+		int[] numOfBytes = { 2000000 };
 
 		PrintStream profilingStream = new PrintStream(new File("largeMessageNetResults.csv"));
 		profilingStream.println("Mode,Encryption,MessageBytes,TotalTimeMillis");
 
-		// brokered and encrypted
-		for (int n : numOfBytes) {
-			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
-					true);
-			for (int rep = 0; rep < numReps; rep++) {
-				trafficSimulation.run();
-				System.out.println(trafficSimulation.getLatestRunDetails());
-				profilingStream.println(
-						String.format("%s,%s,%s,%d", "brokered", "encrypted", n, trafficSimulation.getLatestRunTime()));
-			}
-		}
+//		// brokered and encrypted
+//		for (int n : numOfBytes) {
+//			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
+//					true);
+//			for (int rep = 0; rep < numReps; rep++) {
+//				trafficSimulation.run();
+//				System.out.println(trafficSimulation.getLatestRunDetails());
+//				profilingStream.println(
+//						String.format("%s,%s,%s,%d", "brokered", "encrypted", n, trafficSimulation.getLatestRunTime()));
+//			}
+//		}
 
-		// direct and encrypted
-		for (int n : numOfBytes) {
-			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, false,
-					true);
-			for (int rep = 0; rep < numReps; rep++) {
-				trafficSimulation.run();
-				System.out.println(trafficSimulation.getLatestRunDetails());
-				profilingStream.println(
-						String.format("%s,%s,%s,%d", "direct", "encrypted", n, trafficSimulation.getLatestRunTime()));
-			}
-		}
+//		// direct and encrypted
+//		for (int n : numOfBytes) {
+//			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, false,
+//					true);
+//			for (int rep = 0; rep < numReps; rep++) {
+//				trafficSimulation.run();
+//				System.out.println(trafficSimulation.getLatestRunDetails());
+//				profilingStream.println(
+//						String.format("%s,%s,%s,%d", "direct", "encrypted", n, trafficSimulation.getLatestRunTime()));
+//			}
+//		}
 
 		// brokered and un-encrypted
 		for (int n : numOfBytes) {
@@ -135,17 +141,18 @@ public class LargeMessageTrafficRequester {
 		workerPKs[0] = workerPK;
 //		}
 
-		int port = Vaultage.DEFAULT_SERVER_PORT + 100;
+		int port = Vaultage.DEFAULT_SERVER_PORT + 200;
+		int remotePort = Vaultage.DEFAULT_SERVER_PORT + 100;
 		for (int i = 0; i < numWorkers; i++) {
 			requesters[i] = new Worker();
 			requesters[i].setId("Requester-" + i);
-			requesters[i].setCompletedValue(numOfBytes);
+			requesters[i].setCompletedValue(1);
 			requesters[i].addOperationResponseHandler(new SynchronisedGetTextSizeResponseHandler());
 			requesters[i].register(server);
 			if (!brokered) {
 				requesters[i].startServer(LOCAL_IP, port++);
 				requesters[i].getVaultage().getPublicKeyToRemoteAddress().put(workerPKs[0],
-						new InetSocketAddress(REMOTE_IP, Vaultage.DEFAULT_SERVER_PORT));
+						new InetSocketAddress(REMOTE_IP, remotePort++));
 			} else {
 				requesters[i].getVaultage().forceBrokeredMessaging(false);
 			}
@@ -174,13 +181,9 @@ public class LargeMessageTrafficRequester {
 
 		latestRunTime = end - start;
 
-		if (!brokered) {
-			for (int i = 0; i < numWorkers; i++) {
-				requesters[i].shutdownServer();
-			}
-		}
 		for (Worker requester : requesters) {
 			requester.unregister();
+			requester.shutdownServer();
 		}
 	}
 

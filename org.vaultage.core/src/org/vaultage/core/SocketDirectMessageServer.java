@@ -10,6 +10,7 @@ import java.net.SocketException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.stream.Collectors;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -153,13 +154,16 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 				String mergedMessage = "";
 				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-				while (true) {
-					String temp = in.readLine();
-					if (temp == null) break;
-					mergedMessage = mergedMessage + temp;
-				}
+				 mergedMessage = in.lines().collect(Collectors.joining());
+					 
+//				while (true) {
+//					String temp = in.readLine();
+//					if (temp == null) break;
+//					mergedMessage = mergedMessage + temp;
+//				}
+				in.close();
 				
-				if (mergedMessage.equals("")) return;
+//				if (mergedMessage.equals("")) return;
 				
 //				System.out.println(socket.getRemoteSocketAddress() + ": " + incomingMessage);
 

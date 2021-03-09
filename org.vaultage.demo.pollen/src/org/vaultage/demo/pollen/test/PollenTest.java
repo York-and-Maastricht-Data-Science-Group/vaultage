@@ -115,9 +115,9 @@ public class PollenTest {
 		//start the direct message server of each vault
 		int port = new Integer(Vaultage.DEFAULT_SERVER_PORT);
 		alice.startServer("127.0.0.1", port++);
-		bob.startServer("192.168.56.1", port++);
-		charlie.startServer("192.168.14.2", port++);
-		dan.startServer("192.168.99.80", port++);
+		bob.startServer("127.0.0.1", port++);
+		charlie.startServer("127.0.0.1", port++);
+		dan.startServer("127.0.0.1", port++);
 		
 		/**
 		 * Set up all vaults to trust each other. Therefore, they don't have to use a
