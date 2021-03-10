@@ -75,7 +75,8 @@ public class Vaultage {
 	private RequestMessageHandler requestMessageHandler;
 	private ResponseMessageHandler responseMessageHandler;
 
-	private boolean isForcedBrokeredMessaging = true;
+	private boolean isForcedBrokeredMessaging = false;
+	private boolean isEncrypted = true;
 
 	/***
 	 * Test or demo this Vaultage class. No encryption is performed. These routines
@@ -265,7 +266,7 @@ public class Vaultage {
 	 * @param type
 	 * @return
 	 */
-	public static <T> T deserialise(String content, Class<T> c, Type type) {
+	public static <T> T deserialise(String content, Type type) {
 		return Gson.fromJson(content, type);
 	}
 
@@ -300,6 +301,9 @@ public class Vaultage {
 	public void sendMessage(String topicId, String senderPublicKey, String senderPrivateKey, VaultageMessage message,
 			boolean isEncrypted) throws InterruptedException {
 		try {
+			// get
+			this.isEncrypted = isEncrypted;
+				
 			// add local address and port to the message
 			if (directMessageServerAddress != null) {
 				message.setSenderAddress(directMessageServerAddress.getAddress().getHostAddress());
@@ -608,16 +612,36 @@ public class Vaultage {
 		return directMessageServer;
 	}
 
-	/***
-	 * Use direct messaging if it's possible/available
-	 * 
+	/**
+	 * Forced to use brokered messaging if TRUE, otherwise use direct messaging if it's possible/available
 	 * @return
 	 */
 	public boolean isForcedBrokeredMessaging() {
 		return isForcedBrokeredMessaging;
 	}
 
+	/***
+	 * Force to use brokered messaging if TRUE, otherwise use direct messaging if it's possible/available
+	 * 
+	 * @return
+	 */
 	public void forceBrokeredMessaging(boolean isForced) {
 		this.isForcedBrokeredMessaging = isForced;
+	}
+
+	/***
+	 * Is messaging encrypted
+	 * @return
+	 */
+	public boolean isEncrypted() {
+		return isEncrypted;
+	}
+
+	/***
+	 * set the messaging encrypted or not encrypted
+	 * @param isEncrypted
+	 */
+	public void setEncrypted(boolean isEncrypted) {
+		this.isEncrypted = isEncrypted;
 	}
 }

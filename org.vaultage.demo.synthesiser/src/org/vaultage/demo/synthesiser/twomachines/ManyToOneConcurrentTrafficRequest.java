@@ -59,10 +59,10 @@ public class ManyToOneConcurrentTrafficRequest {
 			REMOTE_IP = "127.0.0.1";
 		}
 
-		int numReps = 3;
+		int numReps = 6;
 		int numOperations = 1;
 //		int[] numRequesters = { 30, 35, 40, 45, 50 };
-		int[] numRequesters = { 200 };
+		int[] numRequesters = { 100 };
 
 		PrintStream profilingStream = new PrintStream(new File("ManyToOneConcurrentNetResults.csv"));
 		profilingStream.println("Mode,Encryption,NumTasks,WaitTimeMillis");
@@ -90,7 +90,7 @@ public class ManyToOneConcurrentTrafficRequest {
 //						trafficSimulation.getLatestWaitTime()));
 //			}
 //		}
-//
+
 		// brokered and un-encrypted
 		for (int nReq : numRequesters) {
 			ManyToOneConcurrentTrafficRequest trafficSimulation = new ManyToOneConcurrentTrafficRequest(nReq,
@@ -155,7 +155,7 @@ public class ManyToOneConcurrentTrafficRequest {
 				requesters[i].getVaultage().getPublicKeyToRemoteAddress().put(workerPKs[0],
 						new InetSocketAddress(REMOTE_IP, Vaultage.DEFAULT_SERVER_PORT + 100));
 			} else {
-				requesters[i].getVaultage().forceBrokeredMessaging(false);
+				requesters[i].getVaultage().forceBrokeredMessaging(true);
 			}
 			Files.write(Paths.get(SHARED_REQUESTER_DIRECTORY + requesters[i].getId() + ".txt"),
 					requesters[i].getPublicKey().getBytes(), StandardOpenOption.CREATE);

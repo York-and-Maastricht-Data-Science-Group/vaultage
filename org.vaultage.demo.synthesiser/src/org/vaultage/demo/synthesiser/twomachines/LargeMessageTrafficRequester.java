@@ -12,6 +12,7 @@ import java.util.Arrays;
 
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageServer;
+import org.vaultage.demo.synthesiser.RemoteWorker;
 import org.vaultage.demo.synthesiser.Worker;
 import org.vaultage.demo.synthesiser.message.SynchronisedGetTextSizeResponseHandler;
 
@@ -56,39 +57,39 @@ public class LargeMessageTrafficRequester {
 			REMOTE_IP = "127.0.0.1";
 		}
 
-		int numReps = 4;
+		int numReps = 6;
 		// Only one requester and worker are required for this test. The worker is
 		// created by WorkerService. That's why I only put one worker here: the
 		// requester.
 		int numWorkers = 1;
-		int[] numOfBytes = { 2000000 };
+		int[] numOfBytes = { 1500000 };
 
 		PrintStream profilingStream = new PrintStream(new File("largeMessageNetResults.csv"));
 		profilingStream.println("Mode,Encryption,MessageBytes,TotalTimeMillis");
 
-//		// brokered and encrypted
-//		for (int n : numOfBytes) {
-//			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
-//					true);
-//			for (int rep = 0; rep < numReps; rep++) {
-//				trafficSimulation.run();
-//				System.out.println(trafficSimulation.getLatestRunDetails());
-//				profilingStream.println(
-//						String.format("%s,%s,%s,%d", "brokered", "encrypted", n, trafficSimulation.getLatestRunTime()));
-//			}
-//		}
+		// brokered and encrypted
+		for (int n : numOfBytes) {
+			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
+					true);
+			for (int rep = 0; rep < numReps; rep++) {
+				trafficSimulation.run();
+				System.out.println(trafficSimulation.getLatestRunDetails());
+				profilingStream.println(
+						String.format("%s,%s,%s,%d", "brokered", "encrypted", n, trafficSimulation.getLatestRunTime()));
+			}
+		}
 
-//		// direct and encrypted
-//		for (int n : numOfBytes) {
-//			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, false,
-//					true);
-//			for (int rep = 0; rep < numReps; rep++) {
-//				trafficSimulation.run();
-//				System.out.println(trafficSimulation.getLatestRunDetails());
-//				profilingStream.println(
-//						String.format("%s,%s,%s,%d", "direct", "encrypted", n, trafficSimulation.getLatestRunTime()));
-//			}
-//		}
+		// direct and encrypted
+		for (int n : numOfBytes) {
+			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, false,
+					true);
+			for (int rep = 0; rep < numReps; rep++) {
+				trafficSimulation.run();
+				System.out.println(trafficSimulation.getLatestRunDetails());
+				profilingStream.println(
+						String.format("%s,%s,%s,%d", "direct", "encrypted", n, trafficSimulation.getLatestRunTime()));
+			}
+		}
 
 		// brokered and un-encrypted
 		for (int n : numOfBytes) {
@@ -166,6 +167,12 @@ public class LargeMessageTrafficRequester {
 			sb.append("a");
 		}
 
+		// set the remote worker(s) to (un)encrypted and direct/brokered modes
+		RemoteWorker remoteWorker = new RemoteWorker(requesters[0], workerPKs[0]);
+		remoteWorker.forceBrokeredMessaging(brokered, false);
+		remoteWorker.setEncrypted(encrypted, false);
+
+		Thread.sleep(2000);
 		// create the thread, only use one vault for this
 		// (two: the requester and the worker)
 		Thread thread[] = new Thread[numWorkers];

@@ -50,7 +50,7 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 		}
 
 		// 5. deserialise the return value using the class/type above
-		Object returnResult = Vaultage.deserialise(message.getValue("result"), returnClass, returnType);
+		Object returnResult = Vaultage.deserialise(message.getValue("result"), returnType);
 
 		// 6. get the response handler of the operation called
 		String capitalisedOperation = operation.replaceFirst(operation.substring(0, 1),

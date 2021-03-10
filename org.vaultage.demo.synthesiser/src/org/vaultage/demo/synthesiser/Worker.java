@@ -62,6 +62,7 @@ public class Worker extends WorkerBase {
 	public void getTextSize(String requesterPublicKey, String requestToken, String text, boolean isEncrypted)
 			throws Exception {
 		RemoteWorker requester = new RemoteWorker(this, requesterPublicKey);
+		isEncrypted = this.getVaultage().isEncrypted(); 
 		requester.respondToGetTextSize(text.getBytes().length, requestToken, isEncrypted);
 	}
 

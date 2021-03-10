@@ -53,7 +53,7 @@ public class WorkerService {
 				workers[i].startServer(LOCAL_IP, port++);
 				Files.write(Paths.get(SHARED_WORKER_DIRECTORY + workers[i].getId() + ".txt"),
 						workers[i].getPublicKey().getBytes(), StandardOpenOption.CREATE);
-				System.out.println(workers[i].getId() + " created");
+				System.out.println(workers[i].getId() + " is running: " + workers[i].getPublicKey());
 			}
 
 			Scanner scanner = new Scanner(System.in);

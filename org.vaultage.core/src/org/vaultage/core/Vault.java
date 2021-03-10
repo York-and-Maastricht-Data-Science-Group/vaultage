@@ -189,4 +189,27 @@ public abstract class Vault {
 		Set<Wallet> w = getWallets();
 		responder.respondToGetPaymentWallets(w, requestToken);
 	}
+
+	/***
+	 * Force messaging in brokered mode
+	 * @param requesterPublicKey
+	 * @param requestToken
+	 * @param forceBrokeredMessaging
+	 * @throws Exception
+	 */
+	protected void forceBrokeredMessaging(String requesterPublicKey, String requestToken,
+			boolean forceBrokeredMessaging) throws Exception {
+		this.getVaultage().forceBrokeredMessaging(forceBrokeredMessaging);
+	}
+
+	/***
+	 * set messaging encrypted or un-encrypted
+	 * @param requesterPublicKey
+	 * @param requestToken
+	 * @param setEncrypted
+	 * @throws Exception
+	 */
+	protected void setEncrypted(String requesterPublicKey, String requestToken, boolean setEncrypted) throws Exception {
+		this.getVaultage().setEncrypted(setEncrypted);
+	}
 }
