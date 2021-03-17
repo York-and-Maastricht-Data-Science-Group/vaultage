@@ -25,7 +25,7 @@ public class Worker extends WorkerBase {
 
 	@Override
 	public void increment(String requesterPublicKey, String requestToken, Integer number) throws Exception {
-		RemoteWorker remote = new RemoteWorker(this, requesterPublicKey);
+		RemoteWorker remote = new RemoteWorker(this, requesterPublicKey); 
 		remote.respondToIncrement(number + 1, requestToken);
 	}
 

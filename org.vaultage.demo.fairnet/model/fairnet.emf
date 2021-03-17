@@ -13,6 +13,9 @@ class FairnetVault {
 	op Boolean addFriend(String friendName);
 	op Post getPost(String postId);
 	op String[*] getPosts();
+	
+	@vaultage(mode="stream")
+	op byte[*] streamAudio(String audioId);
 }
 
 class Friend {

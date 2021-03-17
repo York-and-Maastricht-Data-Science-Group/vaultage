@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import javax.jms.Connection;
@@ -142,7 +143,7 @@ public class Vaultage {
 		message.setMessageType(MessageType.REQUEST);
 		message.setFrom(senderPublicKey);
 		message.setTo(receiverPublicKey);
-		message.setOperation(VaultageHandler.class.getName());
+//		message.setOperation(VaultageHandler.class.getName());
 		message.putValue("value", "Hello World!");
 
 		// send the message
@@ -198,13 +199,19 @@ public class Vaultage {
 	 * @param port    the port of the direct message server
 	 */
 	public void startServer(String address, int port) {
-		this.directMessageServerAddress = new InetSocketAddress(address, port);
-		try {
+		boolean success = false;
+		while (!success) {
+			this.directMessageServerAddress = new InetSocketAddress(address, port);
+			try {
 //			directMessageServer = new NettyDirectMessageServer(this.directMessageServerAddress, this);
-			directMessageServer = new SocketDirectMessageServer(this.directMessageServerAddress, this);
-			directMessageServer.start();
-		} catch (IOException e) {
-			e.printStackTrace();
+				directMessageServer = new SocketDirectMessageServer(this.directMessageServerAddress, this);
+				directMessageServer.start();
+				success = true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				port = (new Random()).nextInt(65536);
+				System.out.println("Try new address " + address + ": " + port);
+			}
 		}
 	}
 
@@ -303,7 +310,7 @@ public class Vaultage {
 		try {
 			// get
 			this.isEncrypted = isEncrypted;
-				
+
 			// add local address and port to the message
 			if (directMessageServerAddress != null) {
 				message.setSenderAddress(directMessageServerAddress.getAddress().getHostAddress());
@@ -489,8 +496,10 @@ public class Vaultage {
 	public void disconnect() throws Exception {
 		if (session != null)
 			session.close();
-		connection.stop();
-		connection.close();
+		if (connection != null) {
+			connection.stop();
+			connection.close();
+		}
 	}
 
 	/***
@@ -613,7 +622,9 @@ public class Vaultage {
 	}
 
 	/**
-	 * Forced to use brokered messaging if TRUE, otherwise use direct messaging if it's possible/available
+	 * Forced to use brokered messaging if TRUE, otherwise use direct messaging if
+	 * it's possible/available
+	 * 
 	 * @return
 	 */
 	public boolean isForcedBrokeredMessaging() {
@@ -621,7 +632,8 @@ public class Vaultage {
 	}
 
 	/***
-	 * Force to use brokered messaging if TRUE, otherwise use direct messaging if it's possible/available
+	 * Force to use brokered messaging if TRUE, otherwise use direct messaging if
+	 * it's possible/available
 	 * 
 	 * @return
 	 */
@@ -631,6 +643,7 @@ public class Vaultage {
 
 	/***
 	 * Is messaging encrypted
+	 * 
 	 * @return
 	 */
 	public boolean isEncrypted() {
@@ -639,6 +652,7 @@ public class Vaultage {
 
 	/***
 	 * set the messaging encrypted or not encrypted
+	 * 
 	 * @param isEncrypted
 	 */
 	public void setEncrypted(boolean isEncrypted) {

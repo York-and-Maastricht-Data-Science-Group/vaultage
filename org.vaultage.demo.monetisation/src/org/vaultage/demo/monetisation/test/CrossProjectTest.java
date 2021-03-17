@@ -17,9 +17,6 @@ import org.vaultage.demo.fairnet.GetPostResponseHandler;
 import org.vaultage.demo.fairnet.GetPostsResponseHandler;
 import org.vaultage.demo.fairnet.Post;
 import org.vaultage.demo.fairnet.RemoteFairnetVault;
-import org.vaultage.demo.fairnet.test.UnitTestAddFriendResponseHandler;
-import org.vaultage.demo.fairnet.test.UnitTestGetPostResponseHandler;
-import org.vaultage.demo.fairnet.test.UnitTestGetPostsResponseHandler;
 import org.vaultage.demo.monetisation.CityCouncil;
 
 public class CrossProjectTest {

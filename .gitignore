@@ -37,3 +37,4 @@ hs_err_pid*
 /bin/
 images/polling.graphml
 /analysis/
+/images/

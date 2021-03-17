@@ -57,14 +57,14 @@ public class LargeMessageTrafficRequester {
 			REMOTE_IP = "127.0.0.1";
 		}
 
-		int numReps = 6;
+		int numReps = 5;
 		// Only one requester and worker are required for this test. The worker is
 		// created by WorkerService. That's why I only put one worker here: the
 		// requester.
 		int numWorkers = 1;
-		int[] numOfBytes = { 1500000 };
+		int[] numOfBytes = { 1500000, 10000, 20000, 30000, 40000, 50000 };
 
-		PrintStream profilingStream = new PrintStream(new File("largeMessageNetResults.csv"));
+		PrintStream profilingStream = new PrintStream(new File("05-large-message-test-results.csv"));
 		profilingStream.println("Mode,Encryption,MessageBytes,TotalTimeMillis");
 
 		// brokered and encrypted

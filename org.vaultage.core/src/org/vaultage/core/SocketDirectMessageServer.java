@@ -67,6 +67,7 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 		this.setName(this.getClass().getSimpleName() + "-" + counter);
 		this.vaultage = vaultage;
 		serverSocket = new ServerSocket(port, BACKLOG_NUMBER, (new InetSocketAddress(address, port)).getAddress());
+		serverSocket.setReuseAddress(true);
 	}
 	
 	/***
@@ -80,6 +81,7 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 		this.setName(this.getClass().getSimpleName() + "-" + counter);
 		this.vaultage = vaultage;
 		serverSocket = new ServerSocket(address.getPort(), BACKLOG_NUMBER, address.getAddress());
+		serverSocket.setReuseAddress(true);
 	}
 
 	/***

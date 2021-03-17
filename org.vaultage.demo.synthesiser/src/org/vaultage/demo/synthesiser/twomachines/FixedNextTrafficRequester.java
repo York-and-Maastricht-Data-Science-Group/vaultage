@@ -3,6 +3,7 @@ package org.vaultage.demo.synthesiser.twomachines;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -12,6 +13,7 @@ import java.util.Random;
 
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageServer;
+import org.vaultage.demo.synthesiser.RemoteWorker;
 import org.vaultage.demo.synthesiser.Worker;
 import org.vaultage.demo.synthesiser.traffic.SynchronisedIncrementResponseHandler;
 
@@ -26,6 +28,8 @@ public class FixedNextTrafficRequester {
 	private static String SHARED_REQUESTER_DIRECTORY;
 	private static String SHARED_WORKER_DIRECTORY;
 	private static String LOCAL_IP;
+	private static String REMOTE_IP;
+
 	protected long latestRunTime;
 	protected boolean brokered;
 	protected boolean encrypted;
@@ -40,21 +44,24 @@ public class FixedNextTrafficRequester {
 			SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
 			SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
 			LOCAL_IP = "192.168.0.2";
+			REMOTE_IP = "192.168.0.4";
 		} else if (hostname.equals("wv9011")) {
 			SHARED_REQUESTER_DIRECTORY = "/home/ryan/share/requesters/";
 			SHARED_WORKER_DIRECTORY = "/home/ryan/share/workers/";
 			LOCAL_IP = "192.168.0.4";
+			REMOTE_IP = "192.168.0.2";
 		} else if (hostname.equals("research1")) {
 			SHARED_WORKER_DIRECTORY = "/tmp/ary506/workers/";
 			SHARED_REQUESTER_DIRECTORY = "/tmp/ary506/requesters/";
 //			LOCAL_IP = "144.32.196.129";
 			LOCAL_IP = "127.0.0.1";
+			REMOTE_IP = "127.0.0.1";
 		}
-		
+
 		int numReps = 5;
 		int numWorkers = 3;
-//		int[] numOperations = { 10 };
-		int[] numOperations = { 4, 5, 10, 15, 20, 25 };
+//		int[] numOperations = { 1 };
+		int[] numOperations = { 50, 100, 150, 200, 250 };
 
 		PrintStream profilingStream = new PrintStream(new File("fixedNetResults.csv"));
 		profilingStream.println("Mode,Encryption,NumTasks,TotalTimeMillis");
@@ -126,7 +133,7 @@ public class FixedNextTrafficRequester {
 		File directoryPath = new File(SHARED_WORKER_DIRECTORY);
 		File[] files = directoryPath.listFiles();
 		Arrays.sort(files);
-		for (int i = 0; i < files.length; i++) {
+		for (int i = 0; i < numWorkers; i++) {
 			String workerPK = new String(Files.readAllBytes(Paths.get(files[i].getAbsolutePath())));
 			workerPKs[i] = workerPK;
 		}
@@ -140,13 +147,26 @@ public class FixedNextTrafficRequester {
 			requesters[i].register(server);
 			if (!brokered) {
 				requesters[i].startServer(LOCAL_IP, port++);
+				int remotePort = Vaultage.DEFAULT_SERVER_PORT + 100;
+				for (int j = 0; j < numWorkers; j++) {
+					requesters[i].getVaultage().getPublicKeyToRemoteAddress().put(workerPKs[j],
+							new InetSocketAddress(REMOTE_IP, remotePort++));
+				}
 			} else {
-				requesters[i].getVaultage().forceBrokeredMessaging(false);
+				requesters[i].getVaultage().forceBrokeredMessaging(true);
 			}
 			Files.write(Paths.get(SHARED_REQUESTER_DIRECTORY + requesters[i].getId() + ".txt"),
 					requesters[i].getPublicKey().getBytes(), StandardOpenOption.CREATE);
 //			System.out.println(requesters[i].getId() + " created");
 		}
+
+		// set the remote worker(s) to (un)encrypted and direct/brokered modes
+		for (int i = 0; i < numWorkers; i++) {
+			RemoteWorker remoteWorker = new RemoteWorker(requesters[i], workerPKs[i]);
+			remoteWorker.forceBrokeredMessaging(brokered, false);
+			remoteWorker.setEncrypted(encrypted, false);
+		}
+		Thread.sleep(2000);
 
 		Thread threads[] = new Thread[numWorkers];
 		for (int i = 0; i < numWorkers; i++) {

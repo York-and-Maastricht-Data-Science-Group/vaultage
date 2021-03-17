@@ -49,7 +49,7 @@ public class SocketDirectMessageClient implements DirectMessageClient {
 	public SocketDirectMessageClient(String serverName, int port) throws UnknownHostException, IOException {
 		clientSocket = new Socket();
 		socketAddress = new InetSocketAddress(serverName, port);
-		clientSocket.setKeepAlive(true);
+//		clientSocket.setKeepAlive(true);
 	}
 	
 	/***
