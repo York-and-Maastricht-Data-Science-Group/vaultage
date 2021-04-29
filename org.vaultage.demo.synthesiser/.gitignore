@@ -3,3 +3,4 @@
 /gen/
 /activemq-data/
 /*.csv
+/workers/

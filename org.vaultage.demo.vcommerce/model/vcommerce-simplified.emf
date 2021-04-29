@@ -1,0 +1,18 @@
+@GenModel(basePackage="org.vaultage.demo.vcommerce")
+package vcommerce;
+
+@vault
+class Customer {		
+	op ShippingAddress getBillingAddress();
+}
+
+@vault
+class Shop {
+	op Item[*] getItems();
+}
+
+@vault
+class Warehouse {
+	op int getItemQuantity(String itemId);
+	
+}

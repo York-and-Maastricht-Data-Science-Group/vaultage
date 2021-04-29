@@ -46,7 +46,7 @@ public class OneToOneTrafficRequest {
 			SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
 			SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
 			LOCAL_IP = "192.168.0.2";
-			REMOTE_IP = "192.168.0.4";
+			REMOTE_IP = "192.168.0.2";
 		} else if (hostname.equals("wv9011")) {
 			SHARED_REQUESTER_DIRECTORY = "/home/ryan/share/requesters/";
 			SHARED_WORKER_DIRECTORY = "/home/ryan/share/workers/";
@@ -61,22 +61,22 @@ public class OneToOneTrafficRequest {
 		}
 
 		int numReps = 10;
-		int[] numOps = { 200, 160, 120, 80, 40 };
+		int[] numOps = { 1 };
 
 		PrintStream profilingStream = new PrintStream(new File("06-1-to-1-test-results.csv"));
 		profilingStream.println("Mode,Encryption,NumTasks,WaitTimeMillis");
-
-		// brokered and encrypted
-
-		for (int numOp : numOps) {
-			OneToOneTrafficRequest trafficSimulation = new OneToOneTrafficRequest(1, numOp, true, true);
-			for (int rep = 0; rep < numReps; rep++) {
-				trafficSimulation.run();
-				System.out.println(trafficSimulation.getLatestRunDetails());
-				profilingStream.println(String.format("%s,%s,%s,%d", "brokered", "encrypted", numOp,
-						trafficSimulation.getLatestWaitTime()));
-			}
-		}
+//
+//		// brokered and encrypted
+//
+//		for (int numOp : numOps) {
+//			OneToOneTrafficRequest trafficSimulation = new OneToOneTrafficRequest(1, numOp, true, true);
+//			for (int rep = 0; rep < numReps; rep++) {
+//				trafficSimulation.run();
+//				System.out.println(trafficSimulation.getLatestRunDetails());
+//				profilingStream.println(String.format("%s,%s,%s,%d", "brokered", "encrypted", numOp,
+//						trafficSimulation.getLatestWaitTime()));
+//			}
+//		}
 
 		// direct and encrypted
 		for (int numOp : numOps) {
@@ -89,27 +89,27 @@ public class OneToOneTrafficRequest {
 			}
 		}
 
-		// brokered and un-encrypted
-		for (int numOp : numOps) {
-			OneToOneTrafficRequest trafficSimulation3 = new OneToOneTrafficRequest(1, numOp, true, false);
-			for (int rep = 0; rep < numReps; rep++) {
-				trafficSimulation3.run();
-				System.out.println(trafficSimulation3.getLatestRunDetails());
-				profilingStream.println(
-						String.format("%s,%s,%s,%d", "brokered", "plain", numOp, trafficSimulation3.getLatestWaitTime()));
-			}
-		}
-
-		// direct and un-encrypted
-		for (int numOp : numOps) {
-			OneToOneTrafficRequest trafficSimulation4 = new OneToOneTrafficRequest(1, numOp, false, false);
-			for (int rep = 0; rep < numReps; rep++) {
-				trafficSimulation4.run();
-				System.out.println(trafficSimulation4.getLatestRunDetails());
-				profilingStream.println(
-						String.format("%s,%s,%s,%d", "direct", "plain", numOp, trafficSimulation4.getLatestWaitTime()));
-			}
-		}
+//		// brokered and un-encrypted
+//		for (int numOp : numOps) {
+//			OneToOneTrafficRequest trafficSimulation3 = new OneToOneTrafficRequest(1, numOp, true, false);
+//			for (int rep = 0; rep < numReps; rep++) {
+//				trafficSimulation3.run();
+//				System.out.println(trafficSimulation3.getLatestRunDetails());
+//				profilingStream.println(
+//						String.format("%s,%s,%s,%d", "brokered", "plain", numOp, trafficSimulation3.getLatestWaitTime()));
+//			}
+//		}
+//
+//		// direct and un-encrypted
+//		for (int numOp : numOps) {
+//			OneToOneTrafficRequest trafficSimulation4 = new OneToOneTrafficRequest(1, numOp, false, false);
+//			for (int rep = 0; rep < numReps; rep++) {
+//				trafficSimulation4.run();
+//				System.out.println(trafficSimulation4.getLatestRunDetails());
+//				profilingStream.println(
+//						String.format("%s,%s,%s,%d", "direct", "plain", numOp, trafficSimulation4.getLatestWaitTime()));
+//			}
+//		}
 
 		profilingStream.close();
 		System.out.println("Finished!");
@@ -134,7 +134,7 @@ public class OneToOneTrafficRequest {
 		Arrays.sort(files);
 		String workerPK = new String(Files.readAllBytes(Paths.get(files[0].getAbsolutePath())));
 
-		int port = Vaultage.DEFAULT_SERVER_PORT + 100;
+		int port = Vaultage.DEFAULT_SERVER_PORT + 200;
 		Worker requester = new Worker();
 		requester.setId("Requester-0");
 		requester.setCompletedValue(numOperations);

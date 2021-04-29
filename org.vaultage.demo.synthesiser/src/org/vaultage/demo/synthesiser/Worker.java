@@ -30,6 +30,7 @@ public class Worker extends WorkerBase {
 	}
 
 	public boolean isWorkComplete() {
+		System.out.println("current value: " + this.currentValue);
 		return currentValue >= completedValue;
 	}
 
