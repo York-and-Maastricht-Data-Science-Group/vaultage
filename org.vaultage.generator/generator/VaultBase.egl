@@ -2,6 +2,7 @@
 [% 	var classes = ePackage.getVaultClasses(); %]
 package [%=packageName%];
 
+import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
@@ -25,11 +26,21 @@ public abstract class [%=class.getBaseName()%] extends Vault {
 		
 	// operations
 [% for (eOperation in class.eOperations){ %]
-	[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
-	if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { %]
-	public abstract void [%= eOperation.name %]([%=eOperation.getRequesterParams()%], PaymentInformation paymentInformation) throws Exception;
+	[% var isStreamed = (eOperation.eAnnotations.selectOne(e | e.source = "stream") <> null )? true : false; %]
+	[% if (not isStreamed) { %]
+		[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
+		if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { %]
+		public abstract void [%= eOperation.name %]([%=eOperation.getRequesterParams()%], PaymentInformation paymentInformation) throws Exception;
+		[% } else { %]
+		public abstract void [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception;
+		[% } %]
 	[% } else { %]
-	public abstract void [%= eOperation.name %]([%=eOperation.getRequesterParams()%]) throws Exception;
+		[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
+		if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { %]
+		public abstract void [%= eOperation.name %]([%=eOperation.getRequesterStreamParams()%], PaymentInformation paymentInformation) throws Exception;
+		[% } else { %]
+		public abstract void [%= eOperation.name %]([%=eOperation.getRequesterStreamParams()%]) throws Exception;
+		[% } %]
 	[% } %]
 [% } %]
 }

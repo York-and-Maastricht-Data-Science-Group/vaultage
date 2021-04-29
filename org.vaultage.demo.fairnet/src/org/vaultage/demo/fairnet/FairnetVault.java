@@ -109,12 +109,6 @@ public class FairnetVault extends FairnetVaultBase {
 
 	}
 
-	@Override
-	public void streamFile(String requesterPublicKey, String requestToken, String audioId) throws Exception {
-		// TODO Auto-generated method stub
-
-	}
-
 	public void streamFile(String requesterPublicKey, String requestToken, InetSocketAddress receiverSocketAddress,
 			String fileId) throws Exception {
 

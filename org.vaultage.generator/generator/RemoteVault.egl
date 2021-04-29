@@ -153,7 +153,7 @@ public class [%=class.remoteName()%] extends RemoteVault {
 		[% if ( eOperation.eParameters.size() > 0) { %]
 		public StreamReceiver [%= eOperation.name %]([%=eOperation.getParams(paramsWithTypes)%], boolean isEncrypted) throws Exception {
 		[% } else { %]
-		public StreamReceiver [%= eOperation.name %]([%= paramsWithoutTypes.concat(", ") %], boolean isEncrypted) throws Exception {
+		public StreamReceiver [%= eOperation.name %]([%= paramsWithTypes.concat(", ") %], boolean isEncrypted) throws Exception {
 		[% } %]
 			VaultageMessage request = new VaultageMessage();
 			request.initToken();
@@ -203,7 +203,7 @@ public class [%=class.remoteName()%] extends RemoteVault {
 				public void onStreamingFinished(Object outputValue) {
 					[%= eOperation.getType() %] output = ([%= eOperation.getType() %]) outputValue;
 					try {
-						responseHandler.run(localVault, RemoteFairnetVault.this, streamReceiver.getToken(), output);
+						responseHandler.run(localVault, [%=class.remoteName()%].this, streamReceiver.getToken(), output);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

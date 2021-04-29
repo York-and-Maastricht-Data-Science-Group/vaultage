@@ -242,6 +242,22 @@ operation EOperation getRequesterParams(): String {
    return params;
 }
 
+operation EOperation getRequesterStreamParams(): String {
+	var params = "";
+	if (not self.isPublic()){
+		params = "String requesterPublicKey";
+		//params = self.eContainer.name + " requester" + self.eContainer.name;
+		params += ", ";
+	}
+	params += "String requestToken";
+	params += ", InetSocketAddress receiverSocketAddress";
+  	for (eParameter in self.eParameters) {
+  	  params += ", ";
+      params += eParameter.getType() + " " + eParameter.name; 
+  	}
+   return params;
+}
+
 operation EClass hasVaultAnnotation(): Boolean{
 	var annotation = self.eAnnotations.selectOne(a | a.source = "vault");
 	if (annotation <> null) {

@@ -63,7 +63,7 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 						[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, receiverSocketAddress, [%= eOperation.getParamsWithoutTypes() %]);
 					[% } %]
 				[% } else { %]
-					[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, receiverSocketAddress, messageToken);
+					[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, receiverSocketAddress);
 				[% } %]
 			[% } %]
 		}

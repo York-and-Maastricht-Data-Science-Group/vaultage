@@ -6,4 +6,8 @@ package synthesiser;
 class Worker {
 	op int increment(int number);
 	op int getTextSize(String text);
+
+	@stream
+	op String streamData(int sizeInBytes);
 }
+
