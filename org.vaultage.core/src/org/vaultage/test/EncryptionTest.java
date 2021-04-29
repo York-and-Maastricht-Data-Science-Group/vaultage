@@ -1,5 +1,6 @@
 package org.vaultage.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -17,6 +18,7 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
@@ -96,7 +98,18 @@ public class EncryptionTest {
 		assertEquals(publicKeyString, loadedPublicKeyString);
 		assertEquals(message, decryptedMessage);
 	}
-	
+
+	/***
+	 * Test double encryption with keys loaded from files in String
+	 * 
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws NoSuchPaddingException
+	 */
 	@Test
 	public void testDoubleEncryptionWithKeysFromFiles()
 			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
@@ -162,6 +175,84 @@ public class EncryptionTest {
 		System.out.println("Double Decrypted Message: " + decryptedMessage);
 
 		assertEquals(message, decryptedMessage);
+	}
+
+	/***
+	 * Test double encryption with keys loaded from files but in bytes
+	 * 
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws NoSuchPaddingException
+	 */
+	@Test
+	public void testDoubleEncryptionWithKeysFromFilesInBytes()
+			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException {
+		String message = "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789"
+				+ "01234567890123456789012345678901234567890123456789";
+
+		// RECEIVER
+		PublicKey receiverPublicKey = receiverKeyPair.getPublic();
+		PrivateKey receiverPrivateKey = receiverKeyPair.getPrivate();
+
+		String receiverPrivateKeyString = Base64.getEncoder().encodeToString(receiverPrivateKey.getEncoded());
+		String receiverPublicKeyString = Base64.getEncoder().encodeToString(receiverPublicKey.getEncoded());
+
+		String receiverPrivateKeyPath = "keys" + File.separator + "receiver.private.key";
+		String receiverPublicKeyPath = "keys" + File.separator + "receiver.public.key";
+		Files.write(Paths.get(receiverPrivateKeyPath), receiverPrivateKeyString.getBytes());
+		Files.write(Paths.get(receiverPublicKeyPath), receiverPublicKeyString.getBytes());
+
+		String loadedReceiverPrivateKeyString = new String(Files.readAllBytes(Paths.get(receiverPrivateKeyPath)));
+		String loadedReceiverPublicKeyString = new String(Files.readAllBytes(Paths.get(receiverPublicKeyPath)));
+
+		byte[] receiverPrivateKeyBytes = Base64.getDecoder().decode(loadedReceiverPrivateKeyString);
+		PKCS8EncodedKeySpec receiverPrivateKeySpec = new PKCS8EncodedKeySpec(receiverPrivateKeyBytes);
+		PrivateKey receiverLoadedPrivateKey = keyFactory.generatePrivate(receiverPrivateKeySpec);
+
+		byte[] receiverPublicKeyBytes = Base64.getDecoder().decode(loadedReceiverPublicKeyString);
+		X509EncodedKeySpec receiverPublicKeySpec = new X509EncodedKeySpec(receiverPublicKeyBytes);
+		PublicKey receiverLoadedPublicKey = keyFactory.generatePublic(receiverPublicKeySpec);
+
+		// SENDER
+		PublicKey senderPublicKey = senderKeyPair.getPublic();
+		PrivateKey senderPrivateKey = senderKeyPair.getPrivate();
+
+		String senderPrivateKeyString = Base64.getEncoder().encodeToString(senderPrivateKey.getEncoded());
+		String senderPublicKeyString = Base64.getEncoder().encodeToString(senderPublicKey.getEncoded());
+
+		String senderPrivateKeyPath = "keys" + File.separator + "sender.private.key";
+		String senderPublicKeyPath = "keys" + File.separator + "sender.public.key";
+		Files.write(Paths.get(senderPrivateKeyPath), senderPrivateKeyString.getBytes());
+		Files.write(Paths.get(senderPublicKeyPath), senderPublicKeyString.getBytes());
+
+		String senderLoadedPrivateKeyString = new String(Files.readAllBytes(Paths.get(senderPrivateKeyPath)));
+		String senderLoadedPublicKeyString = new String(Files.readAllBytes(Paths.get(senderPublicKeyPath)));
+
+		byte[] senderPrivateKeyBytes = Base64.getDecoder().decode(senderLoadedPrivateKeyString);
+		PKCS8EncodedKeySpec senderPrivateKeySpec = new PKCS8EncodedKeySpec(senderPrivateKeyBytes);
+		PrivateKey senderLoadedPrivateKey = keyFactory.generatePrivate(senderPrivateKeySpec);
+
+		byte[] senderPublicKeyBytes = Base64.getDecoder().decode(senderLoadedPublicKeyString);
+		X509EncodedKeySpec senderPublicKeySpec = new X509EncodedKeySpec(senderPublicKeyBytes);
+		PublicKey senderLoadedPublicKey = keyFactory.generatePublic(senderPublicKeySpec);
+
+		// ENCRYPT / DECRYPT
+		System.out.println("Original Message: " + Arrays.toString(message.getBytes()));
+		byte[] encryptedMessage = VaultageEncryption.doubleEncrypt(message.getBytes(), receiverLoadedPublicKey,
+				senderLoadedPrivateKey);
+		System.out.println("Double Encrypted Message: " + Arrays.toString(encryptedMessage));
+		byte[] decryptedMessage = VaultageEncryption.doubleDecrypt(encryptedMessage, senderLoadedPublicKey,
+				receiverLoadedPrivateKey);
+		System.out.println("Double Decrypted Message: " + Arrays.toString(decryptedMessage));
+
+		assertArrayEquals(message.getBytes(), decryptedMessage);
 	}
 
 	/***

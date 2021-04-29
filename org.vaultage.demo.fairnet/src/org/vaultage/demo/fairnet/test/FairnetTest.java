@@ -7,19 +7,15 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Scanner;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageServer;
-import org.vaultage.demo.fairnet.AddFriendResponseHandler;
 import org.vaultage.demo.fairnet.FairnetBroker;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
-import org.vaultage.demo.fairnet.GetPostResponseHandler;
-import org.vaultage.demo.fairnet.GetPostsResponseHandler;
 import org.vaultage.demo.fairnet.Post;
 import org.vaultage.demo.fairnet.RemoteFairnetVault;
 import org.vaultage.util.VaultageEncryption;
@@ -29,25 +25,26 @@ public class FairnetTest {
 	// change this to a bigger value if your machine if slower than the machine I
 	// used for testing
 	private static final int SLEEP_TIME = 50;
-//	private static final String BROKER_ADDRESS = "tcp://localhost:61616";
-	private static final String BROKER_ADDRESS = "tcp://139.162.228.32:61616"; /////test using Linode
+	private static final String BROKER_ADDRESS = "tcp://localhost:61616";
+//	private static final String BROKER_ADDRESS = "tcp://139.162.228.32:61616"; /////test using Linode
 	private static FairnetBroker BROKER = null;
 
-//	@BeforeClass
-//	public static void startBroker() throws Exception {
-//		BROKER = new FairnetBroker();
-//		BROKER.start(BROKER_ADDRESS);
-//	}
-//
-//	@AfterClass
-//	public static void stopBroker() throws Exception {
-//		BROKER.stop();
-//	}
+	@BeforeClass
+	public static void startBroker() throws Exception {
+		BROKER = new FairnetBroker();
+		BROKER.start(BROKER_ADDRESS);
+	}
+
+	@AfterClass
+	public static void stopBroker() throws Exception {
+		BROKER.stop();
+	}
 
 	@Test
 	public void testRegistration() throws Exception {
-		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
-		
+		System.out.println("---" + new Object() {
+		}.getClass().getEnclosingMethod().getName() + "---");
+
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
 		/*** User ***/
@@ -66,8 +63,9 @@ public class FairnetTest {
 //
 	@Test
 	public void testCreatePost() throws Exception {
-		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
-		
+		System.out.println("---" + new Object() {
+		}.getClass().getEnclosingMethod().getName() + "---");
+
 		FairnetVault user1 = new FairnetVault();
 		user1.setId("bob[at]publickey.net");
 		user1.setName("Bob");
@@ -80,7 +78,8 @@ public class FairnetTest {
 
 	@Test
 	public void testAddFriendLocally() throws Exception {
-		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
+		System.out.println("---" + new Object() {
+		}.getClass().getEnclosingMethod().getName() + "---");
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
@@ -107,7 +106,8 @@ public class FairnetTest {
 	@Test
 	public void testDoubleEncryption() throws Exception {
 
-		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
+		System.out.println("---" + new Object() {
+		}.getClass().getEnclosingMethod().getName() + "---");
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
@@ -138,7 +138,8 @@ public class FairnetTest {
 	@Test
 	public void testIsFriend() throws Exception {
 
-		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
+		System.out.println("---" + new Object() {
+		}.getClass().getEnclosingMethod().getName() + "---");
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
@@ -165,7 +166,8 @@ public class FairnetTest {
 	@Test
 	public void testGetMyPosts() throws Exception {
 
-		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
+		System.out.println("---" + new Object() {
+		}.getClass().getEnclosingMethod().getName() + "---");
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
@@ -223,7 +225,8 @@ public class FairnetTest {
 
 	@Test
 	public void testGetFriendPosts() throws Exception {
-		System.out.println("---" + new Object() {}.getClass().getEnclosingMethod().getName() + "---");
+		System.out.println("---" + new Object() {
+		}.getClass().getEnclosingMethod().getName() + "---");
 
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
@@ -254,8 +257,8 @@ public class FairnetTest {
 			user2.getOperationResponseHandler(UnitTestGetPostsResponseHandler.class).wait();
 		}
 
-		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getOperationResponseHandler(UnitTestGetPostsResponseHandler.class))
-				.getResult();
+		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2
+				.getOperationResponseHandler(UnitTestGetPostsResponseHandler.class)).getResult();
 
 		assertEquals(true, retrievedUser1posts.contains(post1.getId()));
 		assertEquals(false, retrievedUser1posts.contains(post2.getId()));
@@ -298,8 +301,8 @@ public class FairnetTest {
 			user2.getOperationResponseHandler(UnitTestGetPostsResponseHandler.class).wait();
 		}
 
-		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getOperationResponseHandler(UnitTestGetPostsResponseHandler.class))
-				.getResult();
+		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2
+				.getOperationResponseHandler(UnitTestGetPostsResponseHandler.class)).getResult();
 
 		// simulate request user1's post contents per post
 		for (String postId : retrievedUser1posts) {
@@ -309,7 +312,8 @@ public class FairnetTest {
 				remoteRequester.getPost(postId);
 				user2.getOperationResponseHandler(UnitTestGetPostResponseHandler.class).wait();
 			}
-			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getOperationResponseHandler(UnitTestGetPostResponseHandler.class)).getResult();
+			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2
+					.getOperationResponseHandler(UnitTestGetPostResponseHandler.class)).getResult();
 			assertEquals(post.getContent(), retrievedUser1post.getContent());
 		}
 
@@ -384,6 +388,7 @@ public class FairnetTest {
 
 	/***
 	 * Test get my friend's posts one-by-one using direct messaging
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -392,20 +397,16 @@ public class FairnetTest {
 		VaultageServer fairnet = new VaultageServer(BROKER_ADDRESS);
 
 		// user 1
-		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet, "0.0.0.0",
-				Vaultage.DEFAULT_SERVER_PORT);
-		user1.register(fairnet);
-		Thread.sleep(SLEEP_TIME);
+		FairnetVault user1 = createVault("bob[at]publickey.net", "Bob", fairnet);
+		user1.startServer("127.0.0.1", Vaultage.DEFAULT_SERVER_PORT);
 
 		user1.createPost("Hello world!!!", true);
 		user1.createPost("Stay at home, protect the NHS!", false);
 		user1.createPost("Don't worry, be happy!", true);
 
 		// user 2
-		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet, "127.0.0.1",
-				Vaultage.DEFAULT_SERVER_PORT + 1);
-		user2.register(fairnet);
-		Thread.sleep(SLEEP_TIME);
+		FairnetVault user2 = createVault("alice[at]publickey.com", "Alice", fairnet);
+		user2.startServer("127.0.0.1", Vaultage.DEFAULT_SERVER_PORT + 1);
 
 		// exchange addresses for direct messaging
 		exchangeNetworkAddresses(user1, user2);
@@ -416,6 +417,7 @@ public class FairnetTest {
 
 		// exchange public keys
 		exchangePublicKeys(user1, user2);
+
 		// user 2 adds user 1 as a friend
 		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(user2, user1.getPublicKey());
 
@@ -424,8 +426,8 @@ public class FairnetTest {
 			user2.getOperationResponseHandler(UnitTestGetPostsResponseHandler.class).wait();
 		}
 
-		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2.getOperationResponseHandler(UnitTestGetPostsResponseHandler.class))
-				.getResult();
+		List<String> retrievedUser1posts = ((UnitTestGetPostsResponseHandler) user2
+				.getOperationResponseHandler(UnitTestGetPostsResponseHandler.class)).getResult();
 
 		// simulate request user1's post contents per post
 		for (String postId : retrievedUser1posts) {
@@ -435,12 +437,10 @@ public class FairnetTest {
 				remoteRequester.getPost(postId);
 				user2.getOperationResponseHandler(UnitTestGetPostResponseHandler.class).wait();
 			}
-			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2.getOperationResponseHandler(UnitTestGetPostResponseHandler.class)).getResult();
+			Post retrievedUser1post = ((UnitTestGetPostResponseHandler) user2
+					.getOperationResponseHandler(UnitTestGetPostResponseHandler.class)).getResult();
 			assertEquals(post.getContent(), retrievedUser1post.getContent());
 		}
-
-		user1.unregister();
-		user2.unregister();
 
 		user1.shutdownServer();
 		user2.shutdownServer();
@@ -480,30 +480,6 @@ public class FairnetTest {
 	private FairnetVault createVault(String id, String name, VaultageServer fairnet)
 			throws FileNotFoundException, IOException, NoSuchAlgorithmException, Exception, InterruptedException {
 		FairnetVault user = new FairnetVault();
-		user.setId(id);
-		user.setName(name);
-		return user;
-	}
-
-	/***
-	 * Create FairnetVault and set userid, name, direct message server's address and
-	 * port
-	 * 
-	 * @param id
-	 * @param name
-	 * @param fairnet
-	 * @param address
-	 * @param port
-	 * @return
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws NoSuchAlgorithmException
-	 * @throws Exception
-	 * @throws InterruptedException
-	 */
-	private FairnetVault createVault(String id, String name, VaultageServer fairnet, String address, int port)
-			throws FileNotFoundException, IOException, NoSuchAlgorithmException, Exception, InterruptedException {
-		FairnetVault user = new FairnetVault(address, port);
 		user.setId(id);
 		user.setName(name);
 		return user;

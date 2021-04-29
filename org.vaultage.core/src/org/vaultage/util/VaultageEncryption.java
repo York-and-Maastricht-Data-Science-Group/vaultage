@@ -51,6 +51,7 @@ public class VaultageEncryption {
 //	public static final String CIPHER_ALGORITHM = "RSA";
 	public static final int MAXIMUM_PLAIN_MESSAGE_LENGTH = 190;
 	public static final int MAXIMUM_ENCRYPTED_MESSAGE_LENGTH = 256;
+	public static final int MAXIMUM_DOUBLE_ENCRYPTED_MESSAGE_LENGTH = 684;
 	public static final int KEY_LENGTH = 2048;
 	public static final int PUBLIC_KEY_LENGTH = 392;
 
@@ -245,6 +246,38 @@ public class VaultageEncryption {
 	}
 
 	/***
+	 * 
+	 * @param plainMessage
+	 * @param receiverPublicKeyString
+	 * @param senderPrivateKeyString
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 * @throws InvalidKeySpecException
+	 */
+	public static byte[] doubleEncrypt(byte[] plainMessage, String receiverPublicKeyString,
+			String senderPrivateKeyString)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
+			NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
+
+		KeyFactory keyFactory = KeyFactory.getInstance(VaultageEncryption.KEY_GENERATOR_ALGORITHM);
+		byte[] privateKeyBytes = Base64.getDecoder().decode(senderPrivateKeyString);
+		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+		PrivateKey senderPrivateKey = keyFactory.generatePrivate(privateKeySpec);
+
+		byte[] publicKeyBytes = Base64.getDecoder().decode(receiverPublicKeyString);
+		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+		PublicKey receiverPublicKey = keyFactory.generatePublic(publicKeySpec);
+
+		return doubleEncrypt(plainMessage, receiverPublicKey, senderPrivateKey);
+	}
+
+	/***
 	 * A method to double encrypt a message using sender private key and receiver
 	 * public key.
 	 * 
@@ -264,6 +297,14 @@ public class VaultageEncryption {
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
 			NoSuchAlgorithmException, NoSuchPaddingException, IOException {
 		String encryptedMessage1 = encrypt(plainMessage, (Key) senderPrivateKey);
+//		System.out.println("intermediateEncryptedMessage: " + encryptedMessage1);
+		return encrypt(encryptedMessage1, (Key) receiverPublicKey);
+	}
+
+	public static byte[] doubleEncrypt(byte[] plainMessage, PublicKey receiverPublicKey, PrivateKey senderPrivateKey)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
+			NoSuchAlgorithmException, NoSuchPaddingException, IOException {
+		byte[] encryptedMessage1 = encrypt(plainMessage, (Key) senderPrivateKey);
 //		System.out.println("intermediateEncryptedMessage: " + encryptedMessage1);
 		return encrypt(encryptedMessage1, (Key) receiverPublicKey);
 	}
@@ -300,7 +341,25 @@ public class VaultageEncryption {
 		}
 //		return out.toByteArray();
 		return Base64.getEncoder().encodeToString(out.toByteArray());
+	}
 
+	public static byte[] encrypt(byte[] plainMessage, Key key)
+			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
+			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException {
+
+		Cipher cipher = Cipher.getInstance(VaultageEncryption.CIPHER_ALGORITHM);
+		cipher.init(Cipher.ENCRYPT_MODE, key);
+//		StringBuilder sb = new StringBuilder();
+		ByteArrayInputStream in = new ByteArrayInputStream(plainMessage);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		byte[] buffer = new byte[MAXIMUM_PLAIN_MESSAGE_LENGTH];
+		int len;
+		while ((len = in.read(buffer)) > 0) {
+			byte[] cipherText = cipher.doFinal(buffer, 0, len);
+			out.write(cipherText);
+		}
+		byte[] temp  = out.toByteArray();
+		return Base64.getEncoder().encode(out.toByteArray());
 	}
 
 	/***
@@ -362,6 +421,38 @@ public class VaultageEncryption {
 	}
 
 	/***
+	 * 
+	 * @param encryptedMessage
+	 * @param senderPublicKeyString
+	 * @param receiverPrivateKeyString
+	 * @return
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 * @throws InvalidKeySpecException
+	 */
+	public static byte[] doubleDecrypt(byte[] encryptedMessage, String senderPublicKeyString,
+			String receiverPrivateKeyString)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException,
+			NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException {
+
+		KeyFactory keyFactory = KeyFactory.getInstance(VaultageEncryption.KEY_GENERATOR_ALGORITHM);
+		byte[] privateKeyBytes = Base64.getDecoder().decode(receiverPrivateKeyString);
+		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+		PrivateKey receiverPrivateKey = keyFactory.generatePrivate(privateKeySpec);
+
+		byte[] publicKeyBytes = Base64.getDecoder().decode(senderPublicKeyString);
+		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+		PublicKey senderPublicKey = keyFactory.generatePublic(publicKeySpec);
+
+		return doubleDecrypt(encryptedMessage, senderPublicKey, receiverPrivateKey);
+	}
+
+	/***
 	 * A method to double decrypt an encrypted message using receiver private key
 	 * and sender public key .
 	 * 
@@ -381,6 +472,14 @@ public class VaultageEncryption {
 			PrivateKey receiverPrivateKey) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
 		String decryptedMessage1 = decrypt(encryptedMessage, (Key) receiverPrivateKey);
+//		System.out.println("intermediateDecryptedMessage: " + decryptedMessage1);
+		return decrypt(decryptedMessage1, (Key) senderPublicKey);
+	}
+
+	public static byte[] doubleDecrypt(byte[] encryptedMessage, PublicKey senderPublicKey,
+			PrivateKey receiverPrivateKey) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
+			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
+		byte[] decryptedMessage1 = decrypt(encryptedMessage, (Key) receiverPrivateKey);
 //		System.out.println("intermediateDecryptedMessage: " + decryptedMessage1);
 		return decrypt(decryptedMessage1, (Key) senderPublicKey);
 	}
@@ -419,6 +518,27 @@ public class VaultageEncryption {
 //			count++;
 		}
 		return sb.toString();
+	}
+
+	public static byte[] decrypt(byte[] encryptedMessage, Key key)
+			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
+			UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException {
+
+		Cipher cipher = Cipher.getInstance(VaultageEncryption.CIPHER_ALGORITHM);
+		cipher.init(Cipher.DECRYPT_MODE, key);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encryptedMessage));
+		byte[] buffer = new byte[MAXIMUM_ENCRYPTED_MESSAGE_LENGTH];
+		int len;
+//		int count = 1;
+		while ((len = in.read(buffer)) > 0) {
+			byte[] cipherText = cipher.doFinal(buffer, 0, len);
+//			String temp = new String(cipherText, StandardCharsets.UTF_8);
+			out.write(cipherText);
+//			System.out.println("Message Part-" + count + ": " + temp);
+//			count++;
+		}
+		return out.toByteArray();
 
 	}
 

@@ -171,10 +171,24 @@ operation EOperation getParams(): String {
 		.concat(", ");
 }
 
+operation EOperation getParams(collection: Sequence): String {
+	var temp = self.eParameters
+		.collect(p | p.getType() + " " + p.name);
+	collection.addAll(temp);
+	return collection.concat(", ");
+}
+
 operation EOperation getParamsWithoutTypes(): String {
 	return self.eParameters
 		.collect(p | p.name)
 		.concat(", ");
+}
+
+operation EOperation getParamsWithoutTypes(collection: Sequence): String {
+	var temp = self.eParameters
+		.collect(p | p.name);
+	collection.addAll(temp);
+	return collection.concat(", ");
 }
 
 operation EOperation getRespondToParams(): String {
@@ -199,7 +213,7 @@ operation EOperation getResponseHandlerParams(): String {
 operation EOperation getRespondToParamsWithoutTypes(): String {
 	var params = "";
   	if (self.eType <> null or self.eType <> ""){
-  	  params = params + ", " + "("+self.getType() + ")" + " result";	
+  	  params = params + ", " + "("+ self.getType() + ")" + " result";	
   	}
    return params;
 }

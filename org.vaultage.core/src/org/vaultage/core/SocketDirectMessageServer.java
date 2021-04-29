@@ -1,15 +1,20 @@
 package org.vaultage.core;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.charset.CharsetDecoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 import java.util.stream.Collectors;
 
 import javax.crypto.BadPaddingException;
@@ -29,7 +34,7 @@ import org.vaultage.util.VaultageEncryption;
 public class SocketDirectMessageServer extends Thread implements DirectMessageServer {
 
 	private static final int BACKLOG_NUMBER = 128;
-	
+
 	private ServerSocket serverSocket;
 	private boolean isListening = false;
 	private static long counter = 0; // for naming the threads
@@ -69,7 +74,7 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 		serverSocket = new ServerSocket(port, BACKLOG_NUMBER, (new InetSocketAddress(address, port)).getAddress());
 		serverSocket.setReuseAddress(true);
 	}
-	
+
 	/***
 	 * Constructor of this implementation of direct message server.
 	 * 
@@ -153,20 +158,34 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 		@Override
 		public void run() {
 			try {
-				String mergedMessage = "";
-				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-				 mergedMessage = in.lines().collect(Collectors.joining());
-					 
+//				long start = System.nanoTime();
+
+//				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//				mergedMessage = in.lines().collect(Collectors.joining());
+//				in.close();
+				
+				ByteArrayOutputStream output = new ByteArrayOutputStream();
+				byte[] buffer = new byte[2048];
+				int length = 0;
+				InputStream is = socket.getInputStream();
+				while((length = is.read(buffer)) > -1) {
+					output.write(buffer, 0, length);
+				}
+				String mergedMessage = output.toString().trim();
+				output.close();
+				
+//				long end = System.nanoTime();
+//				System.out.println("Bytes to String time = " + (end - start));
+				
 //				while (true) {
 //					String temp = in.readLine();
 //					if (temp == null) break;
 //					mergedMessage = mergedMessage + temp;
 //				}
-				in.close();
-				
+
 //				if (mergedMessage.equals("")) return;
-				
+
 //				System.out.println(socket.getRemoteSocketAddress() + ": " + incomingMessage);
 
 				String encryptionFlag = mergedMessage.substring(0, 1);
@@ -178,10 +197,8 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 //				System.out.println(encryptedMessage);
 
 				if (vaultage != null) {
-					String content = (encryptionFlag.equals("1"))
-							? VaultageEncryption.doubleDecrypt(encryptedMessage, senderPublicKey,
-									SocketDirectMessageServer.this.privateKey)
-							: encryptedMessage;
+					String content = (encryptionFlag.equals("1")) ? VaultageEncryption.doubleDecrypt(encryptedMessage,
+							senderPublicKey, SocketDirectMessageServer.this.privateKey) : encryptedMessage;
 
 					// System.out.println("RECEIVED MESSAGE: " + topicId + "\n" + content);
 
@@ -189,8 +206,8 @@ public class SocketDirectMessageServer extends Thread implements DirectMessageSe
 					MessageType msgType = vaultageMessage.getMessageType();
 
 					if (vaultageMessage.getSenderAddress() != null && vaultageMessage.getSenderPort() >= 0) {
-					vaultage.getPublicKeyToRemoteAddress().put(senderPublicKey, new InetSocketAddress(
-							vaultageMessage.getSenderAddress(), vaultageMessage.getSenderPort()));
+						vaultage.getPublicKeyToRemoteAddress().put(senderPublicKey, new InetSocketAddress(
+								vaultageMessage.getSenderAddress(), vaultageMessage.getSenderPort()));
 					}
 
 					switch (msgType) {

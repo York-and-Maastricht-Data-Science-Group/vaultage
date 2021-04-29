@@ -13,6 +13,8 @@ import org.vaultage.wallet.Wallet;
 
 public abstract class Vault {
 
+	public static final String DEFAULT_DOWNLOAD_DIR = "downloads"; 
+	
 	protected String id = UUID.randomUUID().toString();
 	protected String privateKey;
 	protected String publicKey;

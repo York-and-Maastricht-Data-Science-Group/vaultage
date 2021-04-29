@@ -2,6 +2,7 @@
 @namespace(uri="fairnet", prefix="")
 package fairnet;
 
+datatype File: java.io.File;
 
 @vault
 class FairnetVault {
@@ -14,8 +15,8 @@ class FairnetVault {
 	op Post getPost(String postId);
 	op String[*] getPosts();
 	
-	@vaultage(mode="stream")
-	op byte[*] streamAudio(String audioId);
+	@stream
+	op File streamFile(String fileId);
 }
 
 class Friend {

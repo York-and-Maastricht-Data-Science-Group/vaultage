@@ -2,6 +2,7 @@ package org.vaultage.core;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.net.InetSocketAddress;
 import java.util.Set;
 
 import org.vaultage.core.VaultageMessage.MessageType;
@@ -11,10 +12,17 @@ public class RemoteVault {
 
 	protected Vault localVault;
 	protected String remotePublicKey;
+	protected InetSocketAddress receiverSocketAddress;
 
 	public RemoteVault(Vault localVault, String remotePublicKey) {
 		this.localVault = localVault;
 		this.remotePublicKey = remotePublicKey;
+	}
+
+	public RemoteVault(Vault localVault, String remotePublicKey, InetSocketAddress receiverSocketAddress) {
+		this.localVault = localVault;
+		this.remotePublicKey = remotePublicKey;
+		this.receiverSocketAddress = receiverSocketAddress;
 	}
 
 	public String getRemotePublicKey() {

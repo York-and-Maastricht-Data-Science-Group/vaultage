@@ -1,12 +1,18 @@
 [% import 'Util.eol'; %]
 package [%=packageName%];
 
-
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.net.InetSocketAddress;
 import java.util.List;
 
+import org.vaultage.core.BytesToOutputTypeConverter;
+import org.vaultage.core.OnStreamingFinishedHandler;
 import org.vaultage.core.RemoteVault;
+import org.vaultage.core.StreamReceiver;
+import org.vaultage.core.Streamer;
 import org.vaultage.core.Vault;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
@@ -22,77 +28,238 @@ public class [%=class.remoteName()%] extends RemoteVault {
 	public [%=class.remoteName()%](Vault localVault, String remotePublicKey) {
 		super(localVault, remotePublicKey);
 	}
+	
+	public [%=class.remoteName()%](Vault localVault, String remotePublicKey, InetSocketAddress receiverSocketAddress) {
+		super(localVault, remotePublicKey, receiverSocketAddress);
+	}
+	
 [% for (eOperation in class.eOperations) { %]
-
-	public String [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
-	[% if ( eOperation.eParameters.size() > 0) { %]
-		return this.[%= eOperation.name %]([%=eOperation.getParamsWithoutTypes()%], true);
+	[% var isStreamed = (eOperation.eAnnotations.selectOne(e | e.source = "stream") <> null )? true : false; %]
+	[% /* This following part is for operation */ %]
+	[% if (not isStreamed) { %]
+		public String [%= eOperation.name %]([%=eOperation.getParams()%]) throws Exception {
+		[% if ( eOperation.eParameters.size() > 0) { %]
+			return this.[%= eOperation.name %]([%=eOperation.getParamsWithoutTypes()%], true);
+		[% } else { %]
+			return this.[%= eOperation.name %](true);
+		[% } %]
+		}
+		[% if ( eOperation.eParameters.size() > 0) { %]
+		public String [%= eOperation.name %]([%=eOperation.getParams()%], boolean isEncrypted) throws Exception {
+		[% } else { %]
+		public String [%= eOperation.name %](boolean isEncrypted) throws Exception {
+		[% } %]
+			VaultageMessage request = new VaultageMessage();
+			request.initToken();
+			request.setSenderId(localVault.getId());
+			request.setFrom(localVault.getPublicKey());
+			request.setTo(remotePublicKey);
+			request.setMessageType(MessageType.REQUEST);
+			request.setOperation("[%= eOperation.name %]");
+			
+		[% for (eParamater in eOperation.eParameters) { %]
+			request.putValue("[%=eParamater.name%]", Vaultage.serialise([%=eParamater.name%]));
+		[% } %]
+		
+		[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
+		if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { %]
+			Wallet wallet = this.localVault.getDefaultWallet();
+			PaymentInformation paymentInformation = new PaymentInformation(); 
+			paymentInformation.setName(wallet.getName());
+			paymentInformation.setType(wallet.getType());
+			paymentInformation.setCurrency(wallet.getCurrency());
+			paymentInformation.setAccountNumber(wallet.getAccountNumber());
+			paymentInformation.setBank(wallet.getBank());
+			paymentInformation.setBankAddress(wallet.getBankAddress());
+			paymentInformation.setBillAddress(wallet.getBillAddress());
+			request.setPaymentInformation(paymentInformation);
+		[% } %]
+		
+			localVault.getVaultage().sendMessage(request.getTo(), localVault.getPublicKey(),
+					localVault.getPrivateKey(), request, isEncrypted);
+		
+			return request.getToken();
+		}
+	[% /* is streamed */ %]	
 	[% } else { %]
-		return this.[%= eOperation.name %](true);
-	[% } %]
-	}
-[% if ( eOperation.eParameters.size() > 0) { %]
-	public String [%= eOperation.name %]([%=eOperation.getParams()%], boolean isEncrypted) throws Exception {
-[% } else { %]
-	public String [%= eOperation.name %](boolean isEncrypted) throws Exception {
-[% } %]
-		VaultageMessage request = new VaultageMessage();
-		request.initToken();
-		request.setSenderId(localVault.getId());
-		request.setFrom(localVault.getPublicKey());
-		request.setTo(remotePublicKey);
-		request.setMessageType(MessageType.REQUEST);
-		request.setOperation("[%= eOperation.name %]");
+		[% var paramsWithTypes = Sequence{}; 
+		paramsWithTypes.add("ByteArrayOutputStream outputStream");
+		paramsWithTypes.add("String receiverAddress");
+		paramsWithTypes.add("int receiverPort"); 
+		var paramsWithoutTypes = Sequence{}; 
+		paramsWithoutTypes.add("outputStream");
+		paramsWithoutTypes.add("receiverAddress");
+		paramsWithoutTypes.add("receiverPort");
+		paramsWithoutTypes.add("null"); %]
+		public StreamReceiver [%= eOperation.name %]([%=eOperation.getParams(paramsWithTypes)%]) throws Exception {
+		[% if ( eOperation.eParameters.size() > 0) { %]
+			return this.[%= eOperation.name %]([%=eOperation.getParamsWithoutTypes(paramsWithoutTypes)%], true);
+		[% } else { %]
+			return this.[%= eOperation.name %]([%= paramsWithoutTypes.concat(", ") %], true);
+		[% } %]
+		}
 		
-	[% for (eParamater in eOperation.eParameters) { %]
-		request.putValue("[%=eParamater.name%]", Vaultage.serialise([%=eParamater.name%]));
-	[% } %]
-	
-	[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
-	if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { %]
-		Wallet wallet = this.localVault.getDefaultWallet();
-		PaymentInformation paymentInformation = new PaymentInformation(); 
-		paymentInformation.setName(wallet.getName());
-		paymentInformation.setType(wallet.getType());
-		paymentInformation.setCurrency(wallet.getCurrency());
-		paymentInformation.setAccountNumber(wallet.getAccountNumber());
-		paymentInformation.setBank(wallet.getBank());
-		paymentInformation.setBankAddress(wallet.getBankAddress());
-		paymentInformation.setBillAddress(wallet.getBillAddress());
-		request.setPaymentInformation(paymentInformation);
-	[% } %]
-	
-		localVault.getVaultage().sendMessage(request.getTo(), localVault.getPublicKey(),
-				localVault.getPrivateKey(), request, isEncrypted);
-
-		return request.getToken();
-	}
-	[% if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
-	
-	public void respondTo[%=eOperation.name.firstToUpperCase()%]([%=eOperation.getReturnType() %] result, String token) throws Exception {
-		this.respondTo[%=eOperation.name.firstToUpperCase()%](result, token, true);
-	}
-	
-	public void respondTo[%=eOperation.name.firstToUpperCase()%]([%=eOperation.getReturnType() %] result, String token, boolean isEncrypted) throws Exception {
+		[% var paramsWithTypes = Sequence{}; 
+		paramsWithTypes.add("ByteArrayOutputStream outputStream");
+		paramsWithTypes.add("String receiverAddress");
+		paramsWithTypes.add("int receiverPort");  
+		var paramsWithoutTypes = Sequence{}; 
+		paramsWithoutTypes.add("outputStream");
+		paramsWithoutTypes.add("receiverAddress");
+		paramsWithoutTypes.add("receiverPort");
+		paramsWithoutTypes.add("null"); 
+		%]
 		
-		VaultageMessage response = new VaultageMessage();
-		response.setToken(token); // TODO: this token is not known by the vault
-		response.setFrom(localVault.getPublicKey());
-		response.setTo(remotePublicKey);
-		response.setOperation("[%=eOperation.name%]");
-		response.setMessageType(MessageType.RESPONSE);
-		response.setRemoteVaultType(this.getClass().getName());
+		public StreamReceiver [%= eOperation.name %]([%=eOperation.getParams(paramsWithTypes)%], boolean isEncrypted) throws Exception {
+		[% if ( eOperation.eParameters.size() > 0) { %]
+			return this.[%= eOperation.name %]([%=eOperation.getParamsWithoutTypes(paramsWithoutTypes)%], isEncrypted);
+		[% } else { %]
+			return this.[%= eOperation.name %]([%= paramsWithoutTypes.concat(", ") %], isEncrypted);
+		[% } %]
+		}
 		
-		Method m = new Object(){}.getClass().getEnclosingMethod();
-		Type x = m.getGenericParameterTypes()[0];
-		String returnType = x.getTypeName();
-		response.setReturnType(returnType);
-
-		response.putValue("result", Vaultage.serialise(result));
-
-		localVault.getVaultage().sendMessage(response.getTo(), localVault.getPublicKey(),
-				localVault.getPrivateKey(), response, isEncrypted);
-	}
+		[% var paramsWithTypes = Sequence{}; 
+		paramsWithTypes.add("ByteArrayOutputStream outputStream");
+		paramsWithTypes.add("String receiverAddress");
+		paramsWithTypes.add("int receiverPort");
+		paramsWithTypes.add("BytesToOutputTypeConverter bytesToOutputTypeConverter");  
+		var paramsWithoutTypes = Sequence{}; 
+		paramsWithoutTypes.add("outputStream");
+		paramsWithoutTypes.add("receiverAddress");
+		paramsWithoutTypes.add("receiverPort");
+		paramsWithoutTypes.add("bytesToOutputTypeConverter"); 
+		%]
+		
+		public StreamReceiver [%= eOperation.name %]([%=eOperation.getParams(paramsWithTypes)%]) throws Exception {
+		[% if ( eOperation.eParameters.size() > 0) { %]
+			return this.[%= eOperation.name %]([%=eOperation.getParamsWithoutTypes(paramsWithoutTypes)%], true);
+		[% } else { %]
+			return this.[%= eOperation.name %]([%= paramsWithoutTypes.concat(", ") %], true);
+		[% } %]
+		}
+		
+		[% var paramsWithTypes = Sequence{}; 
+		paramsWithTypes.add("ByteArrayOutputStream outputStream");
+		paramsWithTypes.add("String receiverAddress");
+		paramsWithTypes.add("int receiverPort");
+		paramsWithTypes.add("BytesToOutputTypeConverter bytesToOutputTypeConverter");  
+		var paramsWithoutTypes = Sequence{}; 
+		paramsWithoutTypes.add("outputStream");
+		paramsWithoutTypes.add("receiverAddress");
+		paramsWithoutTypes.add("receiverPort");
+		paramsWithoutTypes.add("bytesToOutputTypeConverter"); 
+		%]
+		
+		[% if ( eOperation.eParameters.size() > 0) { %]
+		public StreamReceiver [%= eOperation.name %]([%=eOperation.getParams(paramsWithTypes)%], boolean isEncrypted) throws Exception {
+		[% } else { %]
+		public StreamReceiver [%= eOperation.name %]([%= paramsWithoutTypes.concat(", ") %], boolean isEncrypted) throws Exception {
+		[% } %]
+			VaultageMessage request = new VaultageMessage();
+			request.initToken();
+			request.setSenderId(localVault.getId());
+			request.setFrom(localVault.getPublicKey());
+			request.setTo(remotePublicKey);
+			request.setMessageType(MessageType.REQUEST);
+			request.setOperation("[%= eOperation.name %]");
+			
+		[% for (eParamater in eOperation.eParameters) { %]
+			request.putValue("[%=eParamater.name%]", Vaultage.serialise([%=eParamater.name%]));
+		[% } %]
+		
+			request.putValue("receiverAddress", receiverAddress);
+			request.putValue("receiverPort", String.valueOf(receiverPort));
+		
+		[%	var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
+		if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { %]
+			Wallet wallet = this.localVault.getDefaultWallet();
+			PaymentInformation paymentInformation = new PaymentInformation(); 
+			paymentInformation.setName(wallet.getName());
+			paymentInformation.setType(wallet.getType());
+			paymentInformation.setCurrency(wallet.getCurrency());
+			paymentInformation.setAccountNumber(wallet.getAccountNumber());
+			paymentInformation.setBank(wallet.getBank());
+			paymentInformation.setBankAddress(wallet.getBankAddress());
+			paymentInformation.setBillAddress(wallet.getBillAddress());
+			request.setPaymentInformation(paymentInformation);
+		[% } %]
+		
+			StreamReceiver streamReceiver = new StreamReceiver(receiverAddress, receiverPort, remotePublicKey,
+			localVault.getPrivateKey(), outputStream);
+			streamReceiver.setEncrypted(true);
+			streamReceiver.setToken(request.getToken());
+			
+			if (bytesToOutputTypeConverter == null) {
+				streamReceiver.setBytesToOutputTypeConverter(new BytesToOutputTypeConverter([%= eOperation.getType() %].class));
+			} else {
+				streamReceiver.setBytesToOutputTypeConverter(bytesToOutputTypeConverter);
+			}
+			
+			[%=eOperation.name.firstToUpperCase()%]ResponseHandler responseHandler = ([%=eOperation.name.firstToUpperCase()%]ResponseHandler) localVault
+					.getOperationResponseHandler([%=eOperation.name.firstToUpperCase()%]ResponseHandler.class);
+			
+			streamReceiver.setOnStreamingFinishedHandler(new OnStreamingFinishedHandler() {
+				@Override
+				public void onStreamingFinished(Object outputValue) {
+					[%= eOperation.getType() %] output = ([%= eOperation.getType() %]) outputValue;
+					try {
+						responseHandler.run(localVault, RemoteFairnetVault.this, streamReceiver.getToken(), output);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			
+			streamReceiver.startListening();
+		
+			localVault.getVaultage().sendMessage(request.getTo(), localVault.getPublicKey(),
+					localVault.getPrivateKey(), request, isEncrypted);
+			
+			return streamReceiver;
+		}
 	[% } %]
+	
+	[% /* This following part is for respondTo[OperationName] */ %]
+	[% if (not isStreamed) { %]
+		[% if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
+		public void respondTo[%=eOperation.name.firstToUpperCase()%]([%=eOperation.getReturnType() %] result, String token) throws Exception {
+			this.respondTo[%=eOperation.name.firstToUpperCase()%](result, token, true);
+		}
+		
+		public void respondTo[%=eOperation.name.firstToUpperCase()%]([%=eOperation.getReturnType() %] result, String token, boolean isEncrypted) throws Exception {
+			
+			VaultageMessage response = new VaultageMessage();
+			response.setToken(token); // TODO: this token is not known by the vault
+			response.setFrom(localVault.getPublicKey());
+			response.setTo(remotePublicKey);
+			response.setOperation("[%=eOperation.name%]");
+			response.setMessageType(MessageType.RESPONSE);
+			response.setRemoteVaultType(this.getClass().getName());
+			
+			Method m = new Object(){}.getClass().getEnclosingMethod();
+			Type x = m.getGenericParameterTypes()[0];
+			String returnType = x.getTypeName();
+			response.setReturnType(returnType);
+	
+			response.putValue("result", Vaultage.serialise(result));
+	
+			localVault.getVaultage().sendMessage(response.getTo(), localVault.getPublicKey(),
+					localVault.getPrivateKey(), response, isEncrypted);
+		}
+		[% } %]
+	[% /* if the return value is a stream */  %]
+	[% } else { %]
+		[% if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
+		public void respondTo[%=eOperation.name.firstToUpperCase()%](InputStream result, String token) throws Exception {
+			this.respondTo[%=eOperation.name.firstToUpperCase()%](result, token, true);
+		}
+		
+		public void respondTo[%=eOperation.name.firstToUpperCase()%](InputStream result, String token, boolean isEncrypted) throws Exception {
+			Streamer streamer = new Streamer(receiverSocketAddress, result, localVault.getPrivateKey(), remotePublicKey);
+			streamer.setEncrypted(isEncrypted);
+			streamer.startStreaming();	
+		}
+		[% } %]
+	[% } %]	
 [% } %]	
 }

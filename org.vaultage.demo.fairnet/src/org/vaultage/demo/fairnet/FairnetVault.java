@@ -1,16 +1,21 @@
 
 package org.vaultage.demo.fairnet;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.vaultage.core.DirectMessageServer;
-import org.vaultage.core.NettyDirectMessageServer;
-import org.vaultage.core.Vaultage;
+import org.vaultage.core.BytesToOutputTypeConverter;
+import org.vaultage.core.StreamReceiver;
+import org.vaultage.core.Streamer;
+import org.vaultage.core.Vault;
 
 // import org.vaultage.demo.fairnet.Friend;
 // import org.vaultage.demo.fairnet.Post;
@@ -105,9 +110,64 @@ public class FairnetVault extends FairnetVaultBase {
 	}
 
 	@Override
-	public void streamAudio(String requesterPublicKey, String requestToken, String audioId) throws Exception {
+	public void streamFile(String requesterPublicKey, String requestToken, String audioId) throws Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
 
+	public void streamFile(String requesterPublicKey, String requestToken, InetSocketAddress receiverSocketAddress,
+			String fileId) throws Exception {
+
+		File file = null;
+		if ("data.txt".equals(fileId)) {
+			file = new File("resource" + File.separator + "data.txt");
+		}
+
+		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(this, requesterPublicKey, receiverSocketAddress);
+		FileInputStream dataInputStream = new FileInputStream(file);
+		remoteRequester.respondToStreamFile(dataInputStream, requestToken);
+	}
+
+	public void downloadFile(FairnetVault peer, String fileId) throws Exception {
+
+		// setup localIpAddress and port to receive stream
+		String receiverAddress = InetAddress.getLoopbackAddress().getHostAddress();
+		int receiverPort = 54322;
+
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		RemoteFairnetVault remotePeer = new RemoteFairnetVault(this, peer.getPublicKey());
+
+		BytesToOutputTypeConverter bytesToFile = new BytesToOutputTypeConverter(File.class) {
+			@Override
+			public Object customConvert(ByteArrayOutputStream outputStream) {
+				if (this.outputType.equals(File.class)) {
+					File file = null;
+					try {
+						file = new File(Vault.DEFAULT_DOWNLOAD_DIR + File.separator + fileId);
+						if (!file.getParentFile().exists()) {
+							file.getParentFile().mkdir();
+						}
+						if (file.exists()) {
+							file.delete();
+						}
+						file.createNewFile();
+						outputStream.writeTo(new FileOutputStream(file));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					return file;
+				} else {
+					return null;
+				}
+			}
+		};
+
+		StreamReceiver streamReceiver = remotePeer.streamFile(outputStream, receiverAddress, receiverPort, bytesToFile,
+				fileId);
+		synchronized (streamReceiver) {
+			streamReceiver.wait();
+		}
+
+		System.out.println("Finished!");
+	}
 }

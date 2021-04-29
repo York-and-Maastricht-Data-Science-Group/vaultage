@@ -2,6 +2,7 @@
 [% 	var classes = ePackage.getVaultClasses(); %]
 package [%=packageName%];
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,26 +29,47 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 		String messageToken = message.getToken();
 		switch (operation) {
 [% for (eOperation in class.eOperations){ %]
-			case "[%=eOperation.name%]": {
-[% for (eParameter in eOperation.eParameters){ %]
-				[%=eParameter.getTypeName()%] [%=eParameter.name%] = Vaultage.deserialise(message.getValue("[%=eParameter.name%]"), [%=eParameter.getTypeImplementation()%].class);
-[% } %]
-			[% if (eOperation.eParameters.size() > 0) { %]
-				[%	
-				var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
-				if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { 
-				%]
-					[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, [%= eOperation.getParamsWithoutTypes() %], message.getPaymentInformation());
+	[% var isStreamed = (eOperation.eAnnotations.selectOne(e | e.source = "stream") <> null )? true : false; %]
+
+		case "[%=eOperation.name%]": {
+		[% for (eParameter in eOperation.eParameters){ %]
+			[%=eParameter.getTypeName()%] [%=eParameter.name%] = Vaultage.deserialise(message.getValue("[%=eParameter.name%]"), [%=eParameter.getTypeImplementation()%].class);
+		[% } %]
+			[% if(not isStreamed) { %]
+				[% if (eOperation.eParameters.size() > 0) { %]
+					[%	
+					var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
+					if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { 
+					%]
+						[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, [%= eOperation.getParamsWithoutTypes() %], message.getPaymentInformation());
+					[% } else { %]
+						[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, [%= eOperation.getParamsWithoutTypes() %]);
+					[% } %]
 				[% } else { %]
-					[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, [%= eOperation.getParamsWithoutTypes() %]);
+					[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken);
 				[% } %]
+			[% /* if stream */ %]
 			[% } else { %]
-				[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken);
+			String address = Vaultage.deserialise(message.getValue("receiverAddress"), String.class);
+			int port = Integer.valueOf(Vaultage.deserialise(message.getValue("receiverPort"), String.class));
+			InetSocketAddress receiverSocketAddress = new InetSocketAddress(address, port);
+				[% if (eOperation.eParameters.size() > 0) { %]
+					[%	
+					var eAnnotation = eOperation.eAnnotations.selectOne(e | e.source = "vaultage");
+					if (eAnnotation <> null and eAnnotation.details.one(e | e.key = "monetised" and e.value = "true")) { 
+					%]
+						[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, receiverSocketAddress, [%= eOperation.getParamsWithoutTypes() %], message.getPaymentInformation());
+					[% } else { %]
+						[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, messageToken, receiverSocketAddress, [%= eOperation.getParamsWithoutTypes() %]);
+					[% } %]
+				[% } else { %]
+					[%=class.name.firstToLowerCase()%].[%=eOperation.name%](requester, receiverSocketAddress, messageToken);
+				[% } %]
 			[% } %]
-				}
-				break;
-[% } %]			default:
-				throw new Exception("Operation " + operation + " is not supported!");
+		}
+			break;
+[% } %]	default:
+			throw new Exception("Operation " + operation + " is not supported!");
 		}
 	}
 [% 
