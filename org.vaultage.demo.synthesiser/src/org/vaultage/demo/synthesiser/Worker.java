@@ -8,25 +8,19 @@ import java.util.Map;
 
 import org.fusesource.hawtbuf.ByteArrayInputStream;
 import org.vaultage.core.StreamReceiver;
+import org.vaultage.core.Vault;
 import org.vaultage.demo.synthesiser.message.SynchronisedGetTextSizeResponseHandler;
 
 public class Worker extends WorkerBase {
 
 	private int currentValue;
 	private int completedValue;
-	private int[] numOfBytes = { 1500000, 10000, 20000, 30000, 40000, 50000 };
-	private Map<Integer, String> dataMap = new HashMap<>();
+	private Map<Integer, String> dataMap;
 
 	public Worker() throws Exception {
 		super();
 		currentValue = 0;
-		for (int size : numOfBytes) {
-			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < size; i++) {
-				sb.append("a");
-			}
-			dataMap.put(size, sb.toString());
-		}
+		
 	}
 
 	public void sendOperation(String workerPublicKey) throws Exception {
@@ -91,11 +85,12 @@ public class Worker extends WorkerBase {
 			Integer size) throws Exception {
 		String data = dataMap.get(size);
 		RemoteWorker remoteRequester = new RemoteWorker(this, requesterPublicKey, receiverSocketAddress);
+		boolean isEncrypted = this.getVaultage().isEncrypted();
 		ByteArrayInputStream dataInputStream = new ByteArrayInputStream(data.getBytes());
-		remoteRequester.respondToStreamData(dataInputStream, requestToken);
+		remoteRequester.respondToStreamData(dataInputStream, requestToken, isEncrypted);
 	}
 
-	public void requestDataStream(String requesterPublicKey, int size) throws Exception {
+	public void requestDataStream(String requesterPublicKey, boolean encrypted, int size) throws Exception {
 
 		// setup localIpAddress and port to receive stream
 		String receiverAddress = InetAddress.getLoopbackAddress().getHostAddress();
@@ -103,11 +98,33 @@ public class Worker extends WorkerBase {
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		RemoteWorker remotePeer = new RemoteWorker(this, requesterPublicKey);
-		StreamReceiver streamReceiver = remotePeer.streamData(outputStream, receiverAddress, receiverPort, size);
+		
+		addOperationResponseHandler(new StreamDataResponseHandler() {
+			
+			@Override
+			public void run(Worker localVault, RemoteWorker remoteVault, String responseToken, String result) throws Exception {
+//				System.out.println("AA");
+			}	
+			@Override
+			public void run(Vault localVault, RemoteWorker remoteVault, String responseToken, String result) throws Exception {
+//				System.out.println("MessageSize = " + result.length());
+			}
+		});
+		
+		StreamReceiver streamReceiver = remotePeer.streamData(outputStream, receiverAddress, receiverPort, size, encrypted);
 		synchronized (streamReceiver) {
 			streamReceiver.wait();
 		}
 
-		System.out.println("Finished!");
+//		System.out.println("Finished!");
 	}
+	
+	public Map<Integer, String> getDataMap() {
+		return dataMap;
+	}
+
+	public void setDataMap(Map<Integer, String> dataMap) {
+		this.dataMap = dataMap;
+	}
+
 }

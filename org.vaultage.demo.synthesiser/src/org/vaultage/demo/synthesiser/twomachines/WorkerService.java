@@ -4,6 +4,8 @@ import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.vaultage.core.Vaultage;
@@ -22,10 +24,23 @@ public class WorkerService {
 	private static String LOCAL_IP = "192.168.0.2";
 	private static final int NUM_WORKERS = 1;
 	private static Worker[] workers;
+	
+	private static final int[] dataSizes = { 1500000, 10000, 20000, 30000, 40000, 50000 };
+	private static final Map<Integer, String> dataMap = new HashMap<>();
 
 	public static void main(String[] args) throws Exception {
 		try {
 			System.out.println("Running worker service ...");
+			
+			
+			for (int size : dataSizes) {
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < size; i++) {
+					sb.append("a");
+				}
+				dataMap.put(size, sb.toString());
+			}
+			
 
 			String hostname = InetAddress.getLocalHost().getHostName();
 			if (hostname.equals("DESKTOP-S9QN639")) {
@@ -45,6 +60,7 @@ public class WorkerService {
 
 			for (int i = 0; i < NUM_WORKERS; i++) {
 				workers[i] = new Worker();
+				workers[i].setDataMap(dataMap);
 				// I added 100 so that the key files can be ordered perfectly when
 				// listing the files
 				workers[i].setId("Worker-" + (100 + i));

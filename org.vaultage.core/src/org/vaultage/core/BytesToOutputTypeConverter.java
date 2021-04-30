@@ -18,7 +18,7 @@ public class BytesToOutputTypeConverter {
 			ByteBuffer wrapped = ByteBuffer.wrap(bytes); 
 			output = wrapped.getInt();
 		} else if (outputType.equals(String.class)) {
-			output = String.valueOf(bytes);
+			output = new String(bytes);
 		} else if (outputType.equals(Double.class)) {
 			ByteBuffer wrapped = ByteBuffer.wrap(bytes); 
 			output = wrapped.getDouble();

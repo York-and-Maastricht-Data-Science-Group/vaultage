@@ -43,7 +43,7 @@ public class StreamDataTrafficRequester {
 			SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
 			SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
 			LOCAL_IP = "192.168.0.2";
-			REMOTE_IP = "192.168.0.4";
+			REMOTE_IP = "192.168.0.2";
 		} else if (hostname.equals("wv9011")) {
 			SHARED_REQUESTER_DIRECTORY = "/home/ryan/share/requesters/";
 			SHARED_WORKER_DIRECTORY = "/home/ryan/share/workers/";
@@ -62,27 +62,25 @@ public class StreamDataTrafficRequester {
 		// created by WorkerService. That's why I only put one worker here: the
 		// requester.
 		int numWorkers = 1;
-		int[] numOfBytes = { 1500000, 10000, 20000, 30000, 40000, 50000 };
+		int[] dataSizes = { 10000, 20000, 30000, 40000, 50000, 1500000 };
 
 		PrintStream profilingStream = new PrintStream(new File("06-data-stream-test-results.csv"));
 		profilingStream.println("Mode,Encryption,MessageBytes,TotalTimeMillis");
 
-		// brokered and encrypted
-		for (int n : numOfBytes) {
-			StreamDataTrafficRequester trafficSimulation = new StreamDataTrafficRequester(numWorkers, n, true,
-					true);
+		// direct and un-encrypted
+		for (int n : dataSizes) {
+			StreamDataTrafficRequester trafficSimulation = new StreamDataTrafficRequester(numWorkers, n, false, false);
 			for (int rep = 0; rep < numReps; rep++) {
 				trafficSimulation.run();
 				System.out.println(trafficSimulation.getLatestRunDetails());
 				profilingStream.println(
-						String.format("%s,%s,%s,%d", "brokered", "encrypted", n, trafficSimulation.getLatestRunTime()));
+						String.format("%s,%s,%s,%d", "direct", "plain", n, trafficSimulation.getLatestRunTime()));
 			}
 		}
 
 		// direct and encrypted
-		for (int n : numOfBytes) {
-			StreamDataTrafficRequester trafficSimulation = new StreamDataTrafficRequester(numWorkers, n, false,
-					true);
+		for (int n : dataSizes) {
+			StreamDataTrafficRequester trafficSimulation = new StreamDataTrafficRequester(numWorkers, n, false, true);
 			for (int rep = 0; rep < numReps; rep++) {
 				trafficSimulation.run();
 				System.out.println(trafficSimulation.getLatestRunDetails());
@@ -91,29 +89,6 @@ public class StreamDataTrafficRequester {
 			}
 		}
 
-		// brokered and un-encrypted
-		for (int n : numOfBytes) {
-			StreamDataTrafficRequester trafficSimulation = new StreamDataTrafficRequester(numWorkers, n, true,
-					false);
-			for (int rep = 0; rep < numReps; rep++) {
-				trafficSimulation.run();
-				System.out.println(trafficSimulation.getLatestRunDetails());
-				profilingStream.println(
-						String.format("%s,%s,%s,%d", "brokered", "plain", n, trafficSimulation.getLatestRunTime()));
-			}
-		}
-
-		// direct and un-encrypted
-		for (int n : numOfBytes) {
-			StreamDataTrafficRequester trafficSimulation = new StreamDataTrafficRequester(numWorkers, n, false,
-					false);
-			for (int rep = 0; rep < numReps; rep++) {
-				trafficSimulation.run();
-				System.out.println(trafficSimulation.getLatestRunDetails());
-				profilingStream.println(
-						String.format("%s,%s,%s,%d", "direct", "plain", n, trafficSimulation.getLatestRunTime()));
-			}
-		}
 		profilingStream.close();
 		System.out.println("Finished!");
 		System.exit(0);
@@ -206,7 +181,7 @@ public class StreamDataTrafficRequester {
 		Thread t = new Thread() {
 			public void run() {
 				try {
-					worker.requestDataStream(remoteWorkerKey, size);
+					worker.requestDataStream(remoteWorkerKey, encrypted, size);
 				} catch (Exception e) {
 					e.printStackTrace();
 

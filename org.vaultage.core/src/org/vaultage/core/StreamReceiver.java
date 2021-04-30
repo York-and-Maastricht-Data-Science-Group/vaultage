@@ -54,11 +54,13 @@ public class StreamReceiver extends Thread {
 							break;
 						}
 
-//						System.out.println("Receive 1 = " + receivedData.length + " = " + new String(receivedData));
-						decryptedData = VaultageEncryption.doubleDecrypt(receivedData, senderPublicKey,
-								receiverPrivateKey);
-//						System.out.println("Receive 2 = " + decryptedData.length + " = " + new String(decryptedData));
-						outputStream.write(decryptedData);
+						if (isEncrypted) {
+							decryptedData = VaultageEncryption.doubleDecrypt(receivedData, senderPublicKey,
+									receiverPrivateKey);
+							outputStream.write(decryptedData);
+						} else {
+							outputStream.write(receivedData);
+						}
 //						fos.write(decryptedData, 0, VaultageEncryption.MAXIMUM_PLAIN_MESSAGE_LENGTH);
 						outputStream.flush();
 					}
@@ -78,6 +80,7 @@ public class StreamReceiver extends Thread {
 				is.close();
 			}
 			outputStream.close();
+			receiverSocket.close();
 
 			onFinishedStreaming();
 
@@ -137,7 +140,7 @@ public class StreamReceiver extends Thread {
 	public void setBytesToOutputTypeConverter(BytesToOutputTypeConverter bytesToOutputType) {
 		this.bytesToOutputType = bytesToOutputType;
 	}
-	
+
 	public void setOnStreamingFinishedHandler(OnStreamingFinishedHandler onFinishedStreamingHandler) {
 		this.onFinishedStreamingHandler = onFinishedStreamingHandler;
 	}
