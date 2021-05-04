@@ -25,7 +25,7 @@ public class WorkerService {
 	private static final int NUM_WORKERS = 1;
 	private static Worker[] workers;
 	
-	private static final int[] dataSizes = { 3, 1500000, 10000, 20000, 30000, 40000, 50000 };
+	private static final int[] dataSizes = { 1500000, 10000, 20000, 30000, 40000, 50000 };
 	private static final Map<Integer, String> dataMap = new HashMap<>();
 
 	public static void main(String[] args) throws Exception {
@@ -51,8 +51,8 @@ public class WorkerService {
 				LOCAL_IP = "192.168.0.4";
 			}
 
-		VaultageServer server = new VaultageServer("tcp://localhost:61616");
-//			VaultageServer server = new VaultageServer("tcp://139.162.228.32:61616");
+//		VaultageServer server = new VaultageServer("tcp://localhost:61616");
+			VaultageServer server = new VaultageServer("tcp://139.162.228.32:61616");
 
 			int port = Vaultage.DEFAULT_SERVER_PORT + 100;
 
