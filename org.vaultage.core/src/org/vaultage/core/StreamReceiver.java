@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 import org.vaultage.util.VaultageEncryption;
 
@@ -19,6 +20,7 @@ public class StreamReceiver extends Thread {
 	private String token;
 	private OnStreamingFinishedHandler onFinishedStreamingHandler;
 	private Object returnValue;
+	private byte[] data;
 
 	private BytesToOutputTypeConverter bytesToOutputType;
 	private ByteArrayOutputStream outputStream;
@@ -36,8 +38,7 @@ public class StreamReceiver extends Thread {
 	public void run() {
 		try {
 			receiverSocket = new ServerSocket(port);
-			byte[] receivedData = new byte[VaultageEncryption.MAXIMUM_DOUBLE_ENCRYPTED_MESSAGE_LENGTH];
-			byte[] decryptedData = new byte[VaultageEncryption.MAXIMUM_PLAIN_MESSAGE_LENGTH];
+			byte[] receivedData = new byte[20480];
 
 			isListening = true;
 			while (isListening) {
@@ -45,38 +46,30 @@ public class StreamReceiver extends Thread {
 				InputStream is = socket.getInputStream();
 				int length = 0;
 
-				if (isEncrypted) {
-					while ((length = is.read(receivedData)) > -1) {
-
-						if (receivedData[length - 2] == (byte) (char) 4
-								&& receivedData[length - 1] == (byte) (char) 4) {
-							isListening = false;
-							break;
-						}
-
-						if (isEncrypted) {
-							decryptedData = VaultageEncryption.doubleDecrypt(receivedData, senderPublicKey,
-									receiverPrivateKey);
-							outputStream.write(decryptedData);
-						} else {
-							outputStream.write(receivedData);
-						}
-//						fos.write(decryptedData, 0, VaultageEncryption.MAXIMUM_PLAIN_MESSAGE_LENGTH);
+				
+				while ((length = is.read(receivedData)) > -1) {
+					if (receivedData[length - 2] == (byte) (char) 4
+							&& receivedData[length - 1] == (byte) (char) 4) {
+						isListening = false;
+						
+						byte[] copy = Arrays.copyOf(receivedData, length - 2); 
+						outputStream.write(receivedData, 0, copy.length);
 						outputStream.flush();
+						
+						break;
 					}
-				} else {
-					while ((length = is.read(receivedData)) > -1) {
-						if (receivedData[length - 2] == (byte) (char) 4
-								&& receivedData[length - 1] == (byte) (char) 4) {
-							isListening = false;
-							break;
-						}
 
-						outputStream.write(receivedData, 0, length);
-						outputStream.flush();
-					}
+					outputStream.write(receivedData, 0, length);
+					outputStream.flush();
 				}
-
+				
+				if (isEncrypted) {
+					data = VaultageEncryption.doubleDecrypt(outputStream.toByteArray(), senderPublicKey,
+							receiverPrivateKey);
+				} else {
+					data = outputStream.toByteArray();
+				}
+				
 				is.close();
 			}
 			outputStream.close();
@@ -132,7 +125,8 @@ public class StreamReceiver extends Thread {
 
 	private void onFinishedStreaming() {
 		if (bytesToOutputType != null) {
-			Object outputValue = bytesToOutputType.convert(outputStream);
+//			Object outputValue = bytesToOutputType.convert(outputStream);
+			Object outputValue = bytesToOutputType.convert(data);
 			this.onFinishedStreamingHandler.onStreamingFinished(outputValue);
 		}
 	}

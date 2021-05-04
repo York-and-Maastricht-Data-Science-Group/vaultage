@@ -1,12 +1,9 @@
 package org.vaultage.demo.synthesiser;
 
 import java.io.ByteArrayOutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.fusesource.hawtbuf.ByteArrayInputStream;
 import org.vaultage.core.StreamReceiver;
 import org.vaultage.core.Vault;
 import org.vaultage.demo.synthesiser.message.SynchronisedGetTextSizeResponseHandler;
@@ -86,15 +83,17 @@ public class Worker extends WorkerBase {
 		String data = dataMap.get(size);
 		RemoteWorker remoteRequester = new RemoteWorker(this, requesterPublicKey, receiverSocketAddress);
 		boolean isEncrypted = this.getVaultage().isEncrypted();
-		ByteArrayInputStream dataInputStream = new ByteArrayInputStream(data.getBytes());
-		remoteRequester.respondToStreamData(dataInputStream, requestToken, isEncrypted);
+		
+		remoteRequester.respondToStreamData(data.getBytes(), requestToken, isEncrypted);
+//		ByteArrayInputStream dataInputStream = new ByteArrayInputStream(data.getBytes());
+//		remoteRequester.respondToStreamData(dataInputStream, requestToken, isEncrypted);
 	}
 
 	public void requestDataStream(String requesterPublicKey, boolean encrypted, int size) throws Exception {
 
 		// setup localIpAddress and port to receive stream
-		String receiverAddress = InetAddress.getLoopbackAddress().getHostAddress();
-		int receiverPort = 54322;
+		String receiverAddress = "192.168.0.2";
+		int receiverPort = 54321;
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		RemoteWorker remotePeer = new RemoteWorker(this, requesterPublicKey);

@@ -17,7 +17,7 @@ import org.vaultage.demo.synthesiser.Worker;
 import org.vaultage.demo.synthesiser.message.SynchronisedGetTextSizeResponseHandler;
 
 /**
- * Large message test. Run worker service first to prepare the workers before
+ * Large message test in stream. Run worker service first to prepare the workers before
  * running this class.
  *
  * @author Alfonso de la Vega, Alfa Yohannis
@@ -43,7 +43,7 @@ public class StreamDataTrafficRequester {
 			SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
 			SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
 			LOCAL_IP = "192.168.0.2";
-			REMOTE_IP = "192.168.0.2";
+			REMOTE_IP = "192.168.0.4";
 		} else if (hostname.equals("wv9011")) {
 			SHARED_REQUESTER_DIRECTORY = "/home/ryan/share/requesters/";
 			SHARED_WORKER_DIRECTORY = "/home/ryan/share/workers/";
@@ -63,6 +63,7 @@ public class StreamDataTrafficRequester {
 		// requester.
 		int numWorkers = 1;
 		int[] dataSizes = { 10000, 20000, 30000, 40000, 50000, 1500000 };
+//		int[] dataSizes = { 1500000 };
 
 		PrintStream profilingStream = new PrintStream(new File("06-data-stream-test-results.csv"));
 		profilingStream.println("Mode,Encryption,MessageBytes,TotalTimeMillis");
@@ -117,7 +118,7 @@ public class StreamDataTrafficRequester {
 		workerPKs[0] = workerPK;
 //		}
 
-		int port = Vaultage.DEFAULT_SERVER_PORT + 200;
+		int port = Vaultage.DEFAULT_SERVER_PORT + 300;
 		int remotePort = Vaultage.DEFAULT_SERVER_PORT + 100;
 		for (int i = 0; i < numWorkers; i++) {
 			requesters[i] = new Worker();

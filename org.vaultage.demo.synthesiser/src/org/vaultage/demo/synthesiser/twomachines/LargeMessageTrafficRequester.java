@@ -43,7 +43,7 @@ public class LargeMessageTrafficRequester {
 			SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
 			SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
 			LOCAL_IP = "192.168.0.2";
-			REMOTE_IP = "192.168.0.2";
+			REMOTE_IP = "192.168.0.4";
 		} else if (hostname.equals("wv9011")) {
 			SHARED_REQUESTER_DIRECTORY = "/home/ryan/share/requesters/";
 			SHARED_WORKER_DIRECTORY = "/home/ryan/share/workers/";
@@ -62,7 +62,8 @@ public class LargeMessageTrafficRequester {
 		// created by WorkerService. That's why I only put one worker here: the
 		// requester.
 		int numWorkers = 1;
-		int[] numOfBytes = {10000, 20000, 30000, 40000, 50000, 1500000 };
+		int[] numOfBytes = { 10000, 20000, 30000, 40000, 50000, 1500000 };
+//		int[] numOfBytes = { 20000000 };
 
 		PrintStream profilingStream = new PrintStream(new File("05-large-message-test-results.csv"));
 		profilingStream.println("Mode,Encryption,MessageBytes,TotalTimeMillis");
@@ -130,8 +131,8 @@ public class LargeMessageTrafficRequester {
 	public void run() throws Exception {
 		Worker[] requesters = new Worker[numWorkers];
 
-		VaultageServer server = new VaultageServer("tcp://localhost:61616");
-//		VaultageServer server = new VaultageServer("tcp://139.162.228.32:61616");
+//		VaultageServer server = new VaultageServer("tcp://localhost:61616");
+		VaultageServer server = new VaultageServer("tcp://139.162.228.32:61616");
 
 		// loading workers public keys
 		String[] workerPKs = new String[numWorkers];

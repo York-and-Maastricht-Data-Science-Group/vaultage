@@ -250,11 +250,11 @@ public class [%=class.remoteName()%] extends RemoteVault {
 	[% /* if the return value is a stream */  %]
 	[% } else { %]
 		[% if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
-		public void respondTo[%=eOperation.name.firstToUpperCase()%](InputStream result, String token) throws Exception {
+		public void respondTo[%=eOperation.name.firstToUpperCase()%](byte[] result, String token) throws Exception {
 			this.respondTo[%=eOperation.name.firstToUpperCase()%](result, token, true);
 		}
 		
-		public void respondTo[%=eOperation.name.firstToUpperCase()%](InputStream result, String token, boolean isEncrypted) throws Exception {
+		public void respondTo[%=eOperation.name.firstToUpperCase()%](byte[] result, String token, boolean isEncrypted) throws Exception {
 			Streamer streamer = new Streamer(receiverSocketAddress, result, localVault.getPrivateKey(), remotePublicKey);
 			streamer.setEncrypted(isEncrypted);
 			streamer.startStreaming();	
