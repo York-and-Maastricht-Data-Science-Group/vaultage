@@ -69,7 +69,7 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 		}
 			break;
 [% } %]	default:
-			throw new Exception("Operation " + operation + " is not supported!");
+			//throw new Exception("Operation " + operation + " is not supported!");
 		}
 	}
 [% 

@@ -186,7 +186,7 @@ public class [%=class.remoteName()%] extends RemoteVault {
 		
 			StreamReceiver streamReceiver = new StreamReceiver(receiverAddress, receiverPort, remotePublicKey,
 			localVault.getPrivateKey(), outputStream);
-			streamReceiver.setEncrypted(true);
+			streamReceiver.setEncrypted(isEncrypted);
 			streamReceiver.setToken(request.getToken());
 			
 			if (bytesToOutputTypeConverter == null) {

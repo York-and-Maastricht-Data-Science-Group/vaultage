@@ -1,10 +1,12 @@
 package org.vaultage.core;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.bouncycastle.util.Arrays;
 import org.vaultage.util.VaultageEncryption;
 
 public class StreamReceiver extends Thread {
@@ -48,25 +50,27 @@ public class StreamReceiver extends Thread {
 				if (isEncrypted) {
 					while ((length = is.read(receivedData)) > -1) {
 
+//						System.out.println(new String(receivedData));
+
 						if (receivedData[length - 2] == (byte) (char) 4
 								&& receivedData[length - 1] == (byte) (char) 4) {
 							isListening = false;
-							break;
-						}
-
-						if (isEncrypted) {
+							receivedData = Arrays.copyOf(receivedData, length - 2);
 							decryptedData = VaultageEncryption.doubleDecrypt(receivedData, senderPublicKey,
 									receiverPrivateKey);
 							outputStream.write(decryptedData);
-						} else {
-							outputStream.write(receivedData);
+							outputStream.flush();
+							break;
 						}
-//						fos.write(decryptedData, 0, VaultageEncryption.MAXIMUM_PLAIN_MESSAGE_LENGTH);
+
+						decryptedData = VaultageEncryption.doubleDecrypt(receivedData, senderPublicKey,
+								receiverPrivateKey);
+						outputStream.write(decryptedData);
 						outputStream.flush();
 					}
 				} else {
 					while ((length = is.read(receivedData)) > -1) {
-						if (receivedData[length - 2] == (byte) (char) 4
+						if (receivedData.length >= 2 && receivedData[length - 2] == (byte) (char) 4
 								&& receivedData[length - 1] == (byte) (char) 4) {
 							isListening = false;
 							break;
@@ -86,6 +90,16 @@ public class StreamReceiver extends Thread {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				if (outputStream != null)
+					outputStream.close();
+				if (receiverSocket != null)
+					receiverSocket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}

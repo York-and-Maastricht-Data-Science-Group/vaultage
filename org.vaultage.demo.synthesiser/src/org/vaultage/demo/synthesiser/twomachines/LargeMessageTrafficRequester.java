@@ -43,7 +43,7 @@ public class LargeMessageTrafficRequester {
 			SHARED_REQUESTER_DIRECTORY = "Z:\\requesters\\";
 			SHARED_WORKER_DIRECTORY = "Z:\\workers\\";
 			LOCAL_IP = "192.168.0.2";
-			REMOTE_IP = "192.168.0.2";
+			REMOTE_IP = "192.168.0.4";
 		} else if (hostname.equals("wv9011")) {
 			SHARED_REQUESTER_DIRECTORY = "/home/ryan/share/requesters/";
 			SHARED_WORKER_DIRECTORY = "/home/ryan/share/workers/";
@@ -63,21 +63,22 @@ public class LargeMessageTrafficRequester {
 		// requester.
 		int numWorkers = 1;
 		int[] numOfBytes = {10000, 20000, 30000, 40000, 50000, 1500000 };
+//		int[] numOfBytes = {1500000 };
 
 		PrintStream profilingStream = new PrintStream(new File("05-large-message-test-results.csv"));
 		profilingStream.println("Mode,Encryption,MessageBytes,TotalTimeMillis");
 
-//		// brokered and encrypted
-//		for (int n : numOfBytes) {
-//			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
-//					true);
-//			for (int rep = 0; rep < numReps; rep++) {
-//				trafficSimulation.run();
-//				System.out.println(trafficSimulation.getLatestRunDetails());
-//				profilingStream.println(
-//						String.format("%s,%s,%s,%d", "brokered", "encrypted", n, trafficSimulation.getLatestRunTime()));
-//			}
-//		}
+		// brokered and encrypted
+		for (int n : numOfBytes) {
+			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
+					true);
+			for (int rep = 0; rep < numReps; rep++) {
+				trafficSimulation.run();
+				System.out.println(trafficSimulation.getLatestRunDetails());
+				profilingStream.println(
+						String.format("%s,%s,%s,%d", "brokered", "encrypted", n, trafficSimulation.getLatestRunTime()));
+			}
+		}
 
 		// direct and un-encrypted
 		for (int n : numOfBytes) {
@@ -103,17 +104,17 @@ public class LargeMessageTrafficRequester {
 			}
 		}
 
-//		// brokered and un-encrypted
-//		for (int n : numOfBytes) {
-//			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
-//					false);
-//			for (int rep = 0; rep < numReps; rep++) {
-//				trafficSimulation.run();
-//				System.out.println(trafficSimulation.getLatestRunDetails());
-//				profilingStream.println(
-//						String.format("%s,%s,%s,%d", "brokered", "plain", n, trafficSimulation.getLatestRunTime()));
-//			}
-//		}
+		// brokered and un-encrypted
+		for (int n : numOfBytes) {
+			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
+					false);
+			for (int rep = 0; rep < numReps; rep++) {
+				trafficSimulation.run();
+				System.out.println(trafficSimulation.getLatestRunDetails());
+				profilingStream.println(
+						String.format("%s,%s,%s,%d", "brokered", "plain", n, trafficSimulation.getLatestRunTime()));
+			}
+		}
 
 		profilingStream.close();
 		System.out.println("Finished!");
@@ -130,8 +131,8 @@ public class LargeMessageTrafficRequester {
 	public void run() throws Exception {
 		Worker[] requesters = new Worker[numWorkers];
 
-		VaultageServer server = new VaultageServer("tcp://localhost:61616");
-//		VaultageServer server = new VaultageServer("tcp://139.162.228.32:61616");
+//		VaultageServer server = new VaultageServer("tcp://localhost:61616");
+		VaultageServer server = new VaultageServer("tcp://139.162.228.32:61616");
 
 		// loading workers public keys
 		String[] workerPKs = new String[numWorkers];

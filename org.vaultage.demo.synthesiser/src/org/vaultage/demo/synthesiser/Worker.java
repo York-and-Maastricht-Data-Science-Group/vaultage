@@ -93,8 +93,8 @@ public class Worker extends WorkerBase {
 	public void requestDataStream(String requesterPublicKey, boolean encrypted, int size) throws Exception {
 
 		// setup localIpAddress and port to receive stream
-		String receiverAddress = InetAddress.getLoopbackAddress().getHostAddress();
-		int receiverPort = 54322;
+		String receiverAddress = "192.168.0.4";
+		int receiverPort = 54321;
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		RemoteWorker remotePeer = new RemoteWorker(this, requesterPublicKey);
