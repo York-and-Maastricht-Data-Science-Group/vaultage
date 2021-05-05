@@ -534,6 +534,7 @@ public class VaultageEncryption {
 		while ((len = in.read(buffer)) > 0) {
 			byte[] cipherText = cipher.doFinal(buffer, 0, len);
 //			String temp = new String(cipherText, StandardCharsets.UTF_8);
+//			cipherText = (new String(cipherText, StandardCharsets.UTF_8)).getBytes();
 			out.write(cipherText);
 //			System.out.println("Message Part-" + count + ": " + temp);
 //			count++;

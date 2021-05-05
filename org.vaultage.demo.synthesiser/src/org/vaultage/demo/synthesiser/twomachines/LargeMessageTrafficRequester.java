@@ -62,23 +62,24 @@ public class LargeMessageTrafficRequester {
 		// created by WorkerService. That's why I only put one worker here: the
 		// requester.
 		int numWorkers = 1;
-		int[] numOfBytes = { 10000, 20000, 30000, 40000, 50000, 1500000 };
-//		int[] numOfBytes = { 20000000 };
+
+		int[] numOfBytes = {10000, 20000, 30000, 40000, 50000, 1500000 };
+//		int[] numOfBytes = {1500000 };
 
 		PrintStream profilingStream = new PrintStream(new File("05-large-message-test-results.csv"));
 		profilingStream.println("Mode,Encryption,MessageBytes,TotalTimeMillis");
 
-//		// brokered and encrypted
-//		for (int n : numOfBytes) {
-//			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
-//					true);
-//			for (int rep = 0; rep < numReps; rep++) {
-//				trafficSimulation.run();
-//				System.out.println(trafficSimulation.getLatestRunDetails());
-//				profilingStream.println(
-//						String.format("%s,%s,%s,%d", "brokered", "encrypted", n, trafficSimulation.getLatestRunTime()));
-//			}
-//		}
+		// brokered and encrypted
+		for (int n : numOfBytes) {
+			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
+					true);
+			for (int rep = 0; rep < numReps; rep++) {
+				trafficSimulation.run();
+				System.out.println(trafficSimulation.getLatestRunDetails());
+				profilingStream.println(
+						String.format("%s,%s,%s,%d", "brokered", "encrypted", n, trafficSimulation.getLatestRunTime()));
+			}
+		}
 
 		// direct and un-encrypted
 		for (int n : numOfBytes) {
@@ -104,17 +105,17 @@ public class LargeMessageTrafficRequester {
 			}
 		}
 
-//		// brokered and un-encrypted
-//		for (int n : numOfBytes) {
-//			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
-//					false);
-//			for (int rep = 0; rep < numReps; rep++) {
-//				trafficSimulation.run();
-//				System.out.println(trafficSimulation.getLatestRunDetails());
-//				profilingStream.println(
-//						String.format("%s,%s,%s,%d", "brokered", "plain", n, trafficSimulation.getLatestRunTime()));
-//			}
-//		}
+		// brokered and un-encrypted
+		for (int n : numOfBytes) {
+			LargeMessageTrafficRequester trafficSimulation = new LargeMessageTrafficRequester(numWorkers, n, true,
+					false);
+			for (int rep = 0; rep < numReps; rep++) {
+				trafficSimulation.run();
+				System.out.println(trafficSimulation.getLatestRunDetails());
+				profilingStream.println(
+						String.format("%s,%s,%s,%d", "brokered", "plain", n, trafficSimulation.getLatestRunTime()));
+			}
+		}
 
 		profilingStream.close();
 		System.out.println("Finished!");

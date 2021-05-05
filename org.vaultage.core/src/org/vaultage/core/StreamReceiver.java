@@ -1,11 +1,13 @@
 package org.vaultage.core;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 
+import org.bouncycastle.util.Arrays;
 import org.vaultage.util.VaultageEncryption;
 
 public class StreamReceiver extends Thread {
@@ -45,15 +47,26 @@ public class StreamReceiver extends Thread {
 				Socket socket = receiverSocket.accept();
 				InputStream is = socket.getInputStream();
 				int length = 0;
+        
+				if (isEncrypted) {
+					while ((length = is.read(receivedData)) > -1) {
 
-				
-				while ((length = is.read(receivedData)) > -1) {
-					if (receivedData[length - 2] == (byte) (char) 4
-							&& receivedData[length - 1] == (byte) (char) 4) {
-						isListening = false;
-						
-						byte[] copy = Arrays.copyOf(receivedData, length - 2); 
-						outputStream.write(receivedData, 0, copy.length);
+//						System.out.println(new String(receivedData));
+
+						if (length >= 2 && receivedData[length - 2] == (byte) (char) 4
+								&& receivedData[length - 1] == (byte) (char) 4) {
+							isListening = false;
+							receivedData = Arrays.copyOf(receivedData, length - 2);
+							decryptedData = VaultageEncryption.doubleDecrypt(receivedData, senderPublicKey,
+									receiverPrivateKey);
+							outputStream.write(decryptedData);
+							outputStream.flush();
+							break;
+						}
+
+						decryptedData = VaultageEncryption.doubleDecrypt(receivedData, senderPublicKey,
+								receiverPrivateKey);
+						outputStream.write(decryptedData);
 						outputStream.flush();
 						
 						break;
@@ -67,7 +80,16 @@ public class StreamReceiver extends Thread {
 					data = VaultageEncryption.doubleDecrypt(outputStream.toByteArray(), senderPublicKey,
 							receiverPrivateKey);
 				} else {
-					data = outputStream.toByteArray();
+					while ((length = is.read(receivedData)) > -1) {
+						if (length >= 2 && receivedData[length - 2] == (byte) (char) 4
+								&& receivedData[length - 1] == (byte) (char) 4) {
+							isListening = false;
+							break;
+						}
+
+						outputStream.write(receivedData, 0, length);
+						outputStream.flush();
+					}
 				}
 				
 				is.close();
@@ -79,6 +101,16 @@ public class StreamReceiver extends Thread {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				if (outputStream != null)
+					outputStream.close();
+				if (receiverSocket != null)
+					receiverSocket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}
