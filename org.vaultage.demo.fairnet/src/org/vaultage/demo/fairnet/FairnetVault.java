@@ -3,23 +3,19 @@ package org.vaultage.demo.fairnet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.vaultage.core.BytesToOutputTypeConverter;
 import org.vaultage.core.StreamReceiver;
-import org.vaultage.core.Streamer;
 import org.vaultage.core.Vault;
-
-// import org.vaultage.demo.fairnet.Friend;
-// import org.vaultage.demo.fairnet.Post;
-// import org.vaultage.demo.fairnet.FairnetVaultBase;
 
 public class FairnetVault extends FairnetVaultBase {
 	private String name = new String();
@@ -118,7 +114,9 @@ public class FairnetVault extends FairnetVaultBase {
 		}
 
 		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(this, requesterPublicKey, receiverSocketAddress);
-		FileInputStream dataInputStream = new FileInputStream(file);
+//		FileInputStream dataInputStream = new FileInputStream(file);
+		byte[] dataInputStream = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+		
 		remoteRequester.respondToStreamFile(dataInputStream, requestToken);
 	}
 
@@ -133,7 +131,7 @@ public class FairnetVault extends FairnetVaultBase {
 
 		BytesToOutputTypeConverter bytesToFile = new BytesToOutputTypeConverter(File.class) {
 			@Override
-			public Object customConvert(ByteArrayOutputStream outputStream) {
+			public Object customConvert(byte[] bytes) {
 				if (this.outputType.equals(File.class)) {
 					File file = null;
 					try {
@@ -144,8 +142,7 @@ public class FairnetVault extends FairnetVaultBase {
 						if (file.exists()) {
 							file.delete();
 						}
-						file.createNewFile();
-						outputStream.writeTo(new FileOutputStream(file));
+						Files.write(file.toPath(), bytes, StandardOpenOption.CREATE_NEW);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}

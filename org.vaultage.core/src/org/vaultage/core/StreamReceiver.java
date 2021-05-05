@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 import org.bouncycastle.util.Arrays;
 import org.vaultage.util.VaultageEncryption;
@@ -21,6 +22,7 @@ public class StreamReceiver extends Thread {
 	private String token;
 	private OnStreamingFinishedHandler onFinishedStreamingHandler;
 	private Object returnValue;
+	private byte[] data;
 
 	private BytesToOutputTypeConverter bytesToOutputType;
 	private ByteArrayOutputStream outputStream;
@@ -38,21 +40,20 @@ public class StreamReceiver extends Thread {
 	public void run() {
 		try {
 			receiverSocket = new ServerSocket(port);
-			byte[] receivedData = new byte[VaultageEncryption.MAXIMUM_DOUBLE_ENCRYPTED_MESSAGE_LENGTH];
-			byte[] decryptedData = new byte[VaultageEncryption.MAXIMUM_PLAIN_MESSAGE_LENGTH];
+			byte[] receivedData = new byte[20480];
 
 			isListening = true;
 			while (isListening) {
 				Socket socket = receiverSocket.accept();
 				InputStream is = socket.getInputStream();
 				int length = 0;
-
+        
 				if (isEncrypted) {
 					while ((length = is.read(receivedData)) > -1) {
 
 //						System.out.println(new String(receivedData));
 
-						if (receivedData[length - 2] == (byte) (char) 4
+						if (length >= 2 && receivedData[length - 2] == (byte) (char) 4
 								&& receivedData[length - 1] == (byte) (char) 4) {
 							isListening = false;
 							receivedData = Arrays.copyOf(receivedData, length - 2);
@@ -67,10 +68,20 @@ public class StreamReceiver extends Thread {
 								receiverPrivateKey);
 						outputStream.write(decryptedData);
 						outputStream.flush();
+						
+						break;
 					}
+
+					outputStream.write(receivedData, 0, length);
+					outputStream.flush();
+				}
+				
+				if (isEncrypted) {
+					data = VaultageEncryption.doubleDecrypt(outputStream.toByteArray(), senderPublicKey,
+							receiverPrivateKey);
 				} else {
 					while ((length = is.read(receivedData)) > -1) {
-						if (receivedData.length >= 2 && receivedData[length - 2] == (byte) (char) 4
+						if (length >= 2 && receivedData[length - 2] == (byte) (char) 4
 								&& receivedData[length - 1] == (byte) (char) 4) {
 							isListening = false;
 							break;
@@ -80,7 +91,7 @@ public class StreamReceiver extends Thread {
 						outputStream.flush();
 					}
 				}
-
+				
 				is.close();
 			}
 			outputStream.close();
@@ -146,7 +157,8 @@ public class StreamReceiver extends Thread {
 
 	private void onFinishedStreaming() {
 		if (bytesToOutputType != null) {
-			Object outputValue = bytesToOutputType.convert(outputStream);
+//			Object outputValue = bytesToOutputType.convert(outputStream);
+			Object outputValue = bytesToOutputType.convert(data);
 			this.onFinishedStreamingHandler.onStreamingFinished(outputValue);
 		}
 	}

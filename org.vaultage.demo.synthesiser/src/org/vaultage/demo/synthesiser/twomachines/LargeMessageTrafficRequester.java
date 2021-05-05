@@ -62,6 +62,7 @@ public class LargeMessageTrafficRequester {
 		// created by WorkerService. That's why I only put one worker here: the
 		// requester.
 		int numWorkers = 1;
+
 		int[] numOfBytes = {10000, 20000, 30000, 40000, 50000, 1500000 };
 //		int[] numOfBytes = {1500000 };
 

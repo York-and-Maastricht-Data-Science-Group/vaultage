@@ -4,9 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -64,12 +62,12 @@ public class StreamingTest {
 			@Override
 			public void run(Vault localVault, RemoteFairnetVault remoteVault, String responseToken,
 					File result) throws Exception {
-				System.out.println("BBBB");
+//				System.out.println("BBBB");
 			}
 			@Override
 			public void run(FairnetVault localVault, RemoteFairnetVault remoteVault, String responseToken, File result)
 					throws Exception {
-				System.out.println("CCCC");
+//				System.out.println("CCCC");
 			}
 		});
 
