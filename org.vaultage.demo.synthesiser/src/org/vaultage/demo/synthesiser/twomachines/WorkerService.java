@@ -25,7 +25,7 @@ public class WorkerService {
 	private static final int NUM_WORKERS = 1;
 	private static Worker[] workers;
 	
-	private static final int[] dataSizes = { 1500000, 10000, 20000, 30000, 40000, 50000 };
+	private static final int[] dataSizes = {  60000, 120000, 180000, 240000, 300000, 1500000 };
 	private static final Map<Integer, String> dataMap = new HashMap<>();
 
 	public static void main(String[] args) throws Exception {

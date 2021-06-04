@@ -172,7 +172,7 @@ public class FixedNextTrafficRequester {
 		for (int i = 0; i < numWorkers; i++) {
 //			int remoteWorkerIndex = (i + 1) % numWorkers;
 			int remoteWorkerIndex = random.nextInt(numWorkers);
-			String remoteWorkerKey = workerPKs[remoteWorkerIndex];
+			String remoteWorkerKey = workerPKs[i];
 			threads[i] = startWork(requesters[i], remoteWorkerKey, encrypted);
 		}
 

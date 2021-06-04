@@ -16,7 +16,7 @@ class FairnetVault {
 	op String[*] getPosts();
 	
 	@stream
-	op File streamFile(String fileId);
+	op File getFile(String fileId);
 }
 
 class Friend {
@@ -29,5 +29,6 @@ class Post {
 	attr String content;
 	attr String timestamp;
 	attr boolean isPublic;
+	attr String[*] fileIds;
 }
 

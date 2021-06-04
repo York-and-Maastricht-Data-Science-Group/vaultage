@@ -105,19 +105,19 @@ public class FairnetVault extends FairnetVaultBase {
 
 	}
 
-	public void streamFile(String requesterPublicKey, String requestToken, InetSocketAddress receiverSocketAddress,
+	@Override
+	public void getFile(String requesterPublicKey, String requestToken, InetSocketAddress receiverSocketAddress,
 			String fileId) throws Exception {
-
+	
 		File file = null;
 		if ("data.txt".equals(fileId)) {
 			file = new File("resource" + File.separator + "data.txt");
 		}
 
 		RemoteFairnetVault remoteRequester = new RemoteFairnetVault(this, requesterPublicKey, receiverSocketAddress);
-//		FileInputStream dataInputStream = new FileInputStream(file);
 		byte[] dataInputStream = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
 		
-		remoteRequester.respondToStreamFile(dataInputStream, requestToken);
+		remoteRequester.respondToGetFile(dataInputStream, requestToken);
 	}
 
 	public void downloadFile(FairnetVault peer, String fileId) throws Exception {
@@ -153,7 +153,7 @@ public class FairnetVault extends FairnetVaultBase {
 			}
 		};
 
-		StreamReceiver streamReceiver = remotePeer.streamFile(outputStream, receiverAddress, receiverPort, bytesToFile,
+		StreamReceiver streamReceiver = remotePeer.getFile(outputStream, receiverAddress, receiverPort, bytesToFile,
 				fileId);
 		synchronized (streamReceiver) {
 			streamReceiver.wait();
@@ -161,4 +161,6 @@ public class FairnetVault extends FairnetVaultBase {
 
 		System.out.println("Finished!");
 	}
+
+	
 }

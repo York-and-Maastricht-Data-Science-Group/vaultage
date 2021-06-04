@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 
-import org.bouncycastle.util.Arrays;
 import org.vaultage.util.VaultageEncryption;
 
 public class StreamReceiver extends Thread {
@@ -41,6 +40,7 @@ public class StreamReceiver extends Thread {
 		try {
 			receiverSocket = new ServerSocket(port);
 			byte[] receivedData = new byte[20480];
+			byte[] decryptedData;
 
 			isListening = true;
 			while (isListening) {
