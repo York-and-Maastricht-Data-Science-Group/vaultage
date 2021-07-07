@@ -30,7 +30,8 @@ import org.vaultage.core.RemoteVault;
 import org.vaultage.core.Vault;
 
 /***
- * 
+ * The EOL Model class for Vaultage.
+ *  
  * @author Alfa Yohannis
  *
  */
@@ -38,11 +39,23 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 
 	private Vault localVault;
 	private Reflections reflections;
-	private Set<Class<?>>types = new HashSet<>();
+	private Set<Class<?>> types = new HashSet<>();
 	private Set<Object> contents = new HashSet<>();
-	private VaultageOperationContributor vaultageOperationContributor = new VaultageOperationContributor();
 	
+	private VaultageOperationContributor vaultageOperationContributor = new VaultageOperationContributor();
 
+	/***
+	 * In the constructor, we get all the classes derived from Entity, Vault, and
+	 * RemoteVault of Vaultage of the passed package . We added them to a collection of types that are
+	 * allowable to accessed in the model. Third-party 'reflections' library is used
+	 * to determine those sub-classes.
+	 * 
+	 * @param localVault
+	 * @param vaultPackages
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 */
 	public VaultageModel(Vault localVault, Set<Package> vaultPackages)
 			throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		this.localVault = localVault;
@@ -57,12 +70,10 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 		ConfigurationBuilder conf = new ConfigurationBuilder().addUrls(urls).setScanners(new SubTypesScanner(false))
 				.filterInputsBy(filter);
 		reflections = new Reflections(conf);
-		
+
 		types.addAll(reflections.getSubTypesOf(Entity.class));
 		types.addAll(reflections.getSubTypesOf(Vault.class));
 		types.addAll(reflections.getSubTypesOf(RemoteVault.class));
-
-		System.console();
 	}
 
 	@Override
@@ -70,6 +81,13 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 		return getAllOfKind(type);
 	}
 
+	/***
+	 * To get all instances of a certain type. In this method, the code iterates
+	 * through all the public methods, that can be immediately called (without any
+	 * parameters), of the local vault and then retrieves the instances and add them
+	 * to the contents field.
+	 * 
+	 */
 	@Override
 	public Collection<?> getAllOfKind(String kind) throws EolModelElementTypeNotFoundException {
 		Collection<Object> collection = new HashSet<>();
@@ -78,7 +96,7 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 			collection.add(this.localVault);
 		Method[] methods = this.localVault.getClass().getDeclaredMethods();
 		for (Method method : methods) {
-			if (method.getModifiers() == Modifier.PUBLIC) {
+			if (method.getModifiers() == Modifier.PUBLIC && method.getParameterCount() == 0) {
 				Type genericReturnType = method.getGenericReturnType();
 				if (genericReturnType instanceof ParameterizedType) {
 					ParameterizedType pt = (ParameterizedType) genericReturnType;
@@ -221,5 +239,5 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 	public OperationContributor getOperationContributor() {
 		return vaultageOperationContributor;
 	}
-	
+
 }

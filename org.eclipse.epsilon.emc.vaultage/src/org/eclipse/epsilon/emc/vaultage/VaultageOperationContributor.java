@@ -138,7 +138,7 @@ public class VaultageOperationContributor extends OperationContributor {
 	 * @throws EolRuntimeException
 	 */
 	public Object execute(Object target, String name, Object[] parameters) throws EolRuntimeException {
-		System.out.println("Executing method " + name);
+//		System.out.println("Executing method " + name);
 		Object result = null;
 		if (target instanceof RemoteVault) {
 			RemoteVault remoteVault = (RemoteVault) target;

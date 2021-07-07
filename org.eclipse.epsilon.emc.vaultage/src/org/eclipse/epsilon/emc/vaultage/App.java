@@ -78,7 +78,7 @@ class App {
 		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
 
 		try {
-			String script = Files.readString(Paths.get("model/script.eol"));
+			String script = Files.readString(Paths.get("model/AppScript.eol"));
 			module.parse(script);
 			module.execute();
 			

@@ -22,5 +22,7 @@ for (friend in friends){
     }
 }
 
+return "ALFA";
+
 
 			
