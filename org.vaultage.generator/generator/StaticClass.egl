@@ -4,7 +4,9 @@ package [%=packageName%];
 import java.util.List;
 import java.util.UUID;
 
-public class [%=class.name%] [%=parentClass%] {
+import org.vaultage.core.Entity;
+
+public class [%=class.name%] [%=parentClass%] extends Entity {
 	private String id = UUID.randomUUID().toString();
 [% for (feature in class.eStructuralFeatures){ %]
 	private [%=feature.getType()%] [%=feature.name%];

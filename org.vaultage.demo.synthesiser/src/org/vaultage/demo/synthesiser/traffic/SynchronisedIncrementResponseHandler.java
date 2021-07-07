@@ -5,7 +5,7 @@ import org.vaultage.demo.synthesiser.IncrementResponseHandler;
 import org.vaultage.demo.synthesiser.RemoteWorker;
 import org.vaultage.demo.synthesiser.Worker;
 
-public class SynchronisedIncrementResponseHandler implements IncrementResponseHandler {
+public class SynchronisedIncrementResponseHandler extends IncrementResponseHandler {
 
 	@Override
 	public void run(Worker me, RemoteWorker other,

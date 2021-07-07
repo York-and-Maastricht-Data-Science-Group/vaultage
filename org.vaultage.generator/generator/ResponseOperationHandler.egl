@@ -10,13 +10,13 @@ import java.util.List;
 import org.vaultage.core.OperationResponseHandler;
 import org.vaultage.core.Vault;
 
-public interface [%=eOperation.getClassResponseHandlerName()%] extends OperationResponseHandler {
+public abstract class [%=eOperation.getClassResponseHandlerName()%] extends OperationResponseHandler {
 
 [% if (eOperation.getReturnType() <> null and eOperation.getReturnType() <> "void") { %]
 	/* local vault's type is different from the remote vault's type */
-	public void run(Vault localVault, [%=class.remoteName()%] remoteVault, String responseToken, [%=eOperation.getReturnType()%] result) throws Exception;
+	public abstract void run(Vault localVault, [%=class.remoteName()%] remoteVault, String responseToken, [%=eOperation.getReturnType()%] result) throws Exception;
 	
 	/* local vault has the same type as the remote vault */ 
-	public void run([%=class.name%] localVault, [%=class.remoteName()%] remoteVault, String responseToken, [%=eOperation.getReturnType()%] result) throws Exception;
+	public abstract void run([%=class.name%] localVault, [%=class.remoteName()%] remoteVault, String responseToken, [%=eOperation.getReturnType()%] result) throws Exception;
 [% } %]
 }

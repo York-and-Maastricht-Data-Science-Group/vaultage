@@ -24,6 +24,10 @@ public class [%=class.remoteName()%] extends RemoteVault {
 
 	//protected [%=class.name%] localVault;
 
+	public [%=class.remoteName()%]() {
+		super(null, null);
+	}
+
 	//public [%=class.remoteName()%]([%=class.name%] localVault, String remotePublicKey) {
 	public [%=class.remoteName()%](Vault localVault, String remotePublicKey) {
 		super(localVault, remotePublicKey);

@@ -101,16 +101,21 @@ public abstract class Vault {
 		responseHandlers.add(responseHandler);
 	}
 
-	public OperationResponseHandler getOperationResponseHandler(Class<?> interfaceOrClass) {
+	public OperationResponseHandler getOperationResponseHandler(Class<?> responseHandlerType) {
 		for (OperationResponseHandler handler : this.operationResponseHandlers) {
-			if (handler.getClass().equals(interfaceOrClass)) {
+			if (handler.getClass().equals(responseHandlerType)) {
 				return handler;
-			}
-			for (Class<?> i : handler.getClass().getInterfaces()) {
-				if (i.equals(interfaceOrClass)) {
-					return handler;
-				}
-			}
+			} else if (responseHandlerType.isAssignableFrom(handler.getClass())) {
+				return handler;
+			} 
+//			else if (handler.getClass().isAssignableFrom(responseHandlerType)) {
+//				return handler;
+//			}
+//			for (Class<?> i : handler.getClass().getInterfaces()) {
+//				if (i.equals(interfaceOrClass)) {
+//					return handler;
+//				}
+//			}
 		}
 		return null;
 	}

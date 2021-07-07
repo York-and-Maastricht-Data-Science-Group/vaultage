@@ -37,7 +37,7 @@ public class PollenTest {
 	/**
 	 * Respond to number polls with a fixed value
 	 */
-	public class UnitTestNumberPollResponseHandler implements SendNumberPollResponseHandler {
+	public class UnitTestNumberPollResponseHandler extends SendNumberPollResponseHandler {
 
 		@Override
 		public void run(User me, RemoteUser other, String responseToken, java.lang.Double result) throws Exception {

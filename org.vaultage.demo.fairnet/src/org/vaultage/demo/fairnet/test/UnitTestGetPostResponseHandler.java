@@ -6,7 +6,7 @@ import org.vaultage.demo.fairnet.GetPostResponseHandler;
 import org.vaultage.demo.fairnet.Post;
 import org.vaultage.demo.fairnet.RemoteFairnetVault;
 
-public class UnitTestGetPostResponseHandler implements GetPostResponseHandler {
+public class UnitTestGetPostResponseHandler extends GetPostResponseHandler {
 
 	private Post post;
 

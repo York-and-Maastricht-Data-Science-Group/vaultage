@@ -104,7 +104,7 @@ public class CrossProjectTest {
 	}
 
 	// define the add friend handler for city council
-	class CityCouncilAddFriendResponseHandler implements AddFriendResponseHandler {
+	class CityCouncilAddFriendResponseHandler extends AddFriendResponseHandler {
 		private boolean result;
 		@Override
 		public void run(Vault localVault, RemoteFairnetVault remoteVault, String responseToken, Boolean result)
@@ -118,13 +118,14 @@ public class CrossProjectTest {
 		public void run(FairnetVault localVault, RemoteFairnetVault remoteVault, String responseToken, Boolean result)
 				throws Exception {
 		}
-		public boolean getResult() {
+		
+		public Boolean getResult() {
 			return result;
 		}
 	}
 	
 	// define the get post handler for city council
-	class CityCouncilGetPostResponseHandler implements GetPostResponseHandler {
+	class CityCouncilGetPostResponseHandler extends GetPostResponseHandler {
 		private Post post;
 		@Override
 		public void run(FairnetVault localVault, RemoteFairnetVault remoteVault, String responseToken, Post result)
@@ -144,7 +145,7 @@ public class CrossProjectTest {
 	}
 
 	// define the get post ids handler for city council
-	class CityCouncilGetPostsResponseHandler implements GetPostsResponseHandler {
+	class CityCouncilGetPostsResponseHandler extends GetPostsResponseHandler {
 		private List<String>postIds; 
 		@Override
 		public void run(FairnetVault localVault, RemoteFairnetVault remoteVault, String responseToken,

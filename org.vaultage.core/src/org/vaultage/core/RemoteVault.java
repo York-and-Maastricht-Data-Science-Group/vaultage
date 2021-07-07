@@ -1,12 +1,15 @@
 package org.vaultage.core;
 
 import java.lang.reflect.Method;
+
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.util.Set;
 
 import org.vaultage.core.VaultageMessage.MessageType;
 import org.vaultage.wallet.Wallet;
+
+import org.eclipse.epsilon.eol.execute.operations.contributors.OperationContributor;
 
 public class RemoteVault {
 
@@ -27,6 +30,18 @@ public class RemoteVault {
 
 	public String getRemotePublicKey() {
 		return remotePublicKey;
+	}
+
+	public Vault getLocalVault() {
+		return localVault;
+	}
+
+	public void setLocalVault(Vault localVault) {
+		this.localVault = localVault;
+	}
+
+	public void setRemotePublicKey(String remotePublicKey) {
+		this.remotePublicKey = remotePublicKey;
 	}
 
 	public String forceBrokeredMessaging(boolean forceBrokeredMessaging) throws Exception {

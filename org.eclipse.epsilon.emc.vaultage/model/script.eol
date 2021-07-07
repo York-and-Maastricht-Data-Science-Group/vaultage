@@ -1,0 +1,26 @@
+hello().println();
+
+//var friend = new Friend;
+//friend.name = "Alex";
+var localVault = FairnetVault.all.first();
+var remoteVaults = Sequence{};
+
+var friends = Friend.all;
+for (friend in friends){
+
+//	friend.hello().println();
+    var friendVault = new RemoteFairnetVault;
+    friendVault.localVault = localVault;
+    friendVault.remotePublicKey = friend.publicKey;
+	remoteVaults.add(friendVault);
+    var postIds = friendVault.getPosts();
+    
+	"\nPost from ".print(); friend.name.print();":".println();
+    for (postId in postIds){
+    	var post = friendVault.getPost(postId);
+    	postId.print();": ".print(); post.content.println();	
+    }
+}
+
+
+			

@@ -7,25 +7,23 @@ import org.vaultage.demo.fairnet.Friend;
 import org.vaultage.demo.fairnet.Post;
 import org.vaultage.demo.fairnet.RemoteFairnetVault;
 
-public class UnitTestAddFriendResponseHandler implements AddFriendResponseHandler {
+public class UnitTestAddFriendResponseHandler extends AddFriendResponseHandler {
 
 	private boolean isSuccess = false;
-	
-	
-	
+
 	@Override
 	public void run(FairnetVault me, RemoteFairnetVault other, String responseToken, Boolean result) throws Exception {
 		Friend friend = new Friend();
 		friend.setPublicKey(other.getRemotePublicKey());
 		me.getFriends().add(friend);
 		isSuccess = true;
-		
+
 		synchronized (this) {
 			this.notify();
 		}
 	}
 
-	public boolean getResult() {
+	public Boolean getResult() {
 		return isSuccess;
 	}
 
@@ -33,7 +31,7 @@ public class UnitTestAddFriendResponseHandler implements AddFriendResponseHandle
 	public void run(Vault localVault, RemoteFairnetVault remoteVault, String responseToken, Boolean result)
 			throws Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 }

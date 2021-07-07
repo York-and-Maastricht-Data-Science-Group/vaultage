@@ -6,7 +6,7 @@ import org.vaultage.demo.synthesiser.IncrementResponseHandler;
 import org.vaultage.demo.synthesiser.RemoteWorker;
 import org.vaultage.demo.synthesiser.Worker;
 
-public class SynchronisedGetTextSizeResponseHandler implements GetTextSizeResponseHandler {
+public class SynchronisedGetTextSizeResponseHandler extends GetTextSizeResponseHandler {
 	
 	int textSize = 0;
 	

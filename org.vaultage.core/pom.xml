@@ -65,5 +65,11 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.12.1</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.epsilon/org.eclipse.epsilon.eol.engine -->
+		<dependency>
+			<groupId>org.eclipse.epsilon</groupId>
+			<artifactId>org.eclipse.epsilon.eol.engine</artifactId>
+			<version>2.3.0</version>
+		</dependency>
 	</dependencies>
 </project>
