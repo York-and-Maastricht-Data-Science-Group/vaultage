@@ -1,6 +1,7 @@
 package org.vaultage.demo.pollen;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -44,6 +45,22 @@ public class User extends UserBase {
 	// setter
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	
+	public double startNumberPoll(NumberPoll salaryPoll, List<String> participants) throws Exception {
+		RemoteUser firstParticipant = new RemoteUser(this, participants.get(0));
+		synchronized (this.getOperationResponseHandler(SendNumberPollResponseHandler.class)) {
+			String token = firstParticipant.sendNumberPoll(salaryPoll);
+			this.addInitiatedNumberPoll(salaryPoll, token);
+			this.getOperationResponseHandler(SendNumberPollResponseHandler.class).wait(); 
+		}
+		
+		double fakeValue = this.getNumberPollFakeValue(salaryPoll.getId());
+		double result = this.getNumberPollAnswer(salaryPoll.getId());
+		
+		//return the average 
+		return (result - fakeValue) / participants.size();
 	}
 
 	// operations

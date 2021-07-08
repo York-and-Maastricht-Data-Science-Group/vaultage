@@ -2,12 +2,14 @@ package org.eclipse.epsilon.emc.vaultage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
 import org.eclipse.epsilon.eol.execute.introspection.java.ObjectMethod;
 import org.eclipse.epsilon.eol.execute.operations.contributors.OperationContributor;
 import org.eclipse.epsilon.eol.types.EolNoType;
+import org.eclipse.epsilon.eol.types.EolSequence;
 import org.eclipse.epsilon.eol.util.ReflectionUtil;
 import org.vaultage.core.OperationResponseHandler;
 import org.vaultage.core.RemoteVault;
@@ -21,11 +23,11 @@ public class VaultageOperationContributor extends OperationContributor {
 	private static int timeout = DEFAULT_TIMEOUT;
 
 	/***
-	 * This operation contributor only contributes to EolNoType and RemoteVault. 
+	 * This operation contributor only contributes to EolNoType and RemoteVault.
 	 */
 	@Override
 	public boolean contributesTo(Object target) {
-		if (target == EolNoType.NoInstance || target instanceof RemoteVault) {
+		if (target == EolNoType.NoInstance || target instanceof RemoteVault || target instanceof Vault) {
 			return true;
 		} else {
 			return false;
@@ -43,12 +45,13 @@ public class VaultageOperationContributor extends OperationContributor {
 	/***
 	 * Overrides the same method of the parent class (OperationContributor). If the
 	 * target object is an instace of RemoteVault then the 'createObjectMethodFor'
-	 * of this class called, otherwise the parent class' 'createObjectMethodFor' called.
+	 * of this class called, otherwise the parent class' 'createObjectMethodFor'
+	 * called.
 	 */
 	@Override
 	public ObjectMethod findContributedMethodForEvaluatedParameters(Object target, String name, Object[] parameters,
 			IEolContext context, boolean overrideContextOperationContributorRegistry) {
-		if (target instanceof RemoteVault) {
+		if (target instanceof RemoteVault || target instanceof Vault) {
 			return this.createObjectMethodFor(target, name, parameters, context,
 					overrideContextOperationContributorRegistry);
 		} else {
@@ -161,15 +164,37 @@ public class VaultageOperationContributor extends OperationContributor {
 					handler.wait();
 				}
 				result = handler.getResult();
-				
+
 			} catch (NoSuchMethodException | SecurityException | InterruptedException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {
+				new EolRuntimeException(e.getMessage());
+			}
+		} else if (target instanceof Vault) {
+			Method method = null;
+			try {
+				Class<?>[] parametersTypes = new Class<?>[parameters.length];
+				for (int i = 0; i < parameters.length; i++) {
+					if (parameters[i] instanceof EolSequence) {
+						parametersTypes[i] = List.class;
+					} else {
+						parametersTypes[i] = parameters[i].getClass();
+					}
+				}
+				Vault localVault = (Vault) target;
+				method = localVault.getClass().getMethod(name, parametersTypes);
+				result = method.invoke(localVault, parameters);
+			} catch (NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException
+					| IllegalAccessException e) {
 				new EolRuntimeException(e.getMessage());
 			}
 		}
 		return result;
 	}
 
+	/***
+	 * This method is just for testing. It can be removed any time.
+	 * @return
+	 */
 	public String hello() {
 		if (getTarget() instanceof Friend) {
 			Friend friend = ((Friend) getTarget());

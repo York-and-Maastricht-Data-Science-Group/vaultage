@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,11 +20,14 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.vaultage.core.Vault;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.fairnet.FairnetBroker;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
+import org.vaultage.demo.fairnet.GetPostsResponseHandler;
 import org.vaultage.demo.fairnet.Post;
+import org.vaultage.demo.fairnet.RemoteFairnetVault;
 
 public class FairnetQueryTest {
 
@@ -136,7 +140,7 @@ public class FairnetQueryTest {
 	
 	@Test
 	public void testGetPosts() throws Exception{
-		String script = Files.readString(Paths.get("model/GetPostsIds.eol"));
+		String script = Files.readString(Paths.get("model/GetPosts.eol"));
 		module.parse(script);
 		Collection<Post> result = (Collection<Post>) module.execute();
 		

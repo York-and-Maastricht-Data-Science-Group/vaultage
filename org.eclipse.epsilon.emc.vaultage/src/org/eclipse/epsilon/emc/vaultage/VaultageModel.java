@@ -8,7 +8,9 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.exceptions.models.EolEnumerationValueNotFoundException;
@@ -31,7 +33,7 @@ import org.vaultage.core.Vault;
 
 /***
  * The EOL Model class for Vaultage.
- *  
+ * 
  * @author Alfa Yohannis
  *
  */
@@ -41,14 +43,14 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 	private Reflections reflections;
 	private Set<Class<?>> types = new HashSet<>();
 	private Set<Object> contents = new HashSet<>();
-	
+
 	private VaultageOperationContributor vaultageOperationContributor = new VaultageOperationContributor();
 
 	/***
 	 * In the constructor, we get all the classes derived from Entity, Vault, and
-	 * RemoteVault of Vaultage of the passed package . We added them to a collection of types that are
-	 * allowable to accessed in the model. Third-party 'reflections' library is used
-	 * to determine those sub-classes.
+	 * RemoteVault of Vaultage of the passed package . We added them to a collection
+	 * of types that are allowable to accessed in the model. Third-party
+	 * 'reflections' library is used to determine those sub-classes.
 	 * 
 	 * @param localVault
 	 * @param vaultPackages
@@ -57,6 +59,24 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 	 * @throws InvocationTargetException
 	 */
 	public VaultageModel(Vault localVault, Set<Package> vaultPackages)
+			throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		this(localVault, vaultPackages, null);
+	}
+
+	/***
+	 * In the constructor, we get all the classes derived from Entity, Vault, and
+	 * RemoteVault of Vaultage of the passed package . We added them to a collection
+	 * of types that are allowable to accessed in the model. Third-party
+	 * 'reflections' library is used to determine those sub-classes.
+	 * 
+	 * @param localVault
+	 * @param vaultPackages
+	 * @param otherObjects
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 */
+	public VaultageModel(Vault localVault, Set<Package> vaultPackages, Collection<Object> otherObjects)
 			throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		this.localVault = localVault;
 
@@ -74,6 +94,11 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 		types.addAll(reflections.getSubTypesOf(Entity.class));
 		types.addAll(reflections.getSubTypesOf(Vault.class));
 		types.addAll(reflections.getSubTypesOf(RemoteVault.class));
+
+		contents.add(localVault);
+		if (otherObjects != null) {
+			contents.addAll(otherObjects);
+		}
 	}
 
 	@Override
@@ -92,8 +117,16 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 	public Collection<?> getAllOfKind(String kind) throws EolModelElementTypeNotFoundException {
 		Collection<Object> collection = new HashSet<>();
 
-		if (this.localVault.getClass().getSimpleName().equals(kind))
+		Set<Object> temp = contents.stream().filter(item -> item.getClass().getSimpleName().equals(kind))
+				.collect(Collectors.toSet());
+		collection.addAll(temp);
+		if (collection.size() > 0) {
+			return collection;
+		}
+		if (this.localVault.getClass().getSimpleName().equals(kind)) {
 			collection.add(this.localVault);
+			contents.add(this.localVault);
+		}
 		Method[] methods = this.localVault.getClass().getDeclaredMethods();
 		for (Method method : methods) {
 			if (method.getModifiers() == Modifier.PUBLIC && method.getParameterCount() == 0) {
@@ -106,21 +139,32 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 							Object val = null;
 							try {
 								val = method.invoke(this.localVault);
+								if (val instanceof Collection<?>) {
+									Collection<Object> col = (Collection<Object>) val;
+									collection.addAll(col);
+									contents.addAll(collection);
+								}
 							} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 								e.printStackTrace();
-							}
-							if (val instanceof Collection<?>) {
-								Collection<Object> col = (Collection) val;
-								collection.addAll(col);
-								contents.addAll(collection);
 							}
 						}
 					}
 				} else {
-
+					Class<?> argumentType = (Class<?>) genericReturnType;
+					if (argumentType.getSimpleName().equals(kind)) {
+						Object val = null;
+						try {
+							val = method.invoke(this.localVault);
+							collection.add(val);
+							contents.add(val);
+						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 			}
 		}
+
 		return collection;
 	}
 
@@ -238,6 +282,14 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 	@Override
 	public OperationContributor getOperationContributor() {
 		return vaultageOperationContributor;
+	}
+
+	public void addObjects(Collection<Object> instances) {
+		contents.addAll(instances);
+	}
+
+	public void addObject(Object instance) {
+		contents.add(instance);
 	}
 
 }

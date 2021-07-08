@@ -54,21 +54,26 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 
 		// 6. get the response handler of the operation called
 		String capitalisedOperation = operation.replaceFirst(operation.substring(0, 1),
-				operation.substring(0, 1).toUpperCase());
+		operation.substring(0, 1).toUpperCase());
 		String packageName = this.getClass().getPackage().getName();
 		Class<?> responseHandlerType = Class.forName(packageName + "." + capitalisedOperation + "ResponseHandler");
 		Method getResponseHandlerMethod = vault.getClass().getMethod("getOperationResponseHandler", Class.class);
-
+		
 		// 7. get return object of that operation called
-		Object getResponseHandlerObject = getResponseHandlerMethod.invoke(vault, responseHandlerType);
-
-		// 8. get the response handler interface of the return object
-		Class<? extends Object> geResponseHandlerClass = getResponseHandlerObject.getClass();
-		Class<?> getResponseHandlerInterface = geResponseHandlerClass.getInterfaces()[0];
-
-		// 9. get the run method of the return object
+		Object responseHandlerObject = getResponseHandlerMethod.invoke(vault, responseHandlerType);
+		
+		// 8. get the response handler interface of the OperationResponseHander object
+		Class<? extends Object> responseHandlerClass = responseHandlerObject.getClass();
+//		Class<?> getResponseHandlerInterface = geResponseHandlerClass.getInterfaces()[0];
+			
+		//9. set the result value
+		Method setResult = responseHandlerClass.getMethod("setResult", Object.class);
+		setResult.invoke(responseHandlerObject, returnResult);
+		
+		// 10. get the run method of the OperationResponseHander object
 		Method runMethod = null;
-		for (Method m : getResponseHandlerInterface.getMethods()) {
+//		for (Method m : getResponseHandlerInterface.getMethods()) {
+		for (Method m : responseHandlerClass.getMethods()) {
 			Parameter[] p = m.getParameters();
 			if (m.getName().equals("run") && p.length == 4 && p[0].getType().equals(vault.getClass()) //
 			&& p[1].getType().equals(senderObject.getClass()) //
@@ -78,15 +83,17 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 				break;
 			}
 		}
-//		runMethod = getResponseHandlerInterface.getMethod("run", vault.getClass(), senderObject.getClass(),
-//					String.class, returnClass);
+		
+		//		runMethod = getResponseHandlerInterface.getMethod("run", vault.getClass(), senderObject.getClass(),
+		//					String.class, returnClass);
 		if (runMethod == null)
-			runMethod = getResponseHandlerInterface.getMethod("run", Vault.class, senderObject.getClass(), String.class,
-					returnClass);
+//			runMethod = getResponseHandlerInterface.getMethod("run", Vault.class, senderObject.getClass(), String.class,
+		runMethod = responseHandlerClass.getMethod("run", Vault.class, senderObject.getClass(), String.class,
+		returnClass);
 		Object[] runParameterValues = { vault, senderObject, message.getToken(), returnResult };
-
-		// 10. execute the run method
-		runMethod.invoke(getResponseHandlerObject, runParameterValues);
+		
+		// 11. execute the run method
+		runMethod.invoke(responseHandlerObject, runParameterValues);
 		System.console();
 	}
 }
