@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,30 +14,21 @@ import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.emc.vaultage.GetPostResponder;
 import org.eclipse.epsilon.emc.vaultage.GetPostsResponder;
 import org.eclipse.epsilon.emc.vaultage.VaultageEolContextParallel;
-import org.eclipse.epsilon.emc.vaultage.VaultageFirstOrderCallExpression;
-import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
 import org.eclipse.epsilon.emc.vaultage.VaultageModel;
-import org.eclipse.epsilon.emc.vaultage.VaultageOperationCallExpression;
 import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
-import org.eclipse.epsilon.emc.vaultage.VaultageOperationFactory;
+import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
 import org.eclipse.epsilon.eol.EolModule;
 import org.eclipse.epsilon.eol.concurrent.EolModuleParallel;
-import org.eclipse.epsilon.eol.dom.FirstOrderOperationCallExpression;
-import org.eclipse.epsilon.eol.dom.OperationCallExpression;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
-import org.eclipse.epsilon.eol.execute.operations.EolOperationFactory;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.vaultage.core.Vault;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.fairnet.FairnetBroker;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
-import org.vaultage.demo.fairnet.GetPostsResponseHandler;
 import org.vaultage.demo.fairnet.Post;
-import org.vaultage.demo.fairnet.RemoteFairnetVault;
 
 public class FairnetQueryTest {
 
@@ -126,12 +116,6 @@ public class FairnetQueryTest {
 				if (element instanceof PropertyCallExpression) {
 					element = new VaultagePropertyCallExpression();
 				}
-//				else if (element instanceof OperationCallExpression) {
-//					element = new VaultageOperationCallExpression();
-//				} 
-//				else if (element instanceof FirstOrderOperationCallExpression) {
-//					element = new VaultageFirstOrderCallExpression();
-//				}
 				return element;
 			};
 		};
@@ -143,7 +127,6 @@ public class FairnetQueryTest {
 		model.setName("M");
 		module.getContext().getModelRepository().addModel(model);
 		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
-//		module.getContext().setOperationFactory(new VaultageOperationFactory());
 		((EolModuleParallel) module).getContext().setParallelism(100);
 	}
 

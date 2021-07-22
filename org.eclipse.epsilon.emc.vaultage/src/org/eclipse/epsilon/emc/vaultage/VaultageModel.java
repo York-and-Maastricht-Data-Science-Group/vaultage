@@ -8,7 +8,6 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -206,12 +205,12 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 
 	@Override
 	public IPropertyGetter getPropertyGetter() {
-		return new VaultageModelPropertyGetter();
+		return super.getPropertyGetter();
 	}
 
 	@Override
 	public IPropertySetter getPropertySetter() {
-		return new VaultageModelPropertySetter();
+		return super.getPropertySetter();
 	}
 
 	@Override

@@ -1,8 +1,5 @@
 package org.eclipse.epsilon.emc.vaultage;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.vaultage.core.Vault;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.GetPostResponseHandler;

@@ -1,14 +1,12 @@
 package org.eclipse.epsilon.emc.vaultage.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +20,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.vaultage.core.Vault;
 import org.vaultage.core.VaultageServer;
-import org.vaultage.demo.fairnet.Post;
 import org.vaultage.demo.pollen.NumberPoll;
 import org.vaultage.demo.pollen.PollenBroker;
 import org.vaultage.demo.pollen.RemoteUser;
