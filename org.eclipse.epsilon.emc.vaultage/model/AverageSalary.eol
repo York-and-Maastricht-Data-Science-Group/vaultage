@@ -1,6 +1,7 @@
 var alice: User = User.all.selectFirst(u | u.id == "Alice");
 
-var participants = User.all.select(u1 | u1.id <> "Alice").collect(u2 | u2.publicKey).asSequence();
+var participants = User.all.select(u1 | u1.id <> "Alice")
+	.collect(u2 | u2.publicKey).asSequence();
 
 var salaryPoll = NumberPoll.all.first;
 

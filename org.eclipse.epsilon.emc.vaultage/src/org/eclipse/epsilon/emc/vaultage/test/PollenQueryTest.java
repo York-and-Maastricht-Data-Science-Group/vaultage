@@ -62,24 +62,24 @@ public class PollenQueryTest {
 		charlie.setId("Charlie");
 		charlie.setName("Charlie");
 
-//		dan = new User();
-//		dan.setId("Dan");
-//		dan.setName("Dan");
+		dan = new User();
+		dan.setId("Dan");
+		dan.setName("Dan");
 
 		alice.addOperationResponseHandler(new UnitTestNumberPollResponseHandler());
 		bob.addOperationResponseHandler(new UnitTestNumberPollResponseHandler());
 		charlie.addOperationResponseHandler(new UnitTestNumberPollResponseHandler());
-//		dan.addOperationResponseHandler(new UnitTestNumberPollResponseHandler());
+		dan.addOperationResponseHandler(new UnitTestNumberPollResponseHandler());
 
 		alice.register(brokerServer);
 		bob.register(brokerServer);
 		charlie.register(brokerServer);
-//		dan.register(brokerServer);
+		dan.register(brokerServer);
 
 		participants = new ArrayList<>();
 		participants.add(bob.getPublicKey());
 		participants.add(charlie.getPublicKey());
-//		participants.add(dan.getPublicKey());
+		participants.add(dan.getPublicKey());
 
 		salaryPoll = PollRepository.createSalaryPoll();
 		salaryPoll.setOriginator(alice.getPublicKey());
@@ -89,15 +89,16 @@ public class PollenQueryTest {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		alice.shutdownServer();
-		alice.unregister();
-		bob.shutdownServer();
-		bob.unregister();
+		dan.shutdownServer();
+		dan.unregister();
 		charlie.shutdownServer();
 		charlie.unregister();
-//		dan.shutdownServer();
-//		dan.unregister();
+		bob.shutdownServer();
+		bob.unregister();
+		alice.shutdownServer();
+		alice.unregister();
 		BROKER.stop();
+		System.out.println("Finished!");
 	}
 
 	@Before
@@ -106,9 +107,7 @@ public class PollenQueryTest {
 
 		Set<Package> packages = new HashSet<Package>();
 		packages.add(alice.getClass().getPackage());
-		VaultageModel model = new VaultageModel(alice, packages, Arrays.asList(bob, charlie, 
-//				dan, 
-				salaryPoll));
+		VaultageModel model = new VaultageModel(alice, packages, Arrays.asList(bob, charlie, dan, salaryPoll));
 		model.setName("M");
 		module.getContext().getModelRepository().addModel(model);
 		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
@@ -117,7 +116,8 @@ public class PollenQueryTest {
 	@Test
 	public void testCreatePoll() throws Exception {
 		String script = "var poll = new MultivaluedPoll;" //
-				+ "poll.question = \"A or B?\";" + "return poll.question;";
+				+ "poll.question = \"A or B?\";" //
+				+ "return poll.question;";
 		module.parse(script);
 		Object result = module.execute();
 		assertEquals("A or B?", result);
@@ -138,6 +138,7 @@ public class PollenQueryTest {
 
 		@Override
 		public void run(User me, RemoteUser other, String responseToken, java.lang.Double result) throws Exception {
+			System.out.println(me.getName());
 			NumberPoll poll = me.getPendingNumberPollByResponseToken(responseToken);
 			if (poll != null) {
 				int index = poll.getParticipants().indexOf(me.getPublicKey());

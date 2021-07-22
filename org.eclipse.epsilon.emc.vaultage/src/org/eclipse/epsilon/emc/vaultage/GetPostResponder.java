@@ -1,5 +1,8 @@
 package org.eclipse.epsilon.emc.vaultage;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.vaultage.core.Vault;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.GetPostResponseHandler;
@@ -20,9 +23,9 @@ public class GetPostResponder extends GetPostResponseHandler {
 	@Override
 	public void run(FairnetVault localVault, RemoteFairnetVault remoteVault, String responseToken, Post result)
 			throws Exception {
-
 		synchronized (this) {
 			this.notify();
 		}
 	}
+
 }

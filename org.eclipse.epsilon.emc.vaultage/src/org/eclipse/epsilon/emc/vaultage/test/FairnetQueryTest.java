@@ -11,11 +11,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.emc.vaultage.GetPostResponder;
 import org.eclipse.epsilon.emc.vaultage.GetPostsResponder;
+import org.eclipse.epsilon.emc.vaultage.VaultageEolContextParallel;
+import org.eclipse.epsilon.emc.vaultage.VaultageFirstOrderCallExpression;
+import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
 import org.eclipse.epsilon.emc.vaultage.VaultageModel;
+import org.eclipse.epsilon.emc.vaultage.VaultageOperationCallExpression;
 import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
+import org.eclipse.epsilon.emc.vaultage.VaultageOperationFactory;
 import org.eclipse.epsilon.eol.EolModule;
+import org.eclipse.epsilon.eol.concurrent.EolModuleParallel;
+import org.eclipse.epsilon.eol.dom.FirstOrderOperationCallExpression;
+import org.eclipse.epsilon.eol.dom.OperationCallExpression;
+import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
+import org.eclipse.epsilon.eol.execute.operations.EolOperationFactory;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -49,9 +60,9 @@ public class FairnetQueryTest {
 		alice.setName("Alice");
 		alice.register(brokerServer);
 
-		alice.createPost("Alice Content 01", true);
-		alice.createPost("Alice Content 02", false);
-		alice.createPost("Alice Content 03", true);
+		for (int i = 1; i <= 9; i++) {
+			alice.createPost("Alice Content 0" + i, true).setId("alice-0" + i);
+		}
 		alice.addOperationResponseHandler(new GetPostsResponder());
 		alice.addOperationResponseHandler(new GetPostResponder());
 
@@ -64,8 +75,8 @@ public class FairnetQueryTest {
 		bob.setName("Bob");
 		bob.register(brokerServer);
 
-		bob.createPost("Bob Content 01", true);
-		bob.createPost("Bob Content 02", true);
+		bob.createPost("Bob Content 01", true).setId("bob-01");
+		bob.createPost("Bob Content 02", true).setId("bob-02");
 		bob.addOperationResponseHandler(new GetPostsResponder());
 		bob.addOperationResponseHandler(new GetPostResponder());
 
@@ -78,7 +89,9 @@ public class FairnetQueryTest {
 		charlie.setName("Charlie");
 		charlie.register(brokerServer);
 
-		charlie.createPost("Charlie Content 01", true);
+		for (int i = 1; i <= 5; i++) {
+		charlie.createPost("Charlie Content 0" + i, true).setId("charlie-0" + i);
+		}
 		charlie.addOperationResponseHandler(new GetPostsResponder());
 		charlie.addOperationResponseHandler(new GetPostResponder());
 
@@ -88,7 +101,7 @@ public class FairnetQueryTest {
 
 		exchangePublicKeys(alice, bob);
 		exchangePublicKeys(charlie, bob);
-		
+
 	}
 
 	@AfterClass
@@ -100,11 +113,29 @@ public class FairnetQueryTest {
 		charlie.shutdownServer();
 		charlie.unregister();
 		BROKER.stop();
+		System.out.println("Finished!");
 	}
-	
+
 	@Before
 	public void beforeTest() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		module = new EolModule();
+		
+		module = new EolModuleParallel(new VaultageEolContextParallel()) {
+//		module = new EolModule() {
+			public ModuleElement adapt(org.eclipse.epsilon.common.parse.AST cst, ModuleElement parentAst) {
+				ModuleElement element = super.adapt(cst, parentAst);
+				if (element instanceof PropertyCallExpression) {
+					element = new VaultagePropertyCallExpression();
+				}
+//				else if (element instanceof OperationCallExpression) {
+//					element = new VaultageOperationCallExpression();
+//				} 
+//				else if (element instanceof FirstOrderOperationCallExpression) {
+//					element = new VaultageFirstOrderCallExpression();
+//				}
+				return element;
+			};
+		};
+		
 
 		Set<Package> packages = new HashSet<Package>();
 		packages.add(bob.getClass().getPackage());
@@ -112,49 +143,53 @@ public class FairnetQueryTest {
 		model.setName("M");
 		module.getContext().getModelRepository().addModel(model);
 		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
+//		module.getContext().setOperationFactory(new VaultageOperationFactory());
+		((EolModuleParallel) module).getContext().setParallelism(100);
 	}
 
 	@Test
 	public void testCreateEntity() throws Exception {
-		
-			String script = "var friend = new Friend;"
-					+ "friend.name = \"Alex\";"
-					+ "return friend.name;";
-			module.parse(script);
-			Object result = module.execute();
-			assertEquals("Alex", result);
-		
+
+		String script = "var friend = new Friend;" + "friend.name = \"Alex\";" + "return friend.name;";
+		module.parse(script);
+		Object result = module.execute();
+		assertEquals("Alex", result);
+
 	}
-	
+
 	@Test
 	public void testSelectOne() throws Exception {
-		
-			String script = "var bob = FairnetVault.all"
-					+ ".selectOne( v | v.name = \"Bob\");"
-					+ "return bob.name;";
-			module.parse(script);
-			Object result = module.execute();
-			assertEquals("Bob", result);
-		
+
+		String script = "var bob = FairnetVault.all" + ".selectOne( v | v.name = \"Bob\");" + "return bob.name;";
+		module.parse(script);
+		Object result = module.execute();
+		assertEquals("Bob", result);
+
 	}
-	
+
 	@Test
-	public void testGetPosts() throws Exception{
+	public void testGetPosts() throws Exception {
 		String script = Files.readString(Paths.get("model/GetPosts.eol"));
 		module.parse(script);
+		
+		System.out.println();
 		Collection<Post> result = (Collection<Post>) module.execute();
+//		Thread.sleep(4000);
 		
-		for (Post post: alice.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
+		System.out.println("\nRetrieved Posts: ");
+		for (Post post : result) {
+			System.out.println(post.getContent());
+		}
+		for (Post post : alice.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
 			boolean val = result.stream().anyMatch(p -> p.getContent().equals(post.getContent()));
 			assertEquals(true, val);
 		}
-		
-		for (Post post: charlie.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
+
+		for (Post post : charlie.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
 			boolean val = result.stream().anyMatch(p -> p.getContent().equals(post.getContent()));
 			assertEquals(true, val);
 		}
-		
-		
+
 	}
 
 	private static void exchangePublicKeys(FairnetVault user1, FairnetVault user2) {

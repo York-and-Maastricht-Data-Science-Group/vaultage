@@ -15,6 +15,7 @@ import org.vaultage.core.OperationResponseHandler;
 import org.vaultage.core.RemoteVault;
 import org.vaultage.core.Vault;
 import org.vaultage.demo.fairnet.Friend;
+import org.vaultage.demo.fairnet.Post;
 
 public class VaultageOperationContributor extends OperationContributor {
 
@@ -141,9 +142,18 @@ public class VaultageOperationContributor extends OperationContributor {
 	 * @throws EolRuntimeException
 	 */
 	public Object execute(Object target, String name, Object[] parameters) throws EolRuntimeException {
-//		System.out.println("Executing method " + name);
+
 		Object result = null;
 		if (target instanceof RemoteVault) {
+//			try {
+//				if (parameters.length > 0 && parameters[0].equals("alice-01")) {
+//					Thread.sleep(1000);
+//				}
+//			} catch (InterruptedException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+
 			RemoteVault remoteVault = (RemoteVault) target;
 			Method method = null;
 			try {
@@ -152,6 +162,7 @@ public class VaultageOperationContributor extends OperationContributor {
 					parametersTypes[i] = parameters[i].getClass();
 				}
 
+				String token = null;
 				Vault localVault = remoteVault.getLocalVault();
 				String temp = localVault.getClass().getPackageName() + "."
 						+ name.replaceFirst(name.substring(0, 1), name.substring(0, 1).toUpperCase())
@@ -160,16 +171,27 @@ public class VaultageOperationContributor extends OperationContributor {
 				OperationResponseHandler handler = localVault.getOperationResponseHandler(responseHandlerClass);
 				synchronized (handler) {
 					method = remoteVault.getClass().getMethod(name, parametersTypes);
-					method.invoke(remoteVault, parameters);
-					handler.wait();
+					
+					if (parameters.length > 0) {
+						System.out.println("Send request " + name + " : " + parameters[0]);
+					}
+					
+					token = (String) method.invoke(remoteVault, parameters);
+					handler.wait(getTimeout());
 				}
-				result = handler.getResult();
+				result = handler.getResult(token);
+				if (result instanceof Post) {
+					System.out.println("Local Vault received: " + ((Post) result).getContent());
+				}
+				
 
 			} catch (NoSuchMethodException | SecurityException | InterruptedException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {
 				new EolRuntimeException(e.getMessage());
 			}
-		} else if (target instanceof Vault) {
+		} //
+
+		else if (target instanceof Vault) {
 			Method method = null;
 			try {
 				Class<?>[] parametersTypes = new Class<?>[parameters.length];
@@ -193,6 +215,7 @@ public class VaultageOperationContributor extends OperationContributor {
 
 	/***
 	 * This method is just for testing. It can be removed any time.
+	 * 
 	 * @return
 	 */
 	public String hello() {

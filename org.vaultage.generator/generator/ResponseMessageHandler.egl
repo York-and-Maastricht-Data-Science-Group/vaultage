@@ -67,8 +67,9 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 //		Class<?> getResponseHandlerInterface = geResponseHandlerClass.getInterfaces()[0];
 			
 		//9. set the result value
-		Method setResult = responseHandlerClass.getMethod("setResult", Object.class);
-		setResult.invoke(responseHandlerObject, returnResult);
+//		Method setResult = responseHandlerClass.getMethod("setResult", Object.class);
+		Method setResult = responseHandlerClass.getMethod("addResult", String.class, Object.class);
+		setResult.invoke(responseHandlerObject, message.getToken(), returnResult);
 		
 		// 10. get the run method of the OperationResponseHander object
 		Method runMethod = null;
