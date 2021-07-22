@@ -120,7 +120,6 @@ public class FairnetQueryTest {
 			};
 		};
 		
-
 		Set<Package> packages = new HashSet<Package>();
 		packages.add(bob.getClass().getPackage());
 		VaultageModel model = new VaultageModel(bob, packages);
