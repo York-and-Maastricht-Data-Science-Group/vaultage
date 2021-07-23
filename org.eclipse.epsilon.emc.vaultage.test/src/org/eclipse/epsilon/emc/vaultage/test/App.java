@@ -1,10 +1,12 @@
-package org.eclipse.epsilon.emc.vaultage;
+package org.eclipse.epsilon.emc.vaultage.test;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.epsilon.emc.vaultage.VaultageModel;
+import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
 import org.eclipse.epsilon.eol.EolModule;
 import org.vaultage.core.VaultageServer;
 import org.vaultage.demo.fairnet.FairnetBroker;

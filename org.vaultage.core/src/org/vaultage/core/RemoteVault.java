@@ -1,15 +1,15 @@
 package org.vaultage.core;
 
 import java.lang.reflect.Method;
-
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.epsilon.eol.types.EolSequence;
 import org.vaultage.core.VaultageMessage.MessageType;
 import org.vaultage.wallet.Wallet;
-
-import org.eclipse.epsilon.eol.execute.operations.contributors.OperationContributor;
 
 public class RemoteVault {
 
@@ -112,7 +112,7 @@ public class RemoteVault {
 	public void respondToGetPaymentWallets(Set<Wallet> result, String token, boolean isEncrypted) throws Exception {
 
 		VaultageMessage response = new VaultageMessage();
-		response.setToken(token); // TODO: this token is not known by the vault
+		response.setToken(token);
 		response.setFrom(localVault.getPublicKey());
 		response.setTo(remotePublicKey);
 		response.setOperation("getWallets");
@@ -129,5 +129,51 @@ public class RemoteVault {
 
 		localVault.getVaultage().sendMessage(response.getTo(), localVault.getPublicKey(), localVault.getPrivateKey(),
 				response, isEncrypted);
+	}
+
+	public String query(String query, Map<String, Object> parameters) throws Exception {
+		return this.query(query, parameters, true);
+	}
+
+	public String query(String query, Map<String, Object> parameters, boolean isEncrypted) throws Exception {
+		VaultageMessage request = new VaultageMessage();
+		request.initToken();
+		request.setSenderId(localVault.getId());
+		request.setFrom(localVault.getPublicKey());
+		request.setTo(remotePublicKey);
+		request.setMessageType(MessageType.REQUEST);
+		request.setOperation("query");
+
+		request.putValue("query", Vaultage.serialise(query));
+		request.putValue("parameters", Vaultage.serialise(parameters));
+
+		localVault.getVaultage().sendMessage(request.getTo(), localVault.getPublicKey(), localVault.getPrivateKey(),
+				request, isEncrypted);
+
+		return request.getToken();
+	}
+
+	public void respondToQuery(Object result, String token) throws InterruptedException {
+		this.respondToQuery(result, token, true);
+	}
+
+	public void respondToQuery(Object result, String token, boolean isEncrypted) throws InterruptedException {
+		VaultageMessage response = new VaultageMessage();
+		response.setToken(token);
+		response.setTo(remotePublicKey);
+		response.setOperation("query");
+		response.setMessageType(MessageType.RESPONSE);
+		response.setRemoteVaultType(this.getClass().getName());
+
+		Method m = new Object() {
+		}.getClass().getEnclosingMethod();
+		Type x = m.getGenericParameterTypes()[0];
+		String returnType = x.getTypeName();
+		response.setReturnType(returnType);
+		response.putValue("result", Vaultage.serialise(result));
+
+		localVault.getVaultage().sendMessage(response.getTo(), localVault.getPublicKey(), localVault.getPrivateKey(),
+				response, isEncrypted);
+
 	}
 }

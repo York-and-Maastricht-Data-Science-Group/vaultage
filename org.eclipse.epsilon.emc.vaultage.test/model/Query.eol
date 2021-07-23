@@ -1,0 +1,17 @@
+var localVault = FairnetVault.all.first();
+var remoteVaults = Sequence{};
+
+var friendVault = new RemoteFairnetVault;
+friendVault.localVault = localVault;
+friendVault.remotePublicKey = localVault.friends.first().publicKey;
+
+var parameters = Map{};
+//var result = friendVault.query("return FairnetVault.all.first().name;", parameters);
+
+parameters.put("condition", true);
+var result: Sequence = friendVault.query("return FairnetVault.all.first().posts.select(p | p.isPublic = condition);", parameters);
+
+return result;
+
+
+			

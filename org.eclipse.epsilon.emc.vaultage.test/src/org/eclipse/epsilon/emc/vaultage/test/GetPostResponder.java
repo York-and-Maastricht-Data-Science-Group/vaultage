@@ -1,4 +1,4 @@
-package org.eclipse.epsilon.emc.vaultage;
+package org.eclipse.epsilon.emc.vaultage.test;
 
 import org.vaultage.core.Vault;
 import org.vaultage.demo.fairnet.FairnetVault;
@@ -11,7 +11,6 @@ public class GetPostResponder extends GetPostResponseHandler {
 	@Override
 	public void run(Vault localVault, RemoteFairnetVault remoteVault, String responseToken, Post result)
 			throws Exception {
-
 		synchronized (this) {
 			this.notify();
 		}
@@ -23,6 +22,9 @@ public class GetPostResponder extends GetPostResponseHandler {
 		synchronized (this) {
 			this.notify();
 		}
+//		System.out.print("Received: ");
+//		System.out.println(((Post) getResult(responseToken)).getContent());
+
 	}
 
 }

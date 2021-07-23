@@ -1,4 +1,4 @@
-package org.eclipse.epsilon.emc.vaultage;
+package org.eclipse.epsilon.emc.vaultage.test;
 
 import java.util.List;
 

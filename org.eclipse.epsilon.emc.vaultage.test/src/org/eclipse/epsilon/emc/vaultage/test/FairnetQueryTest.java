@@ -7,12 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
-import org.eclipse.epsilon.emc.vaultage.GetPostResponder;
-import org.eclipse.epsilon.emc.vaultage.GetPostsResponder;
 import org.eclipse.epsilon.emc.vaultage.VaultageEolContextParallel;
 import org.eclipse.epsilon.emc.vaultage.VaultageModel;
 import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
@@ -29,6 +29,8 @@ import org.vaultage.demo.fairnet.FairnetBroker;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
 import org.vaultage.demo.fairnet.Post;
+
+import com.google.gson.internal.LinkedTreeMap;
 
 public class FairnetQueryTest {
 
@@ -55,6 +57,7 @@ public class FairnetQueryTest {
 		}
 		alice.addOperationResponseHandler(new GetPostsResponder());
 		alice.addOperationResponseHandler(new GetPostResponder());
+		alice.addOperationResponseHandler(new QueryResponder());
 
 		for (Post post : alice.getPosts()) {
 			System.out.println(post.getId() + ": " + post.getContent());
@@ -66,7 +69,8 @@ public class FairnetQueryTest {
 		bob.register(brokerServer);
 
 		bob.createPost("Bob Content 01", true).setId("bob-01");
-		bob.createPost("Bob Content 02", true).setId("bob-02");
+		bob.createPost("Bob Content 02", false).setId("bob-02");
+		bob.createPost("Bob Content 03", true).setId("bob-03");
 		bob.addOperationResponseHandler(new GetPostsResponder());
 		bob.addOperationResponseHandler(new GetPostResponder());
 
@@ -79,8 +83,8 @@ public class FairnetQueryTest {
 		charlie.setName("Charlie");
 		charlie.register(brokerServer);
 
-		for (int i = 1; i <= 5; i++) {
-		charlie.createPost("Charlie Content 0" + i, true).setId("charlie-0" + i);
+		for (int i = 1; i <= 9; i++) {
+			charlie.createPost("Charlie Content 0" + i, true).setId("charlie-0" + i);
 		}
 		charlie.addOperationResponseHandler(new GetPostsResponder());
 		charlie.addOperationResponseHandler(new GetPostResponder());
@@ -108,7 +112,7 @@ public class FairnetQueryTest {
 
 	@Before
 	public void beforeTest() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		
+
 		module = new EolModuleParallel(new VaultageEolContextParallel()) {
 //		module = new EolModule() {
 			public ModuleElement adapt(org.eclipse.epsilon.common.parse.AST cst, ModuleElement parentAst) {
@@ -119,7 +123,7 @@ public class FairnetQueryTest {
 				return element;
 			};
 		};
-		
+
 		Set<Package> packages = new HashSet<Package>();
 		packages.add(bob.getClass().getPackage());
 		VaultageModel model = new VaultageModel(bob, packages);
@@ -150,14 +154,47 @@ public class FairnetQueryTest {
 	}
 
 	@Test
+	public void testQuery() throws Exception {
+
+		module = new EolModuleParallel(new VaultageEolContextParallel()) {
+//			module = new EolModule() {
+			public ModuleElement adapt(org.eclipse.epsilon.common.parse.AST cst, ModuleElement parentAst) {
+				ModuleElement element = super.adapt(cst, parentAst);
+				if (element instanceof PropertyCallExpression) {
+					element = new VaultagePropertyCallExpression();
+				}
+				return element;
+			};
+		};
+
+		Set<Package> packages = new HashSet<Package>();
+		packages.add(alice.getClass().getPackage());
+		VaultageModel model = new VaultageModel(alice, packages);
+		model.setName("M");
+		module.getContext().getModelRepository().addModel(model);
+		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
+		((EolModuleParallel) module).getContext().setParallelism(100);
+
+		// ---
+		String script = Files.readString(Paths.get("model/Query.eol"));
+		module.parse(script);
+		Collection<?> result = (Collection<?>) module.execute();
+		System.out.println("\nRetrieved Posts: ");
+		result.stream().forEach(item -> {
+			System.out.println(((LinkedTreeMap<?, ?>) item).get("content"));
+		});
+		assertEquals(2, result.size());
+	}
+
+	@Test
 	public void testGetPosts() throws Exception {
 		String script = Files.readString(Paths.get("model/GetPosts.eol"));
 		module.parse(script);
-		
+
 		System.out.println();
 		Collection<Post> result = (Collection<Post>) module.execute();
 //		Thread.sleep(4000);
-		
+
 		System.out.println("\nRetrieved Posts: ");
 		for (Post post : result) {
 			System.out.println(post.getContent());

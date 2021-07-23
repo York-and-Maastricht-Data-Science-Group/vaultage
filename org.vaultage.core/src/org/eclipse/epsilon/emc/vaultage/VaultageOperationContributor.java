@@ -3,19 +3,19 @@ package org.eclipse.epsilon.emc.vaultage;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
 import org.eclipse.epsilon.eol.execute.introspection.java.ObjectMethod;
 import org.eclipse.epsilon.eol.execute.operations.contributors.OperationContributor;
+import org.eclipse.epsilon.eol.types.EolMap;
 import org.eclipse.epsilon.eol.types.EolNoType;
 import org.eclipse.epsilon.eol.types.EolSequence;
 import org.eclipse.epsilon.eol.util.ReflectionUtil;
 import org.vaultage.core.OperationResponseHandler;
 import org.vaultage.core.RemoteVault;
 import org.vaultage.core.Vault;
-import org.vaultage.demo.fairnet.Friend;
-import org.vaultage.demo.fairnet.Post;
 
 public class VaultageOperationContributor extends OperationContributor {
 
@@ -159,31 +159,44 @@ public class VaultageOperationContributor extends OperationContributor {
 			try {
 				Class<?>[] parametersTypes = new Class<?>[parameters.length];
 				for (int i = 0; i < parameters.length; i++) {
-					parametersTypes[i] = parameters[i].getClass();
+					if (parameters[i] instanceof EolSequence) {
+						parametersTypes[i] = List.class;
+					} else if (parameters[i] instanceof EolMap) {
+						parametersTypes[i] = Map.class;
+					} else {
+						parametersTypes[i] = parameters[i].getClass();
+					}
 				}
 
 				String token = null;
 				Vault localVault = remoteVault.getLocalVault();
-				String temp = localVault.getClass().getPackageName() + "."
-						+ name.replaceFirst(name.substring(0, 1), name.substring(0, 1).toUpperCase())
-						+ RESPONSE_HANDLER;
-				Class<?> responseHandlerClass = Class.forName(temp);
+				String baseName = name.replaceFirst(name.substring(0, 1), name.substring(0, 1).toUpperCase());
+				String temp = localVault.getClass().getPackageName() + "." + baseName + RESPONSE_HANDLER;
+
+				Class<?> responseHandlerClass = null;
+				try {
+					responseHandlerClass = Class.forName(temp);
+				} catch (Exception e) {
+					temp = Vault.class.getPackageName() + "." + baseName + RESPONSE_HANDLER;
+					responseHandlerClass = Class.forName(temp);
+				}
 				OperationResponseHandler handler = localVault.getOperationResponseHandler(responseHandlerClass);
 				synchronized (handler) {
 					method = remoteVault.getClass().getMethod(name, parametersTypes);
-					
+
+					System.out.print("Send request " + name + ": ");
 					if (parameters.length > 0) {
-						System.out.println("Send request " + name + " : " + parameters[0]);
+						System.out.println(parameters[0]);
+					} else {
+						System.out.println();
 					}
-					
+
 					token = (String) method.invoke(remoteVault, parameters);
 					handler.wait(getTimeout());
 				}
 				result = handler.getResult(token);
-				if (result instanceof Post) {
-					System.out.println("Local Vault received: " + ((Post) result).getContent());
-				}
-				
+
+				System.out.println("Received: " + result);
 
 			} catch (NoSuchMethodException | SecurityException | InterruptedException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {
@@ -191,13 +204,17 @@ public class VaultageOperationContributor extends OperationContributor {
 			}
 		} //
 
-		else if (target instanceof Vault) {
+		else if (target instanceof Vault)
+
+		{
 			Method method = null;
 			try {
 				Class<?>[] parametersTypes = new Class<?>[parameters.length];
 				for (int i = 0; i < parameters.length; i++) {
 					if (parameters[i] instanceof EolSequence) {
 						parametersTypes[i] = List.class;
+					} else if (parameters[i] instanceof EolMap) {
+						parametersTypes[i] = Map.class;
 					} else {
 						parametersTypes[i] = parameters[i].getClass();
 					}
@@ -211,19 +228,6 @@ public class VaultageOperationContributor extends OperationContributor {
 			}
 		}
 		return result;
-	}
-
-	/***
-	 * This method is just for testing. It can be removed any time.
-	 * 
-	 * @return
-	 */
-	public String hello() {
-		if (getTarget() instanceof Friend) {
-			Friend friend = ((Friend) getTarget());
-			return "Hello, " + friend.getName() + "!";
-		}
-		return "Hello!";
 	}
 
 	/**

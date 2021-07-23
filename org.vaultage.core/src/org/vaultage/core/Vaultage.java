@@ -251,6 +251,16 @@ public class Vaultage {
 	public static String serialise(Object obj) {
 		return Gson.toJson(obj);
 	}
+	
+	/**
+	 * Serialise object to Json using GSON library
+	 * @param obj
+	 * @param type
+	 * @return
+	 */
+	public static String serialise(Object obj, Type type) {
+		return Gson.toJson(obj, type);
+	}
 
 	/**
 	 * De-serialise from JSON to object with type <T> using GSON library

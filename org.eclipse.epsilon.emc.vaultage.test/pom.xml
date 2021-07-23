@@ -18,7 +18,7 @@
 		</plugins>
 	</build>
 	<dependencies>
-		<dependency>
+	<dependency>
 			<groupId>org.vaultage.core</groupId>
 			<artifactId>org.vaultage.core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
@@ -31,26 +31,18 @@
 		<dependency>
 			<groupId>org.vaultage.demo.pollen</groupId>
 			<artifactId>org.vaultage.demo.pollen</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1-SNAPSHOT</version> 
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 			<version>0.9.12</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.eclipse.epsilon/org.eclipse.epsilon.eol.engine -->
-		<!--<dependency> -->
-		<!--<groupId>org.eclipse.epsilon</groupId> -->
-		<!-- <artifactId>org.eclipse.epsilon.eol.engine</artifactId> -->
-		<!--<version>2.3.0</version> -->
-		<!--</dependency> -->
-
 		<!-- https://mvnrepository.com/artifact/org.eclipse.epsilon/org.eclipse.epsilon.emc.emf -->
 		<dependency>
 			<groupId>org.eclipse.epsilon</groupId>
 			<artifactId>org.eclipse.epsilon.emc.emf</artifactId>
 			<version>2.3.0</version>
-		</dependency>
+		</dependency> 
 	</dependencies>
 </project>

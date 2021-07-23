@@ -5,9 +5,18 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.epsilon.common.module.ModuleElement;
+import org.eclipse.epsilon.emc.vaultage.VaultageEolContextParallel;
+import org.eclipse.epsilon.emc.vaultage.VaultageModel;
+import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
+import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
+import org.eclipse.epsilon.eol.concurrent.EolModuleParallel;
+import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.vaultage.util.VaultageEncryption;
 import org.vaultage.wallet.Wallet;
 
@@ -218,5 +227,39 @@ public abstract class Vault {
 	 */
 	protected void setEncrypted(String requesterPublicKey, String requestToken, boolean setEncrypted) throws Exception {
 		this.getVaultage().setEncrypted(setEncrypted);
+	}
+
+	public void query(String requesterPublicKey, String requestToken, String query, Map<String, Object> parameters) throws Exception {
+		EolModuleParallel module = new EolModuleParallel(new VaultageEolContextParallel()) {
+//			module = new EolModule() {
+				public ModuleElement adapt(org.eclipse.epsilon.common.parse.AST cst, ModuleElement parentAst) {
+					ModuleElement element = super.adapt(cst, parentAst);
+					if (element instanceof PropertyCallExpression) {
+						element = new VaultagePropertyCallExpression();
+					}
+					return element;
+				};
+			};
+			
+			Set<Package> packages = new HashSet<Package>();
+			packages.add(this.getClass().getPackage());
+			VaultageModel model = new VaultageModel(this, packages);
+			model.setName("M");
+			module.getContext().getModelRepository().addModel(model);
+			module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
+			((EolModuleParallel) module).getContext().setParallelism(100);
+			
+		String script = new String(query);
+		Iterator<Entry<String, Object>> iterator = parameters.entrySet().iterator();
+		while(iterator.hasNext()) {
+			Entry<String, Object> entry = iterator.next();
+			script = script.replace(entry.getKey(), entry.getValue().toString());
+		}
+		module.parse(script);
+		Object result = module.execute();
+		
+		RemoteVault responder = new RemoteVault(this, requesterPublicKey);
+		responder.respondToQuery(result, requestToken);
+		
 	}
 }

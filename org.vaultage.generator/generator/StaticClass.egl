@@ -7,15 +7,12 @@ import java.util.UUID;
 import org.vaultage.core.Entity;
 
 public class [%=class.name%] [%=parentClass%] extends Entity {
-	private String id = UUID.randomUUID().toString();
+
 [% for (feature in class.eStructuralFeatures){ %]
 	private [%=feature.getType()%] [%=feature.name%];
 [%	} %]
 
 	// getter
-	public String getId(){
-		return this.id;
-	}
 [% for (feature in class.eStructuralFeatures){ %]
 	public [%=feature.getType()%] get[%=feature.name.firstToUpperCase()%]() {
 		return this.[%=feature.name%];
@@ -23,9 +20,6 @@ public class [%=class.name%] [%=parentClass%] extends Entity {
 [%	} %]
 
 	// setter
-	public void setId(String id){
-		this.id = id;
-	}
 [% for (feature in class.eStructuralFeatures){ %]
 	public void set[%=feature.name.firstToUpperCase()%]([%=feature.getType()%] [%=feature.name%]) {
 		this.[%=feature.name%] = [%=feature.name%];
