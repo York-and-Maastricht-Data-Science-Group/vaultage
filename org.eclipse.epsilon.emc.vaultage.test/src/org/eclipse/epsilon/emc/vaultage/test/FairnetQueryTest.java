@@ -73,6 +73,7 @@ public class FairnetQueryTest {
 		bob.createPost("Bob Content 03", true).setId("bob-03");
 		bob.addOperationResponseHandler(new GetPostsResponder());
 		bob.addOperationResponseHandler(new GetPostResponder());
+		bob.addOperationResponseHandler(new QueryResponder());
 
 		for (Post post : bob.getPosts()) {
 			System.out.println(post.getId() + ": " + post.getContent());
@@ -88,6 +89,7 @@ public class FairnetQueryTest {
 		}
 		charlie.addOperationResponseHandler(new GetPostsResponder());
 		charlie.addOperationResponseHandler(new GetPostResponder());
+		charlie.addOperationResponseHandler(new QueryResponder());
 
 		for (Post post : charlie.getPosts()) {
 			System.out.println(post.getId() + ": " + post.getContent());
@@ -178,11 +180,14 @@ public class FairnetQueryTest {
 		// ---
 		String script = Files.readString(Paths.get("model/Query.eol"));
 		module.parse(script);
-		Collection<?> result = (Collection<?>) module.execute();
+		Object temp = module.execute();
+		
 		System.out.println("\nRetrieved Posts: ");
-		result.stream().forEach(item -> {
-			System.out.println(((LinkedTreeMap<?, ?>) item).get("content"));
-		});
+		System.out.println(temp);
+		Collection<?> result = (Collection<?>)  temp;
+//		result.stream().forEach(item -> {
+//			System.out.println(((LinkedTreeMap<?, ?>) item).get("content"));
+//		});
 		assertEquals(2, result.size());
 	}
 
@@ -200,6 +205,36 @@ public class FairnetQueryTest {
 			System.out.println(post.getContent());
 		}
 		for (Post post : alice.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
+			boolean val = result.stream().anyMatch(p -> p.getContent().equals(post.getContent()));
+			assertEquals(true, val);
+		}
+
+		for (Post post : charlie.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
+			boolean val = result.stream().anyMatch(p -> p.getContent().equals(post.getContent()));
+			assertEquals(true, val);
+		}
+
+	}
+	
+	@Test
+	public void testGetPostsQuery() throws Exception {
+		String script = Files.readString(Paths.get("model/GetPostsQuery.eol"));
+		module.parse(script);
+
+		System.out.println();
+		Collection<Post> result = (Collection<Post>) module.execute();
+//		Thread.sleep(4000);
+
+		System.out.println("\nRetrieved Posts: ");
+		for (Post post : result) {
+			System.out.println(post.getContent());
+		}
+		for (Post post : alice.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
+			boolean val = result.stream().anyMatch(p -> p.getContent().equals(post.getContent()));
+			assertEquals(true, val);
+		}
+		
+		for (Post post : bob.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
 			boolean val = result.stream().anyMatch(p -> p.getContent().equals(post.getContent()));
 			assertEquals(true, val);
 		}

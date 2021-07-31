@@ -1,10 +1,16 @@
 package org.vaultage.core;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.epsilon.eol.types.EolSequence;
@@ -167,9 +173,36 @@ public class RemoteVault {
 
 		Method m = new Object() {
 		}.getClass().getEnclosingMethod();
-		Type x = m.getGenericParameterTypes()[0];
-		String returnType = x.getTypeName();
-		response.setReturnType(returnType);
+		Type returnType = m.getGenericParameterTypes()[0];
+		String returnTypeName = returnType.getTypeName();
+		returnTypeName = result.getClass().getTypeName();
+
+		// handle parameterised type result
+		if (returnType.equals(Object.class)) {
+			Class<?> type = result.getClass();
+			if (result instanceof Collection) {
+				Iterator<?> iterator = ((Collection<?>) result).iterator();
+				Object element = (iterator.hasNext()) ? iterator.next() : null;
+				if (element != null) {
+					Class<?> subtype = element.getClass();
+					returnTypeName = type.getName() + "<" + subtype.getName() + ">";
+				} else {
+					returnTypeName = type.getName();
+				}
+			} else if (result instanceof Map) {
+				Iterator<?> iterator = ((Map<?, ?>) result).entrySet().iterator();
+				Entry<?, ?> element = (iterator.hasNext()) ? (Entry<?, ?>) iterator.next() : null;
+				if (element != null) {
+					Class<?> subtype1 = element.getKey().getClass();
+					Class<?> subtype2 = element.getValue().getClass();
+					returnTypeName = type.getName() + "<" + subtype1.getName() + ", " + subtype2.getName() + ">";
+				} else {
+					returnTypeName = type.getName();
+				}
+			}
+		}
+
+		response.setReturnType(returnTypeName);
 		response.putValue("result", Vaultage.serialise(result));
 
 		localVault.getVaultage().sendMessage(response.getTo(), localVault.getPublicKey(), localVault.getPrivateKey(),

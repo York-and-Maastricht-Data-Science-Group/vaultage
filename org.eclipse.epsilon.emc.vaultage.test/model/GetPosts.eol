@@ -9,7 +9,7 @@ for (friend in localVault.friends){
 }
 
 var vaultPostsIds  = new Map; 
-var posts = remoteVaults.parallelCollect( rv | rv.posts.parallelCollect(postId | rv.getPost(postId)) ).flatten();
+var posts = remoteVaults.parallelCollect( rv | rv.getPosts().parallelCollect(postId | rv.getPost(postId)) ).flatten();
 
 return posts;
 

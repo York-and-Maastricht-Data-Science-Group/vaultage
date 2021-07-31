@@ -200,6 +200,7 @@ public class VaultageOperationContributor extends OperationContributor {
 
 			} catch (NoSuchMethodException | SecurityException | InterruptedException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {
+				e.printStackTrace();
 				new EolRuntimeException(e.getMessage());
 			}
 		} //
