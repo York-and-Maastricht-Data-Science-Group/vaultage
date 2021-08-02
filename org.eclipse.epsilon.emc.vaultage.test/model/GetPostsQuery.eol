@@ -10,17 +10,18 @@ for (friend in localVault.friends){
 
 var allPosts = Sequence{};
 
-//// request remoteVaults' and localVault's Posts in different statements
-//var bobsFriendsPosts = remoteVaults.parallelCollect( rv| rv.posts.parallelSelect(p | p.isPublic = true )).flatten();
+////// request remoteVaults' and localVault's Posts in different statements
+////var bobsFriendsPosts = remoteVaults.parallelCollect( rv| rv.posts).flatten();
+var bobsFriendsPosts = remoteVaults.parallelCollect( rv| rv.posts.parallelSelect(p | p.isPublic = true )).flatten();
 //var bobsPosts = localVault.posts.parallelSelect(p | p.isPublic = true ).flatten();
-//allPosts.addAll(bobsFriendsPosts);
+allPosts.addAll(bobsFriendsPosts);
 //allPosts.addAll(bobsPosts);
 
-//// request remoteVaults' and localVault's Posts in ONE statement
-var allVaults = Sequence{};
-allVaults.add(localVault);
-allVaults.addAll(remoteVaults);
-allPosts = allVaults.parallelCollect( rv| rv.posts.parallelSelect(p | p.isPublic = true )).flatten();
+////// request remoteVaults' and localVault's Posts in ONE statement
+//var allVaults = Sequence{};
+//allVaults.addAll(remoteVaults);
+//allVaults.add(localVault);
+//allPosts = allVaults.parallelCollect( rv| rv.posts.parallelSelect(p | p.isPublic = false )).flatten();
 
 return allPosts;
 
