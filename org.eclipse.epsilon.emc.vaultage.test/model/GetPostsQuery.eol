@@ -10,9 +10,13 @@ for (friend in localVault.friends){
 
 var allPosts = Sequence{};
 
+var condition = true;
+var substring: String = "\"02\"";
+
 ////// request remoteVaults' and localVault's Posts in different statements
 ////var bobsFriendsPosts = remoteVaults.parallelCollect( rv| rv.posts).flatten();
-var bobsFriendsPosts = remoteVaults.parallelCollect( rv| rv.posts.parallelSelect(p | p.isPublic = true )).flatten();
+var bobsFriendsPosts = remoteVaults.parallelCollect( rv| rv.posts.parallelSelect(p | p.isPublic = condition
+	and p.content.endsWith(substring))).flatten();
 //var bobsPosts = localVault.posts.parallelSelect(p | p.isPublic = true ).flatten();
 allPosts.addAll(bobsFriendsPosts);
 //allPosts.addAll(bobsPosts);

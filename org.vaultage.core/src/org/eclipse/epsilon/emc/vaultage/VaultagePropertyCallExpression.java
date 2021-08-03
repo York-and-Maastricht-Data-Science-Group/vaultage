@@ -1,15 +1,23 @@
 package org.eclipse.epsilon.emc.vaultage;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.eol.EolModule;
+import org.eclipse.epsilon.eol.dom.BooleanLiteral;
 import org.eclipse.epsilon.eol.dom.Expression;
 import org.eclipse.epsilon.eol.dom.FirstOrderOperationCallExpression;
+import org.eclipse.epsilon.eol.dom.IntegerLiteral;
 import org.eclipse.epsilon.eol.dom.NameExpression;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
+import org.eclipse.epsilon.eol.dom.RealLiteral;
+import org.eclipse.epsilon.eol.dom.StringLiteral;
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
+import org.eclipse.epsilon.eol.execute.context.SingleFrame;
+import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.types.EolMap;
 import org.vaultage.core.RemoteVault;
 
@@ -47,8 +55,8 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				 * all preceding/required objects haven't been initialised.
 				 */
 				EolModule module = (EolModule) context.getModule();
-				VaultageUnparser unparser = new VaultageUnparser();
-				unparser.unparse(module);
+				VaultageEolUnparser vaultageUnparser = new VaultageEolUnparser();
+				vaultageUnparser.unparse(module);
 
 				/***
 				 * if the the target expression is the current expression (e.g., in
@@ -69,13 +77,29 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 					moduleElement = this;
 				}
 
+				/**
+				 * Get all variables
+				 */
+				EolMap<String, Object> variables = new EolMap<>();
+				for (SingleFrame frame : context.getFrameStack().getFrames(true)) {
+					for (Entry<String, Variable> entry : frame.getAll().entrySet()) {
+						String name = entry.getKey();
+						Variable var = entry.getValue();
+						if (var.getValue() instanceof Boolean || var.getValue() instanceof String
+								|| var.getValue() instanceof Integer || var.getValue() instanceof Double || 
+								var.getValue() instanceof Float) {
+							variables.put(name, var.getValue());
+						}
+					}
+				}
+
 				/***
 				 * Construct a query string (EOL script) and treat all remote vault name
 				 * expressions as a local vault.
 				 */
 				Object target = ((NameExpression) this.getTargetExpression()).getName();
 				String localVaultClass = ((RemoteVault) source).getLocalVault().getClass().getSimpleName();
-				String statement = unparser.unparse(moduleElement);
+				String statement = vaultageUnparser.unparse(moduleElement);
 				statement = "var " + target + " = " + localVaultClass + ".all.first;\n return " + statement + ";";
 
 				try {
@@ -84,9 +108,9 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 					 */
 					String query = statement;
 					String queryMethod = "query";
-					EolMap<?, ?> map = new EolMap<>();
+
 					source.getClass().getMethod(queryMethod, new Class<?>[] { String.class, Map.class });
-					Object result = op.execute(source, queryMethod, new Object[] { query, map });
+					Object result = op.execute(source, queryMethod, new Object[] { query, variables });
 					return result;
 				} catch (NoSuchMethodException | SecurityException e) {
 					e.printStackTrace();
