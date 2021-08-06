@@ -1,19 +1,15 @@
 package org.eclipse.epsilon.emc.vaultage;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.eol.EolModule;
-import org.eclipse.epsilon.eol.dom.BooleanLiteral;
 import org.eclipse.epsilon.eol.dom.Expression;
 import org.eclipse.epsilon.eol.dom.FirstOrderOperationCallExpression;
-import org.eclipse.epsilon.eol.dom.IntegerLiteral;
 import org.eclipse.epsilon.eol.dom.NameExpression;
+import org.eclipse.epsilon.eol.dom.OperationCallExpression;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
-import org.eclipse.epsilon.eol.dom.RealLiteral;
-import org.eclipse.epsilon.eol.dom.StringLiteral;
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
 import org.eclipse.epsilon.eol.execute.context.SingleFrame;
@@ -69,13 +65,23 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				 * remoteVault is also included in the unparsed process.
 				 */
 				ModuleElement moduleElement = null;
-				Expression parentTargetExpression = ((FirstOrderOperationCallExpression) this.getParent())
-						.getTargetExpression();
-				if (parentTargetExpression.equals(this)) {
+				if (this.getParent() instanceof FirstOrderOperationCallExpression) {
+//					parentTargetExpression = ((FirstOrderOperationCallExpression) this.getParent())
+//							.getTargetExpression();
 					moduleElement = this.getParent();
+//				} 
+//				else if (this.getParent() instanceof OperationCallExpression) {
+////					parentTargetExpression = ((OperationCallExpression) this.getParent()).getTargetExpression();
+//					moduleElement = this;
 				} else {
 					moduleElement = this;
 				}
+
+//				if (parentTargetExpression.equals(this)) {
+//					moduleElement = this.getParent();
+//				} else {
+//					moduleElement = this;
+//				}
 
 				/**
 				 * Get all variables
@@ -86,8 +92,8 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 						String name = entry.getKey();
 						Variable var = entry.getValue();
 						if (var.getValue() instanceof Boolean || var.getValue() instanceof String
-								|| var.getValue() instanceof Integer || var.getValue() instanceof Double || 
-								var.getValue() instanceof Float) {
+								|| var.getValue() instanceof Integer || var.getValue() instanceof Double
+								|| var.getValue() instanceof Float) {
 							variables.put(name, var.getValue());
 						}
 					}
@@ -97,9 +103,15 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				 * Construct a query string (EOL script) and treat all remote vault name
 				 * expressions as a local vault.
 				 */
-				Object target = ((NameExpression) this.getTargetExpression()).getName();
+				String target = "rv";
+//				if (this.getTargetExpression() instanceof NameExpression) {
+//					target = ((NameExpression) this.getTargetExpression()).getName();
+//				} else {
+//					target = "rv";
+//				}
 				String localVaultClass = ((RemoteVault) source).getLocalVault().getClass().getSimpleName();
 				String statement = vaultageUnparser.unparse(moduleElement);
+				statement = target + "." + statement.substring(statement.indexOf(propertyNameExpression.getName()));
 				statement = "var " + target + " = " + localVaultClass + ".all.first;\n return " + statement + ";";
 
 				try {

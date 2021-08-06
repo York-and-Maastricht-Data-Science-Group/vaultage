@@ -181,10 +181,10 @@ public class FairnetQueryTest {
 		String script = Files.readString(Paths.get("model/Query.eol"));
 		module.parse(script);
 		Object temp = module.execute();
-		
+
 		System.out.println("\nRetrieved Posts: ");
 		System.out.println(temp);
-		Collection<?> result = (Collection<?>)  temp;
+		Collection<?> result = (Collection<?>) temp;
 //		result.stream().forEach(item -> {
 //			System.out.println(((LinkedTreeMap<?, ?>) item).get("content"));
 //		});
@@ -215,7 +215,7 @@ public class FairnetQueryTest {
 		}
 
 	}
-	
+
 	@Test
 	public void testGetPostsQuery() throws Exception {
 		String script = Files.readString(Paths.get("model/GetPostsQuery.eol"));
@@ -229,21 +229,13 @@ public class FairnetQueryTest {
 		for (Post post : result) {
 			System.out.println(post.getContent());
 		}
-		for (Post post : alice.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
-			boolean val = result.stream().anyMatch(p -> p.getContent().equals(post.getContent()));
-			assertEquals(true, val);
-		}
-		
-		for (Post post : bob.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
-			boolean val = result.stream().anyMatch(p -> p.getContent().equals(post.getContent()));
-			assertEquals(true, val);
-		}
 
-		for (Post post : charlie.getPosts().stream().filter(p -> p.getIsPublic()).collect(Collectors.toList())) {
-			boolean val = result.stream().anyMatch(p -> p.getContent().equals(post.getContent()));
-			assertEquals(true, val);
-		}
-
+		boolean val = result.stream().anyMatch(p -> p.getContent().contains("Alice Content 01"));
+		assertEquals(true, val);
+		val = result.stream().anyMatch(p -> p.getContent().contains("Bob Content 01"));
+		assertEquals(true, val);
+		val = result.stream().anyMatch(p -> p.getContent().contains("Charlie Content 01"));
+		assertEquals(true, val);
 	}
 
 	private static void exchangePublicKeys(FairnetVault user1, FairnetVault user2) {

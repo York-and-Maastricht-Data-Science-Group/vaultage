@@ -16,14 +16,18 @@ import org.eclipse.epsilon.emc.vaultage.VaultageModel;
 import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
 import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
 import org.eclipse.epsilon.eol.concurrent.EolModuleParallel;
+import org.eclipse.epsilon.eol.dom.BooleanLiteral;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
+import org.eclipse.epsilon.eol.execute.context.Variable;
+import org.eclipse.epsilon.eol.types.EolAnyType;
+import org.eclipse.epsilon.eol.types.EolType;
 import org.vaultage.util.VaultageEncryption;
 import org.vaultage.wallet.Wallet;
 
 public abstract class Vault {
 
-	public static final String DEFAULT_DOWNLOAD_DIR = "downloads"; 
-	
+	public static final String DEFAULT_DOWNLOAD_DIR = "downloads";
+
 	protected String id = UUID.randomUUID().toString();
 	protected String privateKey;
 	protected String publicKey;
@@ -116,7 +120,7 @@ public abstract class Vault {
 				return handler;
 			} else if (responseHandlerType.isAssignableFrom(handler.getClass())) {
 				return handler;
-			} 
+			}
 //			else if (handler.getClass().isAssignableFrom(responseHandlerType)) {
 //				return handler;
 //			}
@@ -208,6 +212,7 @@ public abstract class Vault {
 
 	/***
 	 * Force messaging in brokered mode
+	 * 
 	 * @param requesterPublicKey
 	 * @param requestToken
 	 * @param forceBrokeredMessaging
@@ -220,6 +225,7 @@ public abstract class Vault {
 
 	/***
 	 * set messaging encrypted or un-encrypted
+	 * 
 	 * @param requesterPublicKey
 	 * @param requestToken
 	 * @param setEncrypted
@@ -229,37 +235,45 @@ public abstract class Vault {
 		this.getVaultage().setEncrypted(setEncrypted);
 	}
 
-	public void query(String requesterPublicKey, String requestToken, String query, Map<String, Object> parameters) throws Exception {
+	public void query(String requesterPublicKey, String requestToken, String query, Map<String, Object> parameters)
+			throws Exception {
 		EolModuleParallel module = new EolModuleParallel(new VaultageEolContextParallel()) {
 //			module = new EolModule() {
-				public ModuleElement adapt(org.eclipse.epsilon.common.parse.AST cst, ModuleElement parentAst) {
-					ModuleElement element = super.adapt(cst, parentAst);
-					if (element instanceof PropertyCallExpression) {
-						element = new VaultagePropertyCallExpression();
-					}
-					return element;
-				};
+			public ModuleElement adapt(org.eclipse.epsilon.common.parse.AST cst, ModuleElement parentAst) {
+				ModuleElement element = super.adapt(cst, parentAst);
+				if (element instanceof PropertyCallExpression) {
+					element = new VaultagePropertyCallExpression();
+				}
+				return element;
 			};
-			
-			Set<Package> packages = new HashSet<Package>();
-			packages.add(this.getClass().getPackage());
-			VaultageModel model = new VaultageModel(this, packages);
-			model.setName("M");
-			module.getContext().getModelRepository().addModel(model);
-			module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
-			((EolModuleParallel) module).getContext().setParallelism(100);
-			
+		};
+
+		Set<Package> packages = new HashSet<Package>();
+		packages.add(this.getClass().getPackage());
+		VaultageModel model = new VaultageModel(this, packages);
+		model.setName("M");
+		module.getContext().getModelRepository().addModel(model);
+		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
+		((EolModuleParallel) module).getContext().setParallelism(100);
+
 		String script = new String(query);
 		Iterator<Entry<String, Object>> iterator = parameters.entrySet().iterator();
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			Entry<String, Object> entry = iterator.next();
-			script = script.replace(entry.getKey(), entry.getValue().toString());
+			String name = entry.getKey();
+			Object value = entry.getValue();
+			Variable variable = new Variable(name, value, new EolAnyType());
+			module.getContext().getFrameStack().putGlobal(variable);
+//			if (value.getClass().equals(String.class)) {
+//				value = "\"" + value + "\"";
+//			}
+//			script = script.replace(name, value.toString());
 		}
 		module.parse(script);
 		Object result = module.execute();
-		
+
 		RemoteVault responder = new RemoteVault(this, requesterPublicKey);
 		responder.respondToQuery(result, requestToken);
-		
+
 	}
 }

@@ -8,6 +8,7 @@ import org.eclipse.epsilon.eol.dom.Expression;
 import org.eclipse.epsilon.eol.dom.FirstOrderOperationCallExpression;
 import org.eclipse.epsilon.eol.dom.LiteralExpression;
 import org.eclipse.epsilon.eol.dom.NameExpression;
+import org.eclipse.epsilon.eol.dom.OperationCallExpression;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.dom.VariableDeclaration;
 import org.eclipse.epsilon.eol.parse.EolUnparser;
@@ -31,9 +32,13 @@ public class VaultageEolUnparser extends EolUnparser {
 		buffer.setLength(0);
 		if (moduleElement instanceof FirstOrderOperationCallExpression) {
 			this.visit((FirstOrderOperationCallExpression) moduleElement);
-		} else if (moduleElement instanceof PropertyCallExpression) {
+		} else if (moduleElement instanceof OperationCallExpression) {
+			this.visit((OperationCallExpression) moduleElement);
+		} 
+		else if (moduleElement instanceof PropertyCallExpression) {
 			this.visit((PropertyCallExpression) moduleElement);
-		} else if (moduleElement instanceof NameExpression) {
+		} 
+		else if (moduleElement instanceof NameExpression) {
 			this.visit((NameExpression) moduleElement);
 		}
 		String statement = new String(buffer.toString());

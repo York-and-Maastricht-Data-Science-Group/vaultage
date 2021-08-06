@@ -184,7 +184,7 @@ public class VaultageOperationContributor extends OperationContributor {
 				synchronized (handler) {
 					method = remoteVault.getClass().getMethod(name, parametersTypes);
 
-					System.out.print("Send request " + name + ": ");
+					System.out.print("\nSend request " + name + ":\n");
 					if (parameters.length > 0) {
 						System.out.println(parameters[0]);
 					} else {
