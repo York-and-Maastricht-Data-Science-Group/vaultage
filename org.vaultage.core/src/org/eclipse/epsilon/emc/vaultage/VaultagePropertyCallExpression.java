@@ -1,14 +1,13 @@
 package org.eclipse.epsilon.emc.vaultage;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.eol.EolModule;
-import org.eclipse.epsilon.eol.dom.Expression;
 import org.eclipse.epsilon.eol.dom.FirstOrderOperationCallExpression;
 import org.eclipse.epsilon.eol.dom.NameExpression;
-import org.eclipse.epsilon.eol.dom.OperationCallExpression;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
@@ -68,7 +67,8 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				 * Get all variables
 				 */
 				EolMap<String, Object> variables = new EolMap<>();
-				for (SingleFrame frame : context.getFrameStack().getFrames(true)) {
+				List<SingleFrame> frames = context.getFrameStack().getFrames(true);
+				for (SingleFrame frame : frames) {
 					for (Entry<String, Variable> entry : frame.getAll().entrySet()) {
 						String name = entry.getKey();
 						Variable var = entry.getValue();
@@ -87,13 +87,18 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				 * expressions as a local vault.
 				 */
 				String target = "rv";
-//				if (this.getTargetExpression() instanceof NameExpression) {
-//					target = ((NameExpression) this.getTargetExpression()).getName();
-//				} else {
-//					target = "rv";
-//				}
 				String localVaultClass = ((RemoteVault) source).getLocalVault().getClass().getSimpleName();
 				String statement = vaultageUnparser.unparse(moduleElement);
+				
+				/***
+				 * prevent sending local user-defined operations to a remote vault
+				 */
+				if (vaultageUnparser.getUserDefinedOperations().size() > 0) {
+					String operationName = vaultageUnparser.getUserDefinedOperations().get(0).getName();
+					throw new VaultageEolRuntimeException("Sending user-defined operation '" //
+							+ operationName + "()' to a remote vault is not allowed.");
+				}
+				
 				statement = target + "." + statement.substring(statement.indexOf(propertyNameExpression.getName()));
 				statement = "var " + target + " = " + localVaultClass + ".all.first;\n return " + statement + ";";
 

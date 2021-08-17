@@ -14,12 +14,14 @@ import java.util.stream.Collectors;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.emc.vaultage.VaultageEolContextParallel;
+import org.eclipse.epsilon.emc.vaultage.VaultageEolRuntimeException;
 import org.eclipse.epsilon.emc.vaultage.VaultageModel;
 import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
 import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
 import org.eclipse.epsilon.eol.EolModule;
 import org.eclipse.epsilon.eol.concurrent.EolModuleParallel;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
+import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -237,6 +239,20 @@ public class FairnetQueryTest {
 		assertEquals(true, val);
 		val = result.stream().anyMatch(p -> p.getContent().contains("Charlie Content 01"));
 		assertEquals(true, val);
+	}
+	
+	@Test
+	public void testPreventCallingOperation() throws Exception {
+		String script = Files.readString(Paths.get("model/PreventOperation.eol"));
+		module.parse(script);
+		
+		System.out.println();
+		try {
+		Object result =  module.execute();
+		}catch(EolRuntimeException e) {
+			assertEquals(true, e instanceof VaultageEolRuntimeException);
+		}
+		System.console();
 	}
 
 	private static void exchangePublicKeys(FairnetVault user1, FairnetVault user2) {
