@@ -31,7 +31,7 @@ public class FairnetDesktop extends Application {
 		} catch (Exception e) {
 		}
 
-		ID = args[0];
+//		ID = args[0];
 
 		// dealing with persistence, do this later
 		// VAULT_DIR = HOME_DIR + File.separator + ID;
@@ -48,6 +48,7 @@ public class FairnetDesktop extends Application {
 
 		FAIRNET = vault;
 		
+//		Application.launch(FairnetDesktop.class);
 		launch(args);
 	}
 	

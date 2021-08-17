@@ -29,6 +29,7 @@ import org.vaultage.demo.fairnet.FairnetBroker;
 import org.vaultage.demo.fairnet.FairnetVault;
 import org.vaultage.demo.fairnet.Friend;
 import org.vaultage.demo.fairnet.Post;
+import org.vaultage.demo.fairnet.RemoteFairnetVault;
 
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -244,11 +245,15 @@ public class FairnetQueryTest {
 		user1friend.setName(user2.getName());
 		user1friend.setPublicKey(user2.getPublicKey());
 		user1.getFriends().add(user1friend);
-
+		
 		// add user 2 as a friend to user 1's vault
 		Friend user2friend = new Friend();
 		user2friend.setName(user1.getName());
 		user2friend.setPublicKey(user1.getPublicKey());
 		user2.getFriends().add(user2friend);
+		
+		// create remote vaults for both
+		user1.getRemoteVaults().put(user2.getPublicKey(), new RemoteFairnetVault(user1, user2.getPublicKey()));
+		user2.getRemoteVaults().put(user1.getPublicKey(), new RemoteFairnetVault(user2, user1.getPublicKey()));
 	}
 }

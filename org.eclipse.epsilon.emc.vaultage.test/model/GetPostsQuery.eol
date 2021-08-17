@@ -1,12 +1,14 @@
 var localVault = FairnetVault.all.first();
-var remoteVaults = Sequence{};
+//var remoteVaults = Sequence{};
+var remoteVaults = localVault.remoteVaults.values();
 
-for (friend in localVault.friends){
-    var friendVault = new RemoteFairnetVault;
-    friendVault.localVault = localVault;
-    friendVault.remotePublicKey = friend.publicKey;
-	remoteVaults.add(friendVault);
-}
+//remoteVaults.println();
+//for (friend in localVault.friends){
+//    var friendVault = new RemoteFairnetVault;
+//    friendVault.localVault = localVault;
+//    friendVault.remotePublicKey = friend.publicKey;
+//	remoteVaults.add(friendVault);
+//}
 
 var allPosts = Sequence{};
 
@@ -30,7 +32,6 @@ allVaults.addAll(remoteVaults);
 allVaults.add(localVault);
 allPosts = allVaults.parallelCollect( rv| rv.posts.parallelSelect(p | p.isPublic = condition
 	and p.content.endsWith(endString))).flatten();
-
 
 return allPosts;
 

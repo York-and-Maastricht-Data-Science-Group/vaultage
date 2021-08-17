@@ -2,11 +2,14 @@
 [% 	var classes = ePackage.getVaultClasses(); %]
 package [%=packageName%];
 
+import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.vaultage.core.RemoteVault;
 import org.vaultage.core.RequestMessageHandler;
+import org.vaultage.core.Vault;
 import org.vaultage.core.Vaultage;
 import org.vaultage.core.VaultageMessage;
 
@@ -22,11 +25,22 @@ public class [%=appName%]RequestMessageHandler extends RequestMessageHandler {
 	[% } %]
 	if (vault instanceof [%=class.name%]){
 		[%=class.name%] [%=class.name.firstToLowerCase()%] = ([%=class.name%]) vault;
-		// [%=class.name%] requester = new [%=class.name%]();
-		// requester.setPublicKey(senderPublicKey);
+		
 		String requester = senderPublicKey;
 		String operation = message.getOperation();
 		String messageToken = message.getToken();
+		
+		/***
+		 * Create a remote vault for every public key received from a request.
+		 */
+		if (Remote[%=class.name%].class.getName().equals(message.getRemoteVaultType())
+				&& ((Vault) vault).getRemoteVaults().get(senderPublicKey) == null) {
+			Class<?> remoteClass = Class.forName(message.getRemoteVaultType());
+			Constructor<?> constructor = remoteClass.getConstructor(Vault.class, String.class);
+			RemoteVault remoteVault = (RemoteVault) constructor.newInstance(vault, message.getFrom());
+			((Vault) vault).getRemoteVaults().put(senderPublicKey, remoteVault);
+		}
+			
 		switch (operation) {
 [% for (eOperation in class.eOperations){ %]
 	[% var isStreamed = (eOperation.eAnnotations.selectOne(e | e.source = "stream") <> null )? true : false; %]

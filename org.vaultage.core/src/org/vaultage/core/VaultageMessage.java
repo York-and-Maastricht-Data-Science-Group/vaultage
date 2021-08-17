@@ -56,18 +56,34 @@ public class VaultageMessage {
 		this.token = token;
 	}
 
+	/***
+	 * The public key of the sender.
+	 * @return
+	 */
 	public String getFrom() {
 		return from;
 	}
 
+	/***
+	 * The public key of the sender.
+	 * @return
+	 */
 	public void setFrom(String from) {
 		this.from = from;
 	}
 
+	/***
+	 * The public key of the receiver.
+	 * @return
+	 */
 	public String getTo() {
 		return to;
 	}
 
+	/***
+	 * The public key of the receiver.
+	 * @return
+	 */
 	public void setTo(String to) {
 		this.to = to;
 	}

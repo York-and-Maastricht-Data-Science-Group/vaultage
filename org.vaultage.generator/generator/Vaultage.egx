@@ -22,6 +22,19 @@ pre {
 }
 
 /***
+ * To generate enum
+***/
+rule Enum transform enum : EEnum {
+	parameters : Map {
+  		"packageName" = packageName,     
+    	"class" = enum,
+    	"parentClass" = ""
+    }
+  	template: "Enum.egl"
+  	target: outputGen + enum.filename()
+}
+
+/***
  * To generate static classes
 ***/
 rule StaticClasses transform class : EClass {

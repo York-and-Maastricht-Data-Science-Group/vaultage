@@ -9,7 +9,7 @@ import org.vaultage.core.Entity;
 public class [%=class.name%] [%=parentClass%] extends Entity {
 
 [% for (feature in class.eStructuralFeatures){ %]
-	private [%=feature.getType()%] [%=feature.name%];
+	private [%=feature.getType() %] [%=feature.name%];
 [%	} %]
 
 	// getter

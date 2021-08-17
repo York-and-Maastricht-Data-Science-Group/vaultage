@@ -55,33 +55,14 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				vaultageUnparser.unparse(module);
 
 				/***
-				 * if the the target expression is the current expression (e.g., in
-				 * remoteVault.posts.select(), the posts' parent expression is select(), but the
-				 * select() operation's target expression is the posts since the results are
-				 * returned back to the posts. operation's target is posts). In this case, we
-				 * take select() as the expression to be unparsed as a whole; this will also
-				 * unparsed the remoteVault and posts. Otherwise, the current expression will be
-				 * unparsed (e.g., remoteVault.posts). The post will be unparsed as a whole;
-				 * remoteVault is also included in the unparsed process.
+				 * if ...
 				 */
 				ModuleElement moduleElement = null;
 				if (this.getParent() instanceof FirstOrderOperationCallExpression) {
-//					parentTargetExpression = ((FirstOrderOperationCallExpression) this.getParent())
-//							.getTargetExpression();
 					moduleElement = this.getParent();
-//				} 
-//				else if (this.getParent() instanceof OperationCallExpression) {
-////					parentTargetExpression = ((OperationCallExpression) this.getParent()).getTargetExpression();
-//					moduleElement = this;
 				} else {
 					moduleElement = this;
 				}
-
-//				if (parentTargetExpression.equals(this)) {
-//					moduleElement = this.getParent();
-//				} else {
-//					moduleElement = this;
-//				}
 
 				/**
 				 * Get all variables
@@ -91,8 +72,10 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 					for (Entry<String, Variable> entry : frame.getAll().entrySet()) {
 						String name = entry.getKey();
 						Variable var = entry.getValue();
-						if (var.getValue() instanceof Boolean || var.getValue() instanceof String
-								|| var.getValue() instanceof Integer || var.getValue() instanceof Double
+						if (var.getValue() instanceof Boolean || var.getValue() instanceof Short
+								|| var.getValue() instanceof Character || var.getValue() instanceof String
+								|| var.getValue() instanceof Integer || var.getValue() instanceof Long
+								|| var.getValue() instanceof Byte || var.getValue() instanceof Double
 								|| var.getValue() instanceof Float) {
 							variables.put(name, var.getValue());
 						}

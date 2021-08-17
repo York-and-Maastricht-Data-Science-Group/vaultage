@@ -1,8 +1,11 @@
 package org.vaultage.core;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -16,11 +19,9 @@ import org.eclipse.epsilon.emc.vaultage.VaultageModel;
 import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
 import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
 import org.eclipse.epsilon.eol.concurrent.EolModuleParallel;
-import org.eclipse.epsilon.eol.dom.BooleanLiteral;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.types.EolAnyType;
-import org.eclipse.epsilon.eol.types.EolType;
 import org.vaultage.util.VaultageEncryption;
 import org.vaultage.wallet.Wallet;
 
@@ -34,10 +35,11 @@ public abstract class Vault {
 	protected boolean isListening;
 	protected Vaultage vaultage;
 	protected VaultageServer vaultageServer;
+	protected final Map<String, RemoteVault> remoteVaults = new HashMap<>();
 
-	protected Set<OperationResponseHandler> operationResponseHandlers = new HashSet<>();
+	protected final Set<OperationResponseHandler> operationResponseHandlers = new HashSet<>();
 
-	protected Set<Wallet> wallets = new HashSet<>();
+	protected final Set<Wallet> wallets = new HashSet<>();
 	protected Wallet defaultWallet;
 
 	public Vault() throws Exception {
@@ -275,5 +277,19 @@ public abstract class Vault {
 		RemoteVault responder = new RemoteVault(this, requesterPublicKey);
 		responder.respondToQuery(result, requestToken);
 
+	}
+	
+	public Map<String, RemoteVault> getRemoteVaults() {
+		return remoteVaults;
+	}
+	
+	public void addRemoteVault(RemoteVault remoteVault) {
+		remoteVaults.put(remoteVault.getRemotePublicKey(), remoteVault);
+	}
+	
+	public void addRemoteVault(String remoteVaultPublicKey, Class<?> remoteVaultClass) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Constructor<?> constructor = remoteVaultClass.getConstructor(Vault.class, String.class);
+		RemoteVault remoteVault = (RemoteVault) constructor.newInstance(this, remoteVaultPublicKey);
+		remoteVaults.put(remoteVaultPublicKey, remoteVault);
 	}
 }

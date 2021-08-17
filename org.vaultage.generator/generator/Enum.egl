@@ -1,0 +1,7 @@
+[% import 'Util.eol'; %]
+package [%=packageName%];
+
+public enum [%=enum.name%] {
+[% var literals = enum.eLiterals.collect(literal | literal).concat(", "); %]
+    [%=literals%]
+}
