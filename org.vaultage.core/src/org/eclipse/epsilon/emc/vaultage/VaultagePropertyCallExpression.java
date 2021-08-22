@@ -6,8 +6,11 @@ import java.util.Map.Entry;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.eol.EolModule;
+import org.eclipse.epsilon.eol.dom.Expression;
+import org.eclipse.epsilon.eol.dom.FeatureCallExpression;
 import org.eclipse.epsilon.eol.dom.FirstOrderOperationCallExpression;
 import org.eclipse.epsilon.eol.dom.NameExpression;
+import org.eclipse.epsilon.eol.dom.OperationCallExpression;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
@@ -57,9 +60,37 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				 * if ...
 				 */
 				ModuleElement moduleElement = null;
-				if (this.getParent() instanceof FirstOrderOperationCallExpression) {
+
+				if (this.getParent() instanceof FirstOrderOperationCallExpression
+						&& (((FirstOrderOperationCallExpression) this.getParent())
+								.getTargetExpression() instanceof VaultagePropertyCallExpression)) {
 					moduleElement = this.getParent();
-				} else {
+				}
+//				else if (this.getParent() instanceof OperationCallExpression) {
+//					moduleElement = this;
+//					while (moduleElement.getParent() instanceof FeatureCallExpression) {
+//						moduleElement = moduleElement.getParent();
+//						if (moduleElement instanceof FeatureCallExpression) {
+//							System.out.print("-" + 
+//						((FeatureCallExpression) moduleElement).getName() );
+//						} else {
+//							System.out.print("-" + moduleElement.getClass().getSimpleName());
+//						}
+//						if (moduleElement instanceof FirstOrderOperationCallExpression &&
+//								moduleElement.getParent() instanceof FirstOrderOperationCallExpression) {
+//							break;
+//						}
+//						System.console();
+//					}
+//					System.out.println();
+////					if (moduleElement.getParent() instanceof OperationCallExpression) {
+////						moduleElement = moduleElement.getParent();
+////					} else
+////					if (moduleElement.getParent() instanceof FirstOrderOperationCallExpression) {
+////						moduleElement = moduleElement.getParent();
+////					}
+//				}// 
+				else {
 					moduleElement = this;
 				}
 
@@ -88,8 +119,9 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				 */
 				String target = "rv";
 				String localVaultClass = ((RemoteVault) source).getLocalVault().getClass().getSimpleName();
-				String statement = vaultageUnparser.unparse(moduleElement);
-				
+				String statement = vaultageUnparser.unparse(moduleElement).trim();
+				System.out.println(statement);
+
 				/***
 				 * prevent sending local user-defined operations to a remote vault
 				 */
@@ -98,7 +130,7 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 					throw new VaultageEolRuntimeException("Sending user-defined operation '" //
 							+ operationName + "()' to a remote vault is not allowed.");
 				}
-				
+
 				statement = target + "." + statement.substring(statement.indexOf(propertyNameExpression.getName()));
 				statement = "var " + target + " = " + localVaultClass + ".all.first;\n return " + statement + ";";
 
@@ -135,7 +167,9 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 //					e.printStackTrace();
 //				}
 //			}
+		} else {
+			return super.execute(source, propertyNameExpression, context);
 		}
-		return super.execute(source, propertyNameExpression, context);
+		return null;
 	}
 }

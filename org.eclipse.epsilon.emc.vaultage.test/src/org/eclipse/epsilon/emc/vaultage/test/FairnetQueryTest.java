@@ -13,15 +13,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
+import org.eclipse.epsilon.common.parse.AST;
+import org.eclipse.epsilon.emc.vaultage.VaultageEolModuleParallel;
 import org.eclipse.epsilon.emc.vaultage.VaultageEolContextParallel;
 import org.eclipse.epsilon.emc.vaultage.VaultageEolRuntimeException;
+import org.eclipse.epsilon.emc.vaultage.VaultageFirstOrderOperationCallExpression;
 import org.eclipse.epsilon.emc.vaultage.VaultageModel;
+import org.eclipse.epsilon.emc.vaultage.VaultageOperationCallExpression;
 import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
 import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
 import org.eclipse.epsilon.eol.EolModule;
 import org.eclipse.epsilon.eol.concurrent.EolModuleParallel;
+import org.eclipse.epsilon.eol.dom.FirstOrderOperationCallExpression;
+import org.eclipse.epsilon.eol.dom.OperationCallExpression;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
+import org.eclipse.epsilon.eol.execute.context.concurrent.IEolContextParallel;
+import org.eclipse.epsilon.eol.parse.EolParser;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -37,10 +45,13 @@ import com.google.gson.internal.LinkedTreeMap;
 
 public class FairnetQueryTest {
 
+	
+
 	private static FairnetBroker BROKER;
 	private static FairnetVault alice;
 	private static FairnetVault bob;
 	private static FairnetVault charlie;
+	private static FairnetVault dan;
 	private static EolModule module;
 
 	@BeforeClass
@@ -50,6 +61,7 @@ public class FairnetQueryTest {
 
 		VaultageServer brokerServer = new VaultageServer(FairnetBroker.BROKER_ADDRESS);
 
+		// Alice
 		alice = new FairnetVault();
 		alice.setId("Alice");
 		alice.setName("Alice");
@@ -66,6 +78,7 @@ public class FairnetQueryTest {
 			System.out.println(post.getId() + ": " + post.getContent());
 		}
 
+		// Bob
 		bob = new FairnetVault();
 		bob.setId("Bob");
 		bob.setName("Bob");
@@ -82,6 +95,7 @@ public class FairnetQueryTest {
 			System.out.println(post.getId() + ": " + post.getContent());
 		}
 
+		// Charlie
 		charlie = new FairnetVault();
 		charlie.setId("Charlie");
 		charlie.setName("Charlie");
@@ -98,8 +112,26 @@ public class FairnetQueryTest {
 			System.out.println(post.getId() + ": " + post.getContent());
 		}
 
+//		// Dan
+//		dan = new FairnetVault();
+//		dan.setId("Dan");
+//		dan.setName("Dan");
+//		dan.register(brokerServer);
+//
+//		for (int i = 1; i <= 9; i++) {
+//			dan.createPost("Dan Content 0" + i, true).setId("dan-0" + i);
+//		}
+//		dan.addOperationResponseHandler(new GetPostsResponder());
+//		dan.addOperationResponseHandler(new GetPostResponder());
+//		dan.addOperationResponseHandler(new QueryResponder());
+//
+//		for (Post post : dan.getPosts()) {
+//			System.out.println(post.getId() + ": " + post.getContent());
+//		}
+
 		exchangePublicKeys(alice, bob);
-		exchangePublicKeys(charlie, bob);
+		exchangePublicKeys(bob, charlie);
+//		exchangePublicKeys(charlie, dan);
 
 	}
 
@@ -118,16 +150,7 @@ public class FairnetQueryTest {
 	@Before
 	public void beforeTest() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 
-		module = new EolModuleParallel(new VaultageEolContextParallel()) {
-//		module = new EolModule() {
-			public ModuleElement adapt(org.eclipse.epsilon.common.parse.AST cst, ModuleElement parentAst) {
-				ModuleElement element = super.adapt(cst, parentAst);
-				if (element instanceof PropertyCallExpression) {
-					element = new VaultagePropertyCallExpression();
-				}
-				return element;
-			};
-		};
+		module = new VaultageEolModuleParallel(new VaultageEolContextParallel());
 
 		Set<Package> packages = new HashSet<Package>();
 		packages.add(bob.getClass().getPackage());
@@ -160,17 +183,7 @@ public class FairnetQueryTest {
 
 	@Test
 	public void testQuery() throws Exception {
-
-		module = new EolModuleParallel(new VaultageEolContextParallel()) {
-//			module = new EolModule() {
-			public ModuleElement adapt(org.eclipse.epsilon.common.parse.AST cst, ModuleElement parentAst) {
-				ModuleElement element = super.adapt(cst, parentAst);
-				if (element instanceof PropertyCallExpression) {
-					element = new VaultagePropertyCallExpression();
-				}
-				return element;
-			};
-		};
+		module = new VaultageEolModuleParallel(new VaultageEolContextParallel());
 
 		Set<Package> packages = new HashSet<Package>();
 		packages.add(alice.getClass().getPackage());
@@ -240,18 +253,39 @@ public class FairnetQueryTest {
 		val = result.stream().anyMatch(p -> p.getContent().contains("Charlie Content 01"));
 		assertEquals(true, val);
 	}
-	
+
 	@Test
 	public void testPreventCallingOperation() throws Exception {
 		String script = Files.readString(Paths.get("model/PreventOperation.eol"));
 		module.parse(script);
-		
-		System.out.println();
+
 		try {
-		Object result =  module.execute();
-		}catch(EolRuntimeException e) {
+			Object result = module.execute();
+		} catch (EolRuntimeException e) {
+			e.printStackTrace();
 			assertEquals(true, e instanceof VaultageEolRuntimeException);
 		}
+	}
+
+	@Test
+	public void testRecursiveQuery() throws Exception {
+
+		module = new VaultageEolModuleParallel(new VaultageEolContextParallel());
+		
+		Set<Package> packages = new HashSet<Package>();
+		packages.add(alice.getClass().getPackage());
+		VaultageModel model = new VaultageModel(alice, packages);
+		model.setName("M");
+		module.getContext().getModelRepository().addModel(model);
+		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
+		((EolModuleParallel) module).getContext().setParallelism(100);
+
+		String script = Files.readString(Paths.get("model/RecursiveQuery.eol"));
+		module.parse(script);
+
+		List<Object> result = (List<Object>) module.execute();
+		System.out.println("Result: " + result.toString());
+		assertEquals(true, result.size() > 0);
 		System.console();
 	}
 
@@ -261,15 +295,17 @@ public class FairnetQueryTest {
 		user1friend.setName(user2.getName());
 		user1friend.setPublicKey(user2.getPublicKey());
 		user1.getFriends().add(user1friend);
-		
+
 		// add user 2 as a friend to user 1's vault
 		Friend user2friend = new Friend();
 		user2friend.setName(user1.getName());
 		user2friend.setPublicKey(user1.getPublicKey());
 		user2.getFriends().add(user2friend);
-		
+
 		// create remote vaults for both
 		user1.getRemoteVaults().put(user2.getPublicKey(), new RemoteFairnetVault(user1, user2.getPublicKey()));
 		user2.getRemoteVaults().put(user1.getPublicKey(), new RemoteFairnetVault(user2, user1.getPublicKey()));
 	}
+	
+	
 }

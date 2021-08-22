@@ -196,7 +196,7 @@ public class VaultageOperationContributor extends OperationContributor {
 				}
 				result = handler.getResult(token);
 
-				System.out.println("Received: " + result);
+				System.out.println(localVault.getId() + " received: " + result);
 
 			} catch (NoSuchMethodException | SecurityException | InterruptedException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {

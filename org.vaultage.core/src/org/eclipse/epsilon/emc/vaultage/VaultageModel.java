@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -126,6 +127,26 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 			collection.add(this.localVault);
 			contents.add(this.localVault);
 		}
+
+		try {
+			Method method = Vault.class.getMethod("getRemoteVaults", new Class<?>[] {});
+			Object value = method.invoke(this.localVault);
+
+			if (value instanceof Map<?, ?>) {
+				for (Object val : ((Map<?, ?>) value).values()) {
+					if (val instanceof RemoteVault) {
+						contents.add(val);
+					}
+				}
+			} else if (value instanceof Collection<?>) {
+				Collection<Object> col = (Collection<Object>) value;
+				collection.addAll(col);
+			}
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e1) {
+			e1.printStackTrace();
+		}
+
 		Method[] methods = this.localVault.getClass().getDeclaredMethods();
 		for (Method method : methods) {
 			if (method.getModifiers() == Modifier.PUBLIC && method.getParameterCount() == 0) {

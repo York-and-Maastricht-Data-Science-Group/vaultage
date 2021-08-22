@@ -3,21 +3,20 @@ var remoteVaults = localVault.remoteVaults.values();
 
 var allPosts = Sequence{};
 
-var post = remoteVaults.first().posts.second();
-"post: ".print(); post.println();
-
 var condition = true;
 var endString1 = "0";
 var endString2 = "1";
 
-var allVaults = Sequence{};
-allVaults.addAll(remoteVaults);
-allVaults.add(localVault);
-allPosts = allVaults.parallelCollect(
-	rv| rv.posts.parallelSelect(p | p.isPublic = condition
-		and p.content.endsWith(concatenate(endString1, endString2))
-		)
-	).flatten();
+var x =concatenate(endString1, endString2);
+
+//var allVaults = Sequence{};
+//allVaults.addAll(remoteVaults);
+//allVaults.add(localVault);
+//allPosts = allVaults.parallelCollect(
+//	rv| rv.posts.parallelSelect(p | p.isPublic = condition
+//		and p.content.endsWith("01")
+//		)
+//	).flatten();
 
 return allPosts;
 

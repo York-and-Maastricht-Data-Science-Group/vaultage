@@ -292,4 +292,12 @@ public abstract class Vault {
 		RemoteVault remoteVault = (RemoteVault) constructor.newInstance(this, remoteVaultPublicKey);
 		remoteVaults.put(remoteVaultPublicKey, remoteVault);
 	}
+	
+//	@Override
+//	public boolean equals(Object object) {
+//		if (object instanceof Vault && this.getPublicKey() != null) {
+//			return this.getPublicKey().equals(((Vault)object).getPublicKey());
+//		}
+//		return super.equals(object);
+//	}
 }

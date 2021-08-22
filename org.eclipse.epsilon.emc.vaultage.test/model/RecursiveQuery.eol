@@ -1,0 +1,36 @@
+var localVault = FairnetVault.all.first();
+var rvs = RemoteFairnetVault.all;
+
+var remoteVaults = localVault.remoteVaults.values().asSequence();
+
+//var a : String = "abc";
+//M.getAllOfType("RemoteFairnetVault").println();
+//M.isOfKind(remoteVaults.first(), "RemoteFairnetVault").println();
+
+var posts = remoteVaults
+			.parallelCollect( 
+				rv0 | rv0.remoteVaults.values().asSequence()
+				.parallelCollect(
+					rv1 | rv1.remoteVaults.values().asSequence()
+					.parallelCollect(
+						rv3 | rv3.posts	
+					) 	
+				) 
+			)
+			.flatten();
+
+
+
+//var posts = remoteVaults.parallelCollect( rv| rv.posts.parallelSelect(p | p.isPublic = true
+//	and p.content.endsWith("01"))).flatten();
+
+//var posts = remoteVaults.parallelCollect( rv| rv.posts).flatten();
+
+
+//posts.println();
+//
+//return posts.asSequence();
+
+return posts;
+
+			

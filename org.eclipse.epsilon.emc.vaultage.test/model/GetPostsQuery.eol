@@ -13,7 +13,11 @@ var remoteVaults = localVault.remoteVaults.values();
 var allPosts = Sequence{};
 
 var post = remoteVaults.first().posts.second();
-"post: ".print(); post.println();
+"post1: ".print(); post.println();
+
+var post = remoteVaults.second().posts.second();
+"post2: ".print(); post.println();
+allPosts.add(post);
 
 var condition = true;
 var endString = "01";
@@ -26,7 +30,7 @@ var endString = "01";
 //allPosts.addAll(bobsFriendsPosts);
 //allPosts.addAll(bobsPosts);
 
-//// request remoteVaults' and localVault's Posts in ONE statement
+// request remoteVaults' and localVault's Posts in ONE statement
 var allVaults = Sequence{};
 allVaults.addAll(remoteVaults);
 allVaults.add(localVault);
