@@ -20,7 +20,7 @@ import org.vaultage.core.Vault;
 public class VaultageOperationContributor extends OperationContributor {
 
 	private static final String RESPONSE_HANDLER = "ResponseHandler";
-	public static final int DEFAULT_TIMEOUT = 60000; // milliseconds
+	public static final int DEFAULT_TIMEOUT = 600000; // milliseconds
 	private static int timeout = DEFAULT_TIMEOUT;
 
 	/***

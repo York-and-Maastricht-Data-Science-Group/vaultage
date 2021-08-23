@@ -6,8 +6,8 @@ import java.util.Map.Entry;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.eol.EolModule;
-import org.eclipse.epsilon.eol.dom.Expression;
-import org.eclipse.epsilon.eol.dom.FeatureCallExpression;
+import org.eclipse.epsilon.eol.dom.AssignmentStatement;
+import org.eclipse.epsilon.eol.dom.ExpressionStatement;
 import org.eclipse.epsilon.eol.dom.FirstOrderOperationCallExpression;
 import org.eclipse.epsilon.eol.dom.NameExpression;
 import org.eclipse.epsilon.eol.dom.OperationCallExpression;
@@ -39,7 +39,12 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 	public Object execute(Object source, NameExpression propertyNameExpression, IEolContext context)
 			throws EolRuntimeException {
 
-		if (source instanceof RemoteVault) {
+		if ((this.getParent() instanceof FirstOrderOperationCallExpression //
+				|| this.getParent() instanceof AssignmentStatement //
+				|| this.getParent() instanceof ExpressionStatement //
+				|| this.getParent() instanceof OperationCallExpression //
+				) //
+				&& source instanceof RemoteVault) {
 
 			VaultageOperationContributor op = (VaultageOperationContributor) context.getOperationContributorRegistry()
 					.stream().filter(o -> o.getClass().equals(VaultageOperationContributor.class)).findFirst()
@@ -56,43 +61,7 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				VaultageEolUnparser vaultageUnparser = new VaultageEolUnparser();
 				vaultageUnparser.unparse(module);
 
-				/***
-				 * if ...
-				 */
-				ModuleElement moduleElement = null;
-
-				if (this.getParent() instanceof FirstOrderOperationCallExpression
-						&& (((FirstOrderOperationCallExpression) this.getParent())
-								.getTargetExpression() instanceof VaultagePropertyCallExpression)) {
-					moduleElement = this.getParent();
-				}
-//				else if (this.getParent() instanceof OperationCallExpression) {
-//					moduleElement = this;
-//					while (moduleElement.getParent() instanceof FeatureCallExpression) {
-//						moduleElement = moduleElement.getParent();
-//						if (moduleElement instanceof FeatureCallExpression) {
-//							System.out.print("-" + 
-//						((FeatureCallExpression) moduleElement).getName() );
-//						} else {
-//							System.out.print("-" + moduleElement.getClass().getSimpleName());
-//						}
-//						if (moduleElement instanceof FirstOrderOperationCallExpression &&
-//								moduleElement.getParent() instanceof FirstOrderOperationCallExpression) {
-//							break;
-//						}
-//						System.console();
-//					}
-//					System.out.println();
-////					if (moduleElement.getParent() instanceof OperationCallExpression) {
-////						moduleElement = moduleElement.getParent();
-////					} else
-////					if (moduleElement.getParent() instanceof FirstOrderOperationCallExpression) {
-////						moduleElement = moduleElement.getParent();
-////					}
-//				}// 
-				else {
-					moduleElement = this;
-				}
+				ModuleElement moduleElement = this;
 
 				/**
 				 * Get all variables
@@ -120,7 +89,7 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				String target = "rv";
 				String localVaultClass = ((RemoteVault) source).getLocalVault().getClass().getSimpleName();
 				String statement = vaultageUnparser.unparse(moduleElement).trim();
-				System.out.println(statement);
+//				System.out.println(statement);
 
 				/***
 				 * prevent sending local user-defined operations to a remote vault
@@ -132,7 +101,8 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				}
 
 				statement = target + "." + statement.substring(statement.indexOf(propertyNameExpression.getName()));
-				statement = "var " + target + " = " + localVaultClass + ".all.first;\n return " + statement + ";";
+				statement = "var " + target + " = " + localVaultClass + ".all.first;\n" //
+						+ "return " + statement + ";";
 
 				try {
 					/***
@@ -149,27 +119,7 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				}
 			}
 
-			// "rv.posts.parallelCollect(postId | rv.getPost(postId))";
-
-//			VaultageOperationContributor op = (VaultageOperationContributor) context.getOperationContributorRegistry()
-//					.stream().filter(o -> o.getClass().equals(VaultageOperationContributor.class)).findFirst()
-//					.orElse(null);
-//
-//			if (op != null) {
-//				String name = new String(propertyNameExpression.getName());
-//				if (!name.startsWith("get")) {
-//					name = "get" + name.replaceFirst(name.substring(0, 1), name.substring(0, 1).toUpperCase());
-//				}
-//				try {
-//					source.getClass().getMethod(name, new Class<?>[] {});
-//					return op.execute(source, name, new Object[] {});
-//				} catch (NoSuchMethodException | SecurityException e) {
-//					e.printStackTrace();
-//				}
-//			}
-		} else {
-			return super.execute(source, propertyNameExpression, context);
 		}
-		return null;
+		return super.execute(source, propertyNameExpression, context);
 	}
 }

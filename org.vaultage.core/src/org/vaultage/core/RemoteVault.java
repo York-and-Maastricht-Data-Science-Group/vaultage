@@ -179,27 +179,7 @@ public class RemoteVault {
 
 		// handle parameterised type result
 		if (returnType.equals(Object.class)) {
-			Class<?> type = result.getClass();
-			if (result instanceof Collection) {
-				Iterator<?> iterator = ((Collection<?>) result).iterator();
-				Object element = (iterator.hasNext()) ? iterator.next() : null;
-				if (element != null) {
-					Class<?> subtype = element.getClass();
-					returnTypeName = type.getName() + "<" + subtype.getName() + ">";
-				} else {
-					returnTypeName = type.getName();
-				}
-			} else if (result instanceof Map) {
-				Iterator<?> iterator = ((Map<?, ?>) result).entrySet().iterator();
-				Entry<?, ?> element = (iterator.hasNext()) ? (Entry<?, ?>) iterator.next() : null;
-				if (element != null) {
-					Class<?> subtype1 = element.getKey().getClass();
-					Class<?> subtype2 = element.getValue().getClass();
-					returnTypeName = type.getName() + "<" + subtype1.getName() + ", " + subtype2.getName() + ">";
-				} else {
-					returnTypeName = type.getName();
-				}
-			}
+			returnTypeName = identifyReturnType(result);
 		}
 
 		response.setReturnType(returnTypeName);
@@ -208,5 +188,31 @@ public class RemoteVault {
 		localVault.getVaultage().sendMessage(response.getTo(), localVault.getPublicKey(), localVault.getPrivateKey(),
 				response, isEncrypted);
 
+	}
+
+	private String identifyReturnType(Object result) {
+		Class<?> type = result.getClass();
+		String returnTypeName = type.getName();
+		if (result instanceof Collection) {
+			Iterator<?> iterator = ((Collection<?>) result).iterator();
+			Object element = (iterator.hasNext()) ? iterator.next() : null;
+			if (element != null) {
+				String subTypeName = identifyReturnType(element);
+
+				returnTypeName = returnTypeName + "<" + subTypeName + ">";
+//				returnTypeName = type.getName() + "<" + subtype.getName() + ">";
+			}
+		} else if (result instanceof Map) {
+			Iterator<?> iterator = ((Map<?, ?>) result).entrySet().iterator();
+			Entry<?, ?> element = (iterator.hasNext()) ? (Entry<?, ?>) iterator.next() : null;
+			if (element != null) {
+				Class<?> subtype1 = element.getKey().getClass();
+				Class<?> subtype2 = element.getValue().getClass();
+				returnTypeName = type.getName() + "<" + subtype1.getName() + ", " + subtype2.getName() + ">";
+			} else {
+				returnTypeName = type.getName();
+			}
+		}
+		return returnTypeName;
 	}
 }

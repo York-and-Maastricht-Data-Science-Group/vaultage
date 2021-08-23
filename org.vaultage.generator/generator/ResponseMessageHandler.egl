@@ -34,20 +34,9 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 		Object senderObject = constructor.newInstance(parameterValues);
 
 		// 4. Get the class and type of the return value using its class/type above
-		String[] types = returnValueClassName.split("<|>|,\\s");
-		Class<?> returnClass;
-		Type returnType;
-		if (types.length > 1) {
-			returnClass = Class.forName(types[0]);
-			Class<?>[] typeArguments = new Class<?>[types.length - 1];
-			for (int i = 1; i < types.length; i++) {
-				typeArguments[i - 1] = Class.forName(types[i]);
-			}
-			returnType = TypeToken.getParameterized(returnClass, typeArguments).getType();
-		} else {
-			returnClass = Class.forName(returnValueClassName);
-			returnType = (Type) returnClass;
-		}
+		Object[] temp = parseType(returnValueClassName);
+		Type returnType = (Type) temp[1];
+		Class<?> returnClass = (Class<?>) temp[0];
 
 		// 5. deserialise the return value using the class/type above
 		Object returnResult = Vaultage.deserialise(message.getValue("result"), returnType);

@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.emc.vaultage.VaultageEolContextParallel;
+import org.eclipse.epsilon.emc.vaultage.VaultageEolModuleParallel;
 import org.eclipse.epsilon.emc.vaultage.VaultageModel;
 import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
 import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
@@ -239,16 +240,7 @@ public abstract class Vault {
 
 	public void query(String requesterPublicKey, String requestToken, String query, Map<String, Object> parameters)
 			throws Exception {
-		EolModuleParallel module = new EolModuleParallel(new VaultageEolContextParallel()) {
-//			module = new EolModule() {
-			public ModuleElement adapt(org.eclipse.epsilon.common.parse.AST cst, ModuleElement parentAst) {
-				ModuleElement element = super.adapt(cst, parentAst);
-				if (element instanceof PropertyCallExpression) {
-					element = new VaultagePropertyCallExpression();
-				}
-				return element;
-			};
-		};
+		EolModuleParallel module = new VaultageEolModuleParallel(new VaultageEolContextParallel());
 
 		Set<Package> packages = new HashSet<Package>();
 		packages.add(this.getClass().getPackage());
@@ -266,10 +258,6 @@ public abstract class Vault {
 			Object value = entry.getValue();
 			Variable variable = new Variable(name, value, new EolAnyType());
 			module.getContext().getFrameStack().putGlobal(variable);
-//			if (value.getClass().equals(String.class)) {
-//				value = "\"" + value + "\"";
-//			}
-//			script = script.replace(name, value.toString());
 		}
 		module.parse(script);
 		Object result = module.execute();

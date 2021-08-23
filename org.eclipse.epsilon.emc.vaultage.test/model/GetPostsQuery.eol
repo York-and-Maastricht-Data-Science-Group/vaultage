@@ -1,6 +1,7 @@
 var localVault = FairnetVault.all.first();
 //var remoteVaults = Sequence{};
 var remoteVaults = localVault.remoteVaults.values();
+remoteVaults.println();
 
 //remoteVaults.println();
 //for (friend in localVault.friends){
@@ -12,25 +13,24 @@ var remoteVaults = localVault.remoteVaults.values();
 
 var allPosts = Sequence{};
 
-var post = remoteVaults.first().posts.second();
-"post1: ".print(); post.println();
-
-var post = remoteVaults.second().posts.second();
-"post2: ".print(); post.println();
-allPosts.add(post);
-
+/* the parent of a property call is a expression statement */
+remoteVaults.first().posts;
+//
+/* the parent of a property call is an operation */
+var post1 = remoteVaults.second().posts.first();
+"post1: ".print(); post1.println();
+allPosts.add(post1);
+//
+/* the parent of a property call is an assignment statement */
+//var post2 = remoteVaults.first().posts;
+//"post2: ".print(); post2.println();
+//allPosts.addAll(post2);
+//
 var condition = true;
 var endString = "01";
 
-//// request remoteVaults' and localVault's Posts in different statements
-//var bobsFriendsPosts = remoteVaults.parallelCollect( rv| rv.posts).flatten();
-//var bobsFriendsPosts = remoteVaults.parallelCollect( rv| rv.posts.parallelSelect(p | p.isPublic = condition
-//	and p.content.endsWith(endString))).flatten();
-//var bobsPosts = localVault.posts.parallelSelect(p | p.isPublic = condition and p.content.endsWith(endString)).flatten();
-//allPosts.addAll(bobsFriendsPosts);
-//allPosts.addAll(bobsPosts);
-
-// request remoteVaults' and localVault's Posts in ONE statement
+/* the parent of a property call is a first order operation and 
+   request remoteVaults' and localVault's Posts in ONE statement */
 var allVaults = Sequence{};
 allVaults.addAll(remoteVaults);
 allVaults.add(localVault);

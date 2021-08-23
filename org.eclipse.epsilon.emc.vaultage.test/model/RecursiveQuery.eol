@@ -1,36 +1,35 @@
 var localVault = FairnetVault.all.first();
-var rvs = RemoteFairnetVault.all;
 
 var remoteVaults = localVault.remoteVaults.values().asSequence();
+remoteVaults.println();
 
-//var a : String = "abc";
-//M.getAllOfType("RemoteFairnetVault").println();
-//M.isOfKind(remoteVaults.first(), "RemoteFairnetVault").println();
+var posts = Sequence{};
 
-var posts = remoteVaults
-			.parallelCollect( 
+//var a = Sequence{1, 2};
+//var b = Sequence{3, 4};
+//var c = a.includingAll(b);
+//c.println();
+
+var aliceId = localVault.publicKey;
+
+posts = remoteVaults // To Bob
+			.parallelCollect(
+//			rv0 | rv0.posts.includingAll(
+//					rv0.remoteVaults.values().asSequence()
+//						.select(x | x.remotePublicKey != aliceId) // to Charlie only
+//					.parallelCollect(
+//						rv3 | rv3.posts
+//					)
+//				) 
 				rv0 | rv0.remoteVaults.values().asSequence()
-				.parallelCollect(
-					rv1 | rv1.remoteVaults.values().asSequence()
+						.select(x | x.remotePublicKey != aliceId) // to Charlie only
 					.parallelCollect(
-						rv3 | rv3.posts	
-					) 	
-				) 
+							rv3 | rv3.posts 	
+					)
+					.flatten().includingAll(rv0.posts).flatten()
 			)
 			.flatten();
-
-
-
-//var posts = remoteVaults.parallelCollect( rv| rv.posts.parallelSelect(p | p.isPublic = true
-//	and p.content.endsWith("01"))).flatten();
-
-//var posts = remoteVaults.parallelCollect( rv| rv.posts).flatten();
-
-
-//posts.println();
-//
-//return posts.asSequence();
-
+			
 return posts;
 
 			
