@@ -1,8 +1,6 @@
 package org.eclipse.epsilon.emc.vaultage;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.eol.EolModule;
@@ -14,7 +12,6 @@ import org.eclipse.epsilon.eol.dom.OperationCallExpression;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
-import org.eclipse.epsilon.eol.execute.context.SingleFrame;
 import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.types.EolMap;
 import org.vaultage.core.RemoteVault;
@@ -92,6 +89,16 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				EolMap<String, Object> variables = vaultageUnparser.getInUseVariables();
 //				System.out.println(statement);
 
+				/***
+				 * construct origin variable to identify the origin of propagated/chained
+				 * messages
+				 */
+				Variable origin = context.getFrameStack().getGlobal(VaultageModel.ORIGIN_STRING);
+				if (origin == null) {
+					variables.put(VaultageModel.ORIGIN_STRING,
+							((RemoteVault) source).getLocalVault().getPublicKey());
+				}
+				
 				/***
 				 * prevent sending local user-defined operations to a remote vault
 				 */

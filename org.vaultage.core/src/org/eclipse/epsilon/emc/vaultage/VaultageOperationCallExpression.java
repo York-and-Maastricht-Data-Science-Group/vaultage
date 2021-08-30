@@ -1,9 +1,7 @@
 package org.eclipse.epsilon.emc.vaultage;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.eol.EolModule;
@@ -20,7 +18,6 @@ import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.exceptions.EolUndefinedVariableException;
 import org.eclipse.epsilon.eol.execute.ExecutorFactory;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
-import org.eclipse.epsilon.eol.execute.context.SingleFrame;
 import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.execute.introspection.java.ObjectMethod;
 import org.eclipse.epsilon.eol.execute.operations.AbstractOperation;
@@ -269,7 +266,16 @@ public class VaultageOperationCallExpression extends OperationCallExpression {
 		String localVaultClass = ((RemoteVault) target).getLocalVault().getClass().getSimpleName();
 		String statement = vaultageUnparser.unparse(moduleElement).trim();
 		EolMap<String, Object> variables = vaultageUnparser.getInUseVariables();
-				System.out.println("statement: " + statement);
+//		System.out.println("statement: " + statement);
+
+		/***
+		 * construct origin variable to identify the origin of propagated/chained
+		 * messages
+		 */
+		Variable origin = context.getFrameStack().getGlobal(VaultageModel.ORIGIN_STRING);
+		if (origin == null) {
+			variables.put(VaultageModel.ORIGIN_STRING, ((RemoteVault) target).getLocalVault().getPublicKey());
+		}
 
 		/***
 		 * prevent sending local user-defined operations to a remote vault

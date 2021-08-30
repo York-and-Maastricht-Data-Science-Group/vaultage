@@ -1,0 +1,18 @@
+var localVault = FairnetVault.all.first();
+
+var remoteVaults = localVault.remoteVaults.values().asSequence();
+
+"Origin: ".print() + localVault.publicKey.println();
+
+// scenario: Alice <--> Bob <--> Charlie
+
+var origin = remoteVaults // To Bob
+			.parallelCollect(
+				rv0 | rv0.remoteVaults.values().asSequence()
+						.select(x | x.remotePublicKey != ORIGIN) // to Charlie only
+					.parallelCollect(
+							rv3 | ORIGIN	
+					)
+			).flatten().first();
+
+return origin;	

@@ -303,12 +303,39 @@ public class FairnetQueryTest {
 		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
 		((EolModuleParallel) module).getContext().setParallelism(100);
 
-		String script = Files.readString(Paths.get("model/RecursiveQuery.eol"));
+		String script = Files.readString(Paths.get("model/MultilevelQuery.eol"));
 		module.parse(script);
 
 		List<Object> result = (List<Object>) module.execute();
 		System.out.println("Result: " + result.toString());
 		assertEquals(true, result.size() > 0);
+		System.console();
+	}
+	
+	/***
+	 * This test send the public key of Alice to Charlie. 
+	 * Charlie receives it and sends it back to Alice.
+	 * @throws Exception
+	 */
+	@Test
+	public void testPassingVariable() throws Exception {
+
+		module = new VaultageEolModuleParallel(new VaultageEolContextParallel());
+		
+		Set<Package> packages = new HashSet<Package>();
+		packages.add(alice.getClass().getPackage());
+		VaultageModel model = new VaultageModel(alice, packages);
+		model.setName("M");
+		module.getContext().getModelRepository().addModel(model);
+		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
+		((EolModuleParallel) module).getContext().setParallelism(100);
+
+		String script = Files.readString(Paths.get("model/PassingVariable.eol"));
+		module.parse(script);
+
+		String result = (String) module.execute();
+		System.out.println("Returned origin: " + result.toString());
+		assertEquals(alice.getPublicKey(), result);
 		System.console();
 	}
 

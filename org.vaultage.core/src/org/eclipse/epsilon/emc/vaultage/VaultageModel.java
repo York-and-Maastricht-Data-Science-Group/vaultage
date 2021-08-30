@@ -45,6 +45,7 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 	private Set<Object> contents = new HashSet<>();
 
 	private VaultageOperationContributor vaultageOperationContributor = new VaultageOperationContributor();
+	public static final String ORIGIN_STRING = "ORIGIN";
 
 	/***
 	 * In the constructor, we get all the classes derived from Entity, Vault, and

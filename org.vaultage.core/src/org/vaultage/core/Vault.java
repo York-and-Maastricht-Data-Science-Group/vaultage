@@ -23,6 +23,7 @@ import org.eclipse.epsilon.eol.concurrent.EolModuleParallel;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.types.EolAnyType;
+import org.eclipse.epsilon.eol.types.EolType;
 import org.vaultage.util.VaultageEncryption;
 import org.vaultage.wallet.Wallet;
 
@@ -259,6 +260,7 @@ public abstract class Vault {
 			Variable variable = new Variable(name, value, new EolAnyType());
 			module.getContext().getFrameStack().putGlobal(variable);
 		}
+
 		module.parse(script);
 		Object result = module.execute();
 
@@ -266,21 +268,23 @@ public abstract class Vault {
 		responder.respondToQuery(result, requestToken);
 
 	}
-	
+
 	public Map<String, RemoteVault> getRemoteVaults() {
 		return remoteVaults;
 	}
-	
+
 	public void addRemoteVault(RemoteVault remoteVault) {
 		remoteVaults.put(remoteVault.getRemotePublicKey(), remoteVault);
 	}
-	
-	public void addRemoteVault(String remoteVaultPublicKey, Class<?> remoteVaultClass) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+	public void addRemoteVault(String remoteVaultPublicKey, Class<?> remoteVaultClass)
+			throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
 		Constructor<?> constructor = remoteVaultClass.getConstructor(Vault.class, String.class);
 		RemoteVault remoteVault = (RemoteVault) constructor.newInstance(this, remoteVaultPublicKey);
 		remoteVaults.put(remoteVaultPublicKey, remoteVault);
 	}
-	
+
 //	@Override
 //	public boolean equals(Object object) {
 //		if (object instanceof Vault && this.getPublicKey() != null) {

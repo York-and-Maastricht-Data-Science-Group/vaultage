@@ -2,9 +2,7 @@ package org.eclipse.epsilon.emc.vaultage;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.eol.EolModule;
@@ -16,7 +14,6 @@ import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.execute.context.FrameStack;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
-import org.eclipse.epsilon.eol.execute.context.SingleFrame;
 import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.types.EolMap;
 import org.eclipse.epsilon.eol.types.EolNoType;
@@ -101,7 +98,7 @@ public class VaultageFirstOrderOperationCallExpression extends FirstOrderOperati
 					vaultageUnparser.unparse(module);
 
 					ModuleElement moduleElement = this;
-					
+
 //					/**
 //					 * Get all variables
 //					 */
@@ -120,17 +117,27 @@ public class VaultageFirstOrderOperationCallExpression extends FirstOrderOperati
 //							}
 //						}
 //					}
-					
+
 					/***
 					 * Construct a query string (EOL script) and treat all remote vault name
 					 * expressions as a local vault.
 					 */
 					String localVaultClass = ((RemoteVault) target).getLocalVault().getClass().getSimpleName();
 					String statement = vaultageUnparser.unparse(moduleElement).trim();
-					
+
 					EolMap<String, Object> variables = vaultageUnparser.getInUseVariables();
-					
+
 //					System.out.println("Send statement: " + statement);
+
+					/***
+					 * construct origin variable to identify the origin of propagated/chained
+					 * messages
+					 */
+					Variable origin = context.getFrameStack().getGlobal(VaultageModel.ORIGIN_STRING);
+					if (origin == null) {
+						variables.put(VaultageModel.ORIGIN_STRING,
+								((RemoteVault) target).getLocalVault().getPublicKey());
+					}
 
 					/***
 					 * prevent sending local user-defined operations to a remote vault
