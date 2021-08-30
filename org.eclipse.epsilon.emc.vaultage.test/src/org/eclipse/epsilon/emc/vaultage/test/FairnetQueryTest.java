@@ -231,6 +231,29 @@ public class FairnetQueryTest {
 		}
 
 	}
+	
+	
+	@Test
+	public void testIdentifyOnlyRequiredVariables() throws Exception {
+		String script = Files.readString(Paths.get("model/OnlyRequiredVariables.eol"));
+		module.parse(script);
+
+		System.out.println();
+		Collection<Post> result = (Collection<Post>) module.execute();
+
+		System.out.println("\nRetrieved Posts: ");
+		for (Post post : result) {
+			System.out.println(post.getContent());
+		}
+		
+		boolean val = result.stream().anyMatch(p -> p.getContent().contains("Alice Content 01"));
+		assertEquals(true, val);
+		val = result.stream().anyMatch(p -> p.getContent().contains("Bob Content 01"));
+		assertEquals(true, val);
+		val = result.stream().anyMatch(p -> p.getContent().contains("Charlie Content 01"));
+		assertEquals(true, val);
+
+	}
 
 	@Test
 	public void testGetPostsQuery() throws Exception {

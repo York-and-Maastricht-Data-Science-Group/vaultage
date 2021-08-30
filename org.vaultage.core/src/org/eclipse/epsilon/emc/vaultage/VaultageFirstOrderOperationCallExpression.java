@@ -1,5 +1,7 @@
 package org.eclipse.epsilon.emc.vaultage;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,10 +37,9 @@ public class VaultageFirstOrderOperationCallExpression extends FirstOrderOperati
 				targetNameExpression = ((PropertyCallExpression) targetNameExpression).getTargetExpression();
 			} else if (targetNameExpression instanceof OperationCallExpression) {
 				targetNameExpression = ((OperationCallExpression) targetNameExpression).getTargetExpression();
-			}else if (targetNameExpression instanceof FirstOrderOperationCallExpression) {
+			} else if (targetNameExpression instanceof FirstOrderOperationCallExpression) {
 				targetNameExpression = ((FirstOrderOperationCallExpression) targetNameExpression).getTargetExpression();
-			} 
-			else {
+			} else {
 				break;
 			}
 		}
@@ -54,11 +55,41 @@ public class VaultageFirstOrderOperationCallExpression extends FirstOrderOperati
 			if (variable != null && variable.getValue() instanceof RemoteVault) {
 				target = variable.getValue();
 
+				Class<?>[] parameterClasses = null;
+				String targetOperationName = null;
+				if (this.getTargetExpression() instanceof OperationCallExpression) {
+					OperationCallExpression targetOperationCallExpression = (OperationCallExpression) this
+							.getTargetExpression();
+					targetOperationName = targetOperationCallExpression.getName();
+
+					ArrayList<Object> parameterValues = new ArrayList<>(
+							targetOperationCallExpression.getParameterExpressions().size());
+
+					for (Expression parameter : targetOperationCallExpression.getParameterExpressions()) {
+						parameterValues.add(context.getExecutorFactory().execute(parameter, context));
+					}
+
+					Object[] temp = parameterValues.toArray();
+					parameterClasses = new Class<?>[temp.length];
+					for (int i = 0; i < temp.length; i++) {
+						parameterClasses[i] = temp[i].getClass();
+					}
+				}
+
+				Method method = null;
+				if (targetOperationName != null) {
+					try {
+						method = target.getClass().getMethod(targetOperationName, parameterClasses);
+					} catch (NoSuchMethodException | SecurityException e) {
+						e.printStackTrace();
+					}
+				}
+
 				VaultageOperationContributor op = (VaultageOperationContributor) context
 						.getOperationContributorRegistry().stream()
 						.filter(o -> o.getClass().equals(VaultageOperationContributor.class)).findFirst().orElse(null);
 
-				if (op != null) {
+				if (op != null && method == null) {
 
 					/**
 					 * Module has to be unparsed in its entirety to initialise all required objects.
@@ -70,32 +101,36 @@ public class VaultageFirstOrderOperationCallExpression extends FirstOrderOperati
 					vaultageUnparser.unparse(module);
 
 					ModuleElement moduleElement = this;
-					/**
-					 * Get all variables
-					 */
-					EolMap<String, Object> variables = new EolMap<>();
-					List<SingleFrame> frames = context.getFrameStack().getFrames(true);
-					for (SingleFrame frame : frames) {
-						for (Entry<String, Variable> entry : frame.getAll().entrySet()) {
-							String name = entry.getKey();
-							Variable var = entry.getValue();
-							if (var.getValue() instanceof Boolean || var.getValue() instanceof Short
-									|| var.getValue() instanceof Character || var.getValue() instanceof String
-									|| var.getValue() instanceof Integer || var.getValue() instanceof Long
-									|| var.getValue() instanceof Byte || var.getValue() instanceof Double
-									|| var.getValue() instanceof Float) {
-								variables.put(name, var.getValue());
-							}
-						}
-					}
-
+					
+//					/**
+//					 * Get all variables
+//					 */
+//					EolMap<String, Object> variables = new EolMap<>();
+//					List<SingleFrame> frames = context.getFrameStack().getFrames(true);
+//					for (SingleFrame frame : frames) {
+//						for (Entry<String, Variable> entry : frame.getAll().entrySet()) {
+//							String name = entry.getKey();
+//							Variable var = entry.getValue();
+//							if (var.getValue() instanceof Boolean || var.getValue() instanceof Short
+//									|| var.getValue() instanceof Character || var.getValue() instanceof String
+//									|| var.getValue() instanceof Integer || var.getValue() instanceof Long
+//									|| var.getValue() instanceof Byte || var.getValue() instanceof Double
+//									|| var.getValue() instanceof Float) {
+//								variables.put(name, var.getValue());
+//							}
+//						}
+//					}
+					
 					/***
 					 * Construct a query string (EOL script) and treat all remote vault name
 					 * expressions as a local vault.
 					 */
 					String localVaultClass = ((RemoteVault) target).getLocalVault().getClass().getSimpleName();
 					String statement = vaultageUnparser.unparse(moduleElement).trim();
-					System.out.println("Send statement: " + statement);
+					
+					EolMap<String, Object> variables = vaultageUnparser.getInUseVariables();
+					
+//					System.out.println("Send statement: " + statement);
 
 					/***
 					 * prevent sending local user-defined operations to a remote vault

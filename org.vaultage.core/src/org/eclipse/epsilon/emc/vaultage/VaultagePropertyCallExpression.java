@@ -63,24 +63,24 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 
 				ModuleElement moduleElement = this;
 
-				/**
-				 * Get all variables
-				 */
-				EolMap<String, Object> variables = new EolMap<>();
-				List<SingleFrame> frames = context.getFrameStack().getFrames(true);
-				for (SingleFrame frame : frames) {
-					for (Entry<String, Variable> entry : frame.getAll().entrySet()) {
-						String name = entry.getKey();
-						Variable var = entry.getValue();
-						if (var.getValue() instanceof Boolean || var.getValue() instanceof Short
-								|| var.getValue() instanceof Character || var.getValue() instanceof String
-								|| var.getValue() instanceof Integer || var.getValue() instanceof Long
-								|| var.getValue() instanceof Byte || var.getValue() instanceof Double
-								|| var.getValue() instanceof Float) {
-							variables.put(name, var.getValue());
-						}
-					}
-				}
+//				/**
+//				 * Get all variables
+//				 */
+//				EolMap<String, Object> variables = new EolMap<>();
+//				List<SingleFrame> frames = context.getFrameStack().getFrames(true);
+//				for (SingleFrame frame : frames) {
+//					for (Entry<String, Variable> entry : frame.getAll().entrySet()) {
+//						String name = entry.getKey();
+//						Variable var = entry.getValue();
+//						if (var.getValue() instanceof Boolean || var.getValue() instanceof Short
+//								|| var.getValue() instanceof Character || var.getValue() instanceof String
+//								|| var.getValue() instanceof Integer || var.getValue() instanceof Long
+//								|| var.getValue() instanceof Byte || var.getValue() instanceof Double
+//								|| var.getValue() instanceof Float) {
+//							variables.put(name, var.getValue());
+//						}
+//					}
+//				}
 
 				/***
 				 * Construct a query string (EOL script) and treat all remote vault name
@@ -89,6 +89,7 @@ public class VaultagePropertyCallExpression extends PropertyCallExpression {
 				String target = "rv";
 				String localVaultClass = ((RemoteVault) source).getLocalVault().getClass().getSimpleName();
 				String statement = vaultageUnparser.unparse(moduleElement).trim();
+				EolMap<String, Object> variables = vaultageUnparser.getInUseVariables();
 //				System.out.println(statement);
 
 				/***

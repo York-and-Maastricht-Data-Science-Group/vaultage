@@ -15,9 +15,14 @@ import org.eclipse.epsilon.eol.dom.OperationList;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.execute.ExecutorFactory;
+import org.eclipse.epsilon.eol.execute.context.FrameStack;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
+import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.parse.EolUnparser;
+import org.eclipse.epsilon.eol.types.EolMap;
 import org.eclipse.epsilon.eol.types.EolNoType;
+import org.vaultage.core.Entity;
+import org.vaultage.core.RemoteVault;
 
 public class VaultageEolUnparser extends EolUnparser {
 
@@ -25,6 +30,7 @@ public class VaultageEolUnparser extends EolUnparser {
 	// for the entire module/script.
 	private boolean isPartial = false;
 	private final List<Operation> userDefinedOperations = new ArrayList<>();
+	private final EolMap<String, Object> usedVariables = new EolMap<>();
 
 	/***
 	 * Move the buffer string to a temporary String then move it back to the buffer
@@ -38,7 +44,8 @@ public class VaultageEolUnparser extends EolUnparser {
 		// module/script.
 		isPartial = true;
 		userDefinedOperations.clear();
-		
+		usedVariables.clear();
+
 		String originalBuffer = new String(buffer.toString());
 
 		buffer.setLength(0);
@@ -62,6 +69,21 @@ public class VaultageEolUnparser extends EolUnparser {
 	}
 
 	@Override
+	public void visit(NameExpression nameExpression) {
+		FrameStack fs = ((VaultageEolModuleParallel) nameExpression.getModule()).getContext().getFrameStack();
+		Variable var = fs.get(nameExpression.getName());
+		if (var != null && !(var.getValue() instanceof RemoteVault)
+				&& (var.getValue() instanceof Boolean || var.getValue() instanceof Short
+						|| var.getValue() instanceof Character || var.getValue() instanceof String
+						|| var.getValue() instanceof Integer || var.getValue() instanceof Long
+						|| var.getValue() instanceof Byte || var.getValue() instanceof Double
+						|| var.getValue() instanceof Float || var.getValue() instanceof Entity)) {
+			usedVariables.put(var.getName(), var.getValue());
+		}
+		super.visit(nameExpression);
+	}
+
+	@Override
 	public void visit(OperationCallExpression operationCallExpression) {
 		super.visit(operationCallExpression);
 		if (isPartial) {
@@ -76,6 +98,10 @@ public class VaultageEolUnparser extends EolUnparser {
 			ExecutorFactory executorFactory = context.getExecutorFactory();
 			try {
 				for (Expression parameter : parameterExpressions) {
+					Variable x = null;
+					if (parameter instanceof NameExpression) {
+						x = context.getFrameStack().getLocal(((NameExpression) parameter).getName());
+					}
 					parameterValues.add(executorFactory.execute(parameter, context));
 				}
 				if (module instanceof IEolModule && !operationCallExpression.isArrow()) {
@@ -96,4 +122,9 @@ public class VaultageEolUnparser extends EolUnparser {
 	public List<Operation> getUserDefinedOperations() {
 		return userDefinedOperations;
 	}
+
+	public EolMap<String, Object> getInUseVariables() {
+		return usedVariables;
+	}
+
 }
