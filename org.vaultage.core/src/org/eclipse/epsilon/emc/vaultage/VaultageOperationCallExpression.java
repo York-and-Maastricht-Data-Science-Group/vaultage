@@ -1,10 +1,7 @@
 package org.eclipse.epsilon.emc.vaultage;
 
 import java.util.ArrayList;
-import java.util.Map;
 
-import org.eclipse.epsilon.common.module.ModuleElement;
-import org.eclipse.epsilon.eol.EolModule;
 import org.eclipse.epsilon.eol.IEolModule;
 import org.eclipse.epsilon.eol.dom.Expression;
 import org.eclipse.epsilon.eol.dom.NameExpression;
@@ -18,14 +15,12 @@ import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.exceptions.EolUndefinedVariableException;
 import org.eclipse.epsilon.eol.execute.ExecutorFactory;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
-import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.execute.introspection.java.ObjectMethod;
 import org.eclipse.epsilon.eol.execute.operations.AbstractOperation;
 import org.eclipse.epsilon.eol.execute.operations.contributors.IOperationContributorProvider;
 import org.eclipse.epsilon.eol.execute.operations.contributors.OperationContributor;
 import org.eclipse.epsilon.eol.execute.operations.simple.SimpleOperation;
 import org.eclipse.epsilon.eol.models.IModel;
-import org.eclipse.epsilon.eol.types.EolMap;
 import org.eclipse.epsilon.eol.types.EolNoType;
 import org.eclipse.epsilon.eol.types.EolSequence;
 import org.eclipse.epsilon.eol.types.EolUndefined;
@@ -94,16 +89,14 @@ public class VaultageOperationCallExpression extends OperationCallExpression {
 
 		// query remote vault
 		if (targetObject instanceof RemoteVault) {
-			VaultageOperationContributor op = (VaultageOperationContributor) context.getOperationContributorRegistry()
-					.stream().filter(o -> o.getClass().equals(VaultageOperationContributor.class)).findFirst()
-					.orElse(null);
-
-			if (op != null && !operationName.equals("query")) {
+			if (!operationName.equals("query")) {
+				VaultageEolRemoteOperationFetcher messageSender = new VaultageEolRemoteOperationFetcher();
 				if (queryTargetExpression instanceof NameExpression) {
-					targetObject = executeRemoteVaultMethod(targetObject, operationName, parameterValues, op);
+					targetObject = messageSender.executeRemoteVaultOperation(targetObject, context, operationName,
+							parameterValues);
 					return targetObject;
 				} else {
-					targetObject = queryRemoteVault(context, targetObject, queryTargetExpression, op);
+					targetObject = messageSender.queryRemoteVault(this, context, targetObject, queryTargetExpression);
 				}
 				if (parameterExpressions.size() == 0) {
 					return targetObject;
@@ -204,105 +197,6 @@ public class VaultageOperationCallExpression extends OperationCallExpression {
 			}
 		}
 
-	}
-
-	private Object executeRemoteVaultMethod(Object target, String methodName, ArrayList<Object> parameterValues,
-			VaultageOperationContributor op) {
-
-		Object result;
-		try {
-			result = op.execute(target, methodName, parameterValues.toArray());
-			return result;
-		} catch (EolRuntimeException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	private Object queryRemoteVault(IEolContext context, Object target, Expression expression,
-			VaultageOperationContributor op) throws VaultageEolRuntimeException, EolRuntimeException {
-		/**
-		 * Module has to be unparsed in its entirety to initialise all required objects.
-		 * Otherwise, when parsing only certain expressions, it would fail, since the
-		 * all preceding/required objects haven't been initialised.
-		 */
-		EolModule module = (EolModule) context.getModule();
-		VaultageEolUnparser vaultageUnparser = new VaultageEolUnparser();
-		vaultageUnparser.unparse(module);
-
-		ModuleElement moduleElement = this;
-
-//				/**
-//		 * Get all variables
-//		 */
-//		EolMap<String, Object> variables = new EolMap<>();
-//		List<SingleFrame> frames = context.getFrameStack().getFrames(true);
-//		for (SingleFrame frame : frames) {
-//			for (Entry<String, Variable> entry : frame.getAll().entrySet()) {
-//				String name = entry.getKey();
-//				Variable var = entry.getValue();
-//				if (var.getValue() instanceof Boolean || var.getValue() instanceof Short
-//						|| var.getValue() instanceof Character || var.getValue() instanceof String
-//						|| var.getValue() instanceof Integer || var.getValue() instanceof Long
-//						|| var.getValue() instanceof Byte || var.getValue() instanceof Double
-//						|| var.getValue() instanceof Float) {
-//					variables.put(name, var.getValue());
-//				}
-//			}
-//		}
-
-		/***
-		 * Identify prefix statement (statement that returns remote vault) that will be
-		 * replaced by local vault.
-		 */
-		String prefixStatement = vaultageUnparser.unparse(expression).trim();
-//				System.out.println("prefix statement: " + prefixStatement);
-
-		/***
-		 * Construct a query string (EOL script) and treat all remote vault name
-		 * expressions as a local vault.
-		 */
-		String localVaultClass = ((RemoteVault) target).getLocalVault().getClass().getSimpleName();
-		String statement = vaultageUnparser.unparse(moduleElement).trim();
-		EolMap<String, Object> variables = vaultageUnparser.getInUseVariables();
-//		System.out.println("statement: " + statement);
-
-		/***
-		 * construct origin variable to identify the origin of propagated/chained
-		 * messages
-		 */
-		Variable origin = context.getFrameStack().getGlobal(VaultageModel.ORIGIN_STRING);
-		if (origin == null) {
-			variables.put(VaultageModel.ORIGIN_STRING, ((RemoteVault) target).getLocalVault().getPublicKey());
-		}
-
-		/***
-		 * prevent sending local user-defined operations to a remote vault
-		 */
-		if (vaultageUnparser.getUserDefinedOperations().size() > 0) {
-			String opName = vaultageUnparser.getUserDefinedOperations().get(0).getName();
-			throw new VaultageEolRuntimeException("Sending user-defined operation '" //
-					+ opName + "()' to a remote vault is not allowed.");
-		}
-		String vaultVariable = "localVault";
-		statement = "var " + vaultVariable + " = " + localVaultClass + ".all.first;\n" //
-				+ " return " + statement.replace(prefixStatement, vaultVariable) + ";";
-
-		try {
-			/***
-			 * Call the Vault's Query operation
-			 */
-			String query = statement;
-			String queryMethod = "query";
-
-			target.getClass().getMethod(queryMethod, new Class<?>[] { String.class, Map.class });
-			Object result = op.execute(target, queryMethod, new Object[] { query, variables });
-			return result;
-		} catch (NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	static Object wrap(Object o) {
