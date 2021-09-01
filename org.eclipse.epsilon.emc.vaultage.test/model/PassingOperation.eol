@@ -1,5 +1,3 @@
-var x = M.allContents().first();
-x.println();
 var localVault = FairnetVault.all.first();
 var remoteVaults = localVault.remoteVaults.values().asSequence();
 

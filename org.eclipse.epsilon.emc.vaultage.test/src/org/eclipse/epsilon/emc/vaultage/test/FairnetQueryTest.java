@@ -112,26 +112,26 @@ public class FairnetQueryTest {
 			System.out.println(post.getId() + ": " + post.getContent());
 		}
 
-//		// Dan
-//		dan = new FairnetVault();
-//		dan.setId("Dan");
-//		dan.setName("Dan");
-//		dan.register(brokerServer);
-//
-//		for (int i = 1; i <= 9; i++) {
-//			dan.createPost("Dan Content 0" + i, true).setId("dan-0" + i);
-//		}
-//		dan.addOperationResponseHandler(new GetPostsResponder());
-//		dan.addOperationResponseHandler(new GetPostResponder());
-//		dan.addOperationResponseHandler(new QueryResponder());
-//
-//		for (Post post : dan.getPosts()) {
-//			System.out.println(post.getId() + ": " + post.getContent());
-//		}
+		// Dan
+		dan = new FairnetVault();
+		dan.setId("Dan");
+		dan.setName("Dan");
+		dan.register(brokerServer);
+
+		for (int i = 1; i <= 9; i++) {
+			dan.createPost("Dan Content 0" + i, true).setId("dan-0" + i);
+		}
+		dan.addOperationResponseHandler(new GetPostsResponder());
+		dan.addOperationResponseHandler(new GetPostResponder());
+		dan.addOperationResponseHandler(new QueryResponder());
+
+		for (Post post : dan.getPosts()) {
+			System.out.println(post.getId() + ": " + post.getContent());
+		}
 
 		exchangePublicKeys(alice, bob);
 		exchangePublicKeys(bob, charlie);
-//		exchangePublicKeys(charlie, dan);
+		exchangePublicKeys(charlie, dan);
 
 	}
 
@@ -364,6 +364,34 @@ public class FairnetQueryTest {
 		int result = (int) module.execute();
 		System.out.println("Bob's number of friends: " + result);
 		assertEquals(2, result);
+		System.console();
+	}
+	
+	
+	/***
+	 * This is to count all the posts in the network. 
+	 * Alice initiate the chain 
+	 * @throws Exception
+	 */
+	@Test
+	public void testCountAllPosts() throws Exception {
+
+		module = new VaultageEolModuleParallel(new VaultageEolContextParallel());
+		
+		Set<Package> packages = new HashSet<Package>();
+		packages.add(alice.getClass().getPackage());
+		VaultageModel model = new VaultageModel(alice, packages);
+		model.setName("M");
+		module.getContext().getModelRepository().addModel(model);
+		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
+		((EolModuleParallel) module).getContext().setParallelism(100);
+
+		String script = Files.readString(Paths.get("model/CountAllPosts.eol"));
+		module.parse(script);
+
+		int result = (int) module.execute();
+		System.out.println("Total number of posts: " + result);
+		assertEquals(30, result);
 		System.console();
 	}
 

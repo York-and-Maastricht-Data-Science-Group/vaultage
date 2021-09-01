@@ -89,9 +89,10 @@ public class VaultageOperationCallExpression extends OperationCallExpression {
 			parameterValues.add(value);
 
 			if (targetObject instanceof EolNoType.EolNoTypeInstance) {
-				parameterRemoteVault = parameterValues.stream().filter(i -> i instanceof RemoteVault).findFirst()
-						.orElse(EolNoType.NoInstance);
-				parameterExpression = parameter;
+				if (value instanceof RemoteVault) {
+					parameterRemoteVault = value;
+					parameterExpression = parameter;
+				}
 			}
 		}
 

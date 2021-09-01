@@ -1,0 +1,22 @@
+var localVault = FairnetVault.all.first();
+var remoteVaults = localVault.remoteVaults.values().asSequence();
+
+// scenario: Alice <--> Bob <--> Charlie
+ 
+var senderId = localVault.publicKey;
+var otherPosts = remoteVaults
+				.parallelCollect(rv | countAllPosts(rv, senderId))
+				.flatten().sum();
+var myPosts = localVault.posts.size(); 
+
+return myPosts + otherPosts;	
+
+operation countAllPosts(localVault: Any, sender: String): Integer {
+	var senderId = localVault.publicKey;
+	var otherPosts = localVault.remoteVaults.values().asSequence()
+				.select(x | x.remotePublicKey != sender)
+				.parallelCollect(rv0 | countAllPosts(rv0, senderId))
+				.flatten().sum();
+	var myPosts = localVault.posts.size(); 
+	return myPosts + otherPosts;
+}

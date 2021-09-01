@@ -44,22 +44,24 @@ public class VaultageEolUnparser extends EolUnparser {
 		// module/script.
 		isPartial = true;
 		userDefinedOperations.clear();
-		usedVariables.clear();
 
 		String originalBuffer = new String(buffer.toString());
 
 		buffer.setLength(0);
 		if (moduleElement instanceof FirstOrderOperationCallExpression) {
+			usedVariables.clear();
 			this.visit((FirstOrderOperationCallExpression) moduleElement);
 		} else if (moduleElement instanceof OperationCallExpression) {
+			usedVariables.clear();
 			this.visit((OperationCallExpression) moduleElement);
 		} else if (moduleElement instanceof PropertyCallExpression) {
+			usedVariables.clear();
 			this.visit((PropertyCallExpression) moduleElement);
 		} else if (moduleElement instanceof NameExpression) {
+			usedVariables.clear();
 			this.visit((NameExpression) moduleElement);
 		} else if (moduleElement instanceof Operation) {
 			this.visit((Operation) moduleElement);
-			
 		}
 		String statement = new String(buffer.toString());
 
