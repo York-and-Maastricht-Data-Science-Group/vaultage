@@ -43,7 +43,7 @@ public class VaultageOperationCallExpression extends OperationCallExpression {
 		System.out.println("ALFA Operation: " + operationName);
 		final ExecutorFactory executorFactory = context.getExecutorFactory();
 
-		if (operationName.equals("getPost")) {
+		if (operationName.equals("countFriendsOfFriend")) {
 			System.console();
 		}
 
@@ -81,27 +81,39 @@ public class VaultageOperationCallExpression extends OperationCallExpression {
 
 		ArrayList<Object> parameterValues = new ArrayList<>(parameterExpressions.size());
 
+		Object parameterRemoteVault = null;
+		Expression parameterExpression = null;
+
 		for (Expression parameter : parameterExpressions) {
 			Object value = executorFactory.execute(parameter, context);
 			parameterValues.add(value);
-//			context.getFrameStack().put(((NameExpression) parameter).getName(), value);
+
+			if (targetObject instanceof EolNoType.EolNoTypeInstance) {
+				parameterRemoteVault = parameterValues.stream().filter(i -> i instanceof RemoteVault).findFirst()
+						.orElse(EolNoType.NoInstance);
+				parameterExpression = parameter;
+			}
 		}
 
-		// query remote vault
-		if (targetObject instanceof RemoteVault) {
-			if (!operationName.equals("query")) {
-				VaultageEolRemoteOperationFetcher messageSender = new VaultageEolRemoteOperationFetcher();
-				if (queryTargetExpression instanceof NameExpression) {
-					targetObject = messageSender.executeRemoteVaultOperation(targetObject, context, operationName,
-							parameterValues);
-					return targetObject;
-				} else {
-					targetObject = messageSender.queryRemoteVault(this, context, targetObject, queryTargetExpression);
-				}
-				if (parameterExpressions.size() == 0) {
-					return targetObject;
-				}
+		/***
+		 * Query remote vault.
+		 */
+		if (targetObject instanceof RemoteVault && !operationName.equals("query")) {
+			VaultageEolRemoteOperationFetcher messageSender = new VaultageEolRemoteOperationFetcher();
+			if (queryTargetExpression instanceof NameExpression) {
+				targetObject = messageSender.executeRemoteVaultOperation(targetObject, context, operationName,
+						parameterValues);
+				return targetObject;
+			} else {
+				targetObject = messageSender.queryRemoteVault(this, context, targetObject, queryTargetExpression);
 			}
+			if (parameterExpressions.size() == 0) {
+				return targetObject;
+			}
+		} else if (parameterRemoteVault instanceof RemoteVault) {
+			VaultageEolRemoteOperationFetcher messageSender = new VaultageEolRemoteOperationFetcher();
+			targetObject = messageSender.queryRemoteVault(this, context, parameterRemoteVault, parameterExpression);
+			return targetObject;
 		}
 
 		IModel owningModel = context.getModelRepository().getOwningModel(targetObject);

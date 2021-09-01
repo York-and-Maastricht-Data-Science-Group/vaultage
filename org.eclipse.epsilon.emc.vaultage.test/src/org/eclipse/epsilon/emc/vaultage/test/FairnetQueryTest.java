@@ -282,16 +282,17 @@ public class FairnetQueryTest {
 		String script = Files.readString(Paths.get("model/PreventOperation.eol"));
 		module.parse(script);
 
+		EolRuntimeException exception = null;
 		try {
 			Object result = module.execute();
 		} catch (EolRuntimeException e) {
-			e.printStackTrace();
-			assertEquals(true, e instanceof VaultageEolRuntimeException);
+			exception = e;
 		}
+		assertEquals(true, exception instanceof VaultageEolRuntimeException);
 	}
 
 	@Test
-	public void testRecursiveQuery() throws Exception {
+	public void testMultilevelQuery() throws Exception {
 
 		module = new VaultageEolModuleParallel(new VaultageEolContextParallel());
 		
@@ -338,6 +339,34 @@ public class FairnetQueryTest {
 		assertEquals(alice.getPublicKey(), result);
 		System.console();
 	}
+	
+	/***
+	 * This test sends an operation to Bob. 
+	 * Bob returns the return value of the operation.
+	 * @throws Exception
+	 */
+	@Test
+	public void testPassingOperation() throws Exception {
+
+		module = new VaultageEolModuleParallel(new VaultageEolContextParallel());
+		
+		Set<Package> packages = new HashSet<Package>();
+		packages.add(alice.getClass().getPackage());
+		VaultageModel model = new VaultageModel(alice, packages);
+		model.setName("M");
+		module.getContext().getModelRepository().addModel(model);
+		module.getContext().getOperationContributorRegistry().add(new VaultageOperationContributor());
+		((EolModuleParallel) module).getContext().setParallelism(100);
+
+		String script = Files.readString(Paths.get("model/PassingOperation.eol"));
+		module.parse(script);
+
+		int result = (int) module.execute();
+		System.out.println("Bob's number of friends: " + result);
+		assertEquals(2, result);
+		System.console();
+	}
+
 
 	private static void exchangePublicKeys(FairnetVault user1, FairnetVault user2) {
 		// add user 2 as a friend to user 1's vault

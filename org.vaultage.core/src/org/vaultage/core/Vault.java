@@ -20,6 +20,7 @@ import org.eclipse.epsilon.emc.vaultage.VaultageModel;
 import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
 import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
 import org.eclipse.epsilon.eol.concurrent.EolModuleParallel;
+import org.eclipse.epsilon.eol.dom.Operation;
 import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.types.EolAnyType;
@@ -257,6 +258,9 @@ public abstract class Vault {
 			Entry<String, Object> entry = iterator.next();
 			String name = entry.getKey();
 			Object value = entry.getValue();
+			if (value instanceof Operation) {
+				module.getDeclaredOperations().add((Operation) value);
+			}
 			Variable variable = new Variable(name, value, new EolAnyType());
 			module.getContext().getFrameStack().putGlobal(variable);
 		}

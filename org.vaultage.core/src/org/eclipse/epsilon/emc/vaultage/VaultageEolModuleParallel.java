@@ -22,7 +22,6 @@ public class VaultageEolModuleParallel extends EolModuleParallel {
 			element = new VaultagePropertyCallExpression();
 		} else if (element instanceof FirstOrderOperationCallExpression) {
 			element = new VaultageFirstOrderOperationCallExpression();
-
 		} else if (element instanceof OperationCallExpression) {
 			AST cstParent = cst.getParent();
 			int parentType = cst.getType();
@@ -31,7 +30,7 @@ public class VaultageEolModuleParallel extends EolModuleParallel {
 							&& parentType != EolParser.NAVIGATION)
 							|| (parentType == EolParser.ARROW || parentType == EolParser.POINT
 									|| parentType == EolParser.NAVIGATION) && cstParent.getFirstChild() == cst)) {
-				element = new OperationCallExpression(true);
+				element = new VaultageOperationCallExpression(true);
 			} else {
 				element = new VaultageOperationCallExpression();
 			}

@@ -250,7 +250,7 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 	@Override
 	public Collection<?> allContents() {
 		// TODO Auto-generated method stub
-		return null;
+		return contents;
 	}
 
 	@Override

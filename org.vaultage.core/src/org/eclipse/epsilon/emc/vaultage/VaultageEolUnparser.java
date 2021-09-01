@@ -57,6 +57,9 @@ public class VaultageEolUnparser extends EolUnparser {
 			this.visit((PropertyCallExpression) moduleElement);
 		} else if (moduleElement instanceof NameExpression) {
 			this.visit((NameExpression) moduleElement);
+		} else if (moduleElement instanceof Operation) {
+			this.visit((Operation) moduleElement);
+			
 		}
 		String statement = new String(buffer.toString());
 

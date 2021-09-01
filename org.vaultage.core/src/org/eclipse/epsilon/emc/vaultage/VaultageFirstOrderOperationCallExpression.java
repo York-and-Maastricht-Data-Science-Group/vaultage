@@ -80,7 +80,7 @@ public class VaultageFirstOrderOperationCallExpression extends FirstOrderOperati
 
 				if (method == null) {
 					VaultageEolRemoteOperationFetcher messageSender = new VaultageEolRemoteOperationFetcher();
-					 return messageSender.queryRemoteVault(this, context, target, targetNameExpression);
+					return messageSender.queryRemoteVault(this, context, target, targetNameExpression);
 				}
 
 			}
