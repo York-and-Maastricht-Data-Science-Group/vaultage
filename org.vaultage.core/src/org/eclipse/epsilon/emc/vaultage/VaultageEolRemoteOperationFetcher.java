@@ -3,7 +3,6 @@ package org.eclipse.epsilon.emc.vaultage;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.eclipse.epsilon.common.module.IModule;
 import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.eol.EolModule;
 import org.eclipse.epsilon.eol.dom.Expression;
@@ -11,11 +10,8 @@ import org.eclipse.epsilon.eol.dom.Operation;
 import org.eclipse.epsilon.eol.exceptions.EolRuntimeException;
 import org.eclipse.epsilon.eol.execute.context.IEolContext;
 import org.eclipse.epsilon.eol.execute.context.Variable;
-import org.eclipse.epsilon.eol.models.IModel;
 import org.eclipse.epsilon.eol.types.EolMap;
 import org.eclipse.epsilon.eol.types.EolNoType;
-import org.vaultage.core.RemoteVault;
-import org.vaultage.core.Vault;
 
 /***
  * A class that is responsible to fetch the operations, query or other
@@ -108,10 +104,12 @@ public class VaultageEolRemoteOperationFetcher {
 		 * construct origin variable to identify the origin of propagated/chained
 		 * messages
 		 */
-		IModel m = context.getModelRepository().getModelByName("M");
+		VaultageModel model = (VaultageModel) context.getModelRepository().getModelByName("M");
 		Variable origin = context.getFrameStack().getGlobal(VaultageModel.ORIGIN_STRING);
 		if (origin == null) {
-			variables.put(VaultageModel.ORIGIN_STRING, ((Vault) m.allContents().iterator().next()).getPublicKey());
+			variables.put(VaultageModel.ORIGIN_STRING, model.getLocalVault().getPublicKey());
+		}else {
+			variables.put(VaultageModel.ORIGIN_STRING, origin.getValue());
 		}
 
 //		/***
@@ -125,7 +123,7 @@ public class VaultageEolRemoteOperationFetcher {
 		String vaultVariable = "localVault";
 		if (prefixStatement != null)
 			statement = statement.replace(prefixStatement, vaultVariable);
-		
+
 		statement = "var " + vaultVariable + " = M.allContents().first();\n" //
 				+ " return " + statement + ";\n";
 

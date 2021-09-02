@@ -103,10 +103,6 @@ public class VaultageEolUnparser extends EolUnparser {
 			ExecutorFactory executorFactory = context.getExecutorFactory();
 			try {
 				for (Expression parameter : parameterExpressions) {
-					Variable x = null;
-					if (parameter instanceof NameExpression) {
-						x = context.getFrameStack().getLocal(((NameExpression) parameter).getName());
-					}
 					parameterValues.add(executorFactory.execute(parameter, context));
 				}
 				if (module instanceof IEolModule && !operationCallExpression.isArrow()) {

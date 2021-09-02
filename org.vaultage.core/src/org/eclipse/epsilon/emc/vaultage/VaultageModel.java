@@ -114,6 +114,7 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 	 * to the contents field.
 	 * 
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<?> getAllOfKind(String kind) throws EolModelElementTypeNotFoundException {
 		Collection<Object> collection = new HashSet<>();
@@ -311,6 +312,10 @@ public class VaultageModel extends Model implements IOperationContributorProvide
 
 	public void addObject(Object instance) {
 		contents.add(instance);
+	}
+	
+	public Vault getLocalVault() {
+		return localVault;
 	}
 
 }

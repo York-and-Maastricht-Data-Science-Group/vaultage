@@ -1,12 +1,17 @@
 var localVault = FairnetVault.all.first();
 var remoteVaults = localVault.remoteVaults.values().asSequence();
 
-// scenario: Alice <--> Bob <--> Charlie
+// scenario: Alice <--> Bob <--> Charlie <--> Dan
+//									\-------> Erin 
+//(Erin doesn't put Alice in her trusted list, so she returns EolNoType.NoInstance)
  
-var senderId = localVault.publicKey;
-var otherPosts = remoteVaults
-				.parallelCollect(rv | countAllPosts(rv, senderId))
-				.flatten().sum();
+//var senderId = localVault.publicKey;
+
+//var otherPosts = remoteVaults
+//				.parallelCollect(rv | countAllPosts(rv, senderId))
+//				.flatten().sum();
+
+var otherPosts = countAllPosts(localVault, "");
 var myPosts = localVault.posts.size(); 
 
 return myPosts + otherPosts;	

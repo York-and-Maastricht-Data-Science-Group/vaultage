@@ -13,18 +13,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
-import org.eclipse.epsilon.common.module.ModuleElement;
 import org.eclipse.epsilon.emc.vaultage.VaultageEolContextParallel;
 import org.eclipse.epsilon.emc.vaultage.VaultageEolModuleParallel;
 import org.eclipse.epsilon.emc.vaultage.VaultageModel;
 import org.eclipse.epsilon.emc.vaultage.VaultageOperationContributor;
-import org.eclipse.epsilon.emc.vaultage.VaultagePropertyCallExpression;
 import org.eclipse.epsilon.eol.concurrent.EolModuleParallel;
 import org.eclipse.epsilon.eol.dom.Operation;
-import org.eclipse.epsilon.eol.dom.PropertyCallExpression;
 import org.eclipse.epsilon.eol.execute.context.Variable;
 import org.eclipse.epsilon.eol.types.EolAnyType;
-import org.eclipse.epsilon.eol.types.EolType;
+import org.eclipse.epsilon.eol.types.EolNoType;
 import org.vaultage.util.VaultageEncryption;
 import org.vaultage.wallet.Wallet;
 
@@ -39,6 +36,7 @@ public abstract class Vault {
 	protected Vaultage vaultage;
 	protected VaultageServer vaultageServer;
 	protected final Map<String, RemoteVault> remoteVaults = new HashMap<>();
+	protected Set<String> trustedVaultIds = new HashSet<String>(); 
 
 	protected final Set<OperationResponseHandler> operationResponseHandlers = new HashSet<>();
 
@@ -258,6 +256,15 @@ public abstract class Vault {
 			Entry<String, Object> entry = iterator.next();
 			String name = entry.getKey();
 			Object value = entry.getValue();
+			
+			if (name.equals(VaultageModel.ORIGIN_STRING)) {
+				if (this.getTrustedVaultIds().stream().noneMatch(id -> id.equals(value))) {
+					RemoteVault responder = new RemoteVault(this, requesterPublicKey);
+					responder.respondToQuery(EolNoType.NoInstance, requestToken);
+					return;
+				}
+			}
+			
 			if (value instanceof Operation) {
 				module.getDeclaredOperations().add((Operation) value);
 			}
@@ -289,11 +296,8 @@ public abstract class Vault {
 		remoteVaults.put(remoteVaultPublicKey, remoteVault);
 	}
 
-//	@Override
-//	public boolean equals(Object object) {
-//		if (object instanceof Vault && this.getPublicKey() != null) {
-//			return this.getPublicKey().equals(((Vault)object).getPublicKey());
-//		}
-//		return super.equals(object);
-//	}
+	public Set<String> getTrustedVaultIds() {
+		return trustedVaultIds;
+	}	
+
 }
