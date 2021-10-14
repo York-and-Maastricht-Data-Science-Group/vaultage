@@ -254,7 +254,7 @@ public class FairnetQueryTest {
 
 		EolRuntimeException exception = null;
 		try {
-			Object result = module.execute();
+			module.execute();
 		} catch (EolRuntimeException e) {
 			exception = e;
 		}

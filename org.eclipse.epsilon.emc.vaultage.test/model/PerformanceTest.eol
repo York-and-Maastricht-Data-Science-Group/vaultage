@@ -1,0 +1,13 @@
+var localVault = FairnetVault.all.first();
+
+var remoteVaults = localVault.remoteVaults.values().asSequence();
+//remoteVaults.println();
+
+// scenario: vault-101 to the rest vault
+
+var posts = remoteVaults.parallelCollect( rv | rv.getPosts()).flatten();
+//var posts = remoteVaults.parallelCollect( rv | rv.posts).flatten();
+			
+return posts;
+
+			
