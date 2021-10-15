@@ -181,7 +181,8 @@ public class VaultageOperationContributor extends OperationContributor {
 					responseHandlerClass = Class.forName(temp);
 				}
 				OperationResponseHandler handler = localVault.getOperationResponseHandler(responseHandlerClass);
-				synchronized (handler) {
+				Object holder = new Object();
+				synchronized (holder) {
 					method = remoteVault.getClass().getMethod(name, parametersTypes);
 
 					System.out.print("\nSend request " + name + ":\n");
@@ -192,11 +193,12 @@ public class VaultageOperationContributor extends OperationContributor {
 					}
 
 					token = (String) method.invoke(remoteVault, parameters);
-					handler.wait(getTimeout());
+					handler.addHolder(token, holder);
+					holder.wait(getTimeout());
 				}
 				result = handler.getResult(token);
 
-				System.out.println(localVault.getId() + " received: " + result);
+//				System.out.println(localVault.getId() + " received: " + result);
 
 			} catch (NoSuchMethodException | SecurityException | InterruptedException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {

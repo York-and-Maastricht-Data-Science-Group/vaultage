@@ -38,9 +38,10 @@ public class QueryPerformanceTest {
 	private static EolModule module;
 	private static VaultageServer brokerServer;
 	private static final int NUM_OF_VAULTS = 16;
-	private static final int NUM_OF_POSTS = 100;
+	private static final int NUM_OF_POSTS = 200;
 	private static final int CONTENT_SIZE = 1000;
 	private static final int ITERATION = 13;
+	private static final int LOADING_EFFECT_SKIP = 3;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -128,7 +129,7 @@ public class QueryPerformanceTest {
 			List<Post> result = (List<Post>) module.execute();
 			long endTime = System.currentTimeMillis();
 
-			if (i >= 0) {
+			if (i > LOADING_EFFECT_SKIP) {
 				long time = endTime - startTime;
 				results.add(time);
 				System.out.println("Total Number of Posts: " + result.size());

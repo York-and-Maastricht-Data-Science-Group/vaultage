@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 
+import org.vaultage.core.OperationResponseHandler;
 import org.vaultage.core.ResponseMessageHandler;
 import org.vaultage.core.Vault;
 import org.vaultage.core.Vaultage;
@@ -99,6 +100,13 @@ public class [%=appName%]ResponseMessageHandler extends ResponseMessageHandler {
 		Object[] runParameterValues = { vault, senderObject, message.getToken(), returnResult };
 
 		// 11. execute the run method
+		OperationResponseHandler orh = (OperationResponseHandler) responseHandlerObject;
+			Object holder = orh.getHolder(message.getToken());
+			if (holder != null) {
+				synchronized (holder) {
+					holder.notify();
+			}
+		}
 		runMethod.invoke(responseHandlerObject, runParameterValues);
 		System.console();
 	}

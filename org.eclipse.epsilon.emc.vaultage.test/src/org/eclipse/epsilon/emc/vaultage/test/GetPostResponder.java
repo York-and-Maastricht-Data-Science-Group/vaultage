@@ -11,17 +11,17 @@ public class GetPostResponder extends GetPostResponseHandler {
 	@Override
 	public void run(Vault localVault, RemoteFairnetVault remoteVault, String responseToken, Post result)
 			throws Exception {
-		synchronized (this) {
-			this.notify();
-		}
+//		synchronized (this) {
+//			this.notify();
+//		}
 	}
 
 	@Override
 	public void run(FairnetVault localVault, RemoteFairnetVault remoteVault, String responseToken, Post result)
 			throws Exception {
-		synchronized (this) {
-			this.notify();
-		}
+//		synchronized (this) {
+//			this.notify();
+//		}
 //		System.out.print("Received: ");
 //		System.out.println(((Post) getResult(responseToken)).getContent());
 

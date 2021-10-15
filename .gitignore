@@ -38,3 +38,4 @@ hs_err_pid*
 images/polling.graphml
 /analysis/
 /images/
+org.eclipse.epsilon.emc.vaultage.test/analysis/query-performance.ods
